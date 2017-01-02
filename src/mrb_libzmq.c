@@ -252,7 +252,7 @@ mrb_zmq_thread_fn(void *pipe)
   mrb_bool success = FALSE;
 
   mrb_state *mrb = mrb_open();
-  if (mrb) {
+  if (likely(mrb)) {
     int arena_index = mrb_gc_arena_save(mrb);
     struct mrb_jmpbuf* prev_jmp = mrb->jmp;
     struct mrb_jmpbuf c_jmp;
@@ -266,7 +266,7 @@ mrb_zmq_thread_fn(void *pipe)
       mrb_data_init(pipe_val, pipe, &mrb_zmq_socket_type);
       mrb_hash_set(mrb, MRB_LIBZMQ_SOCKETS(), mrb_cptr_value(mrb, pipe), pipe_val);
       mrb_gc_arena_restore(mrb, arena_index);
-      thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread_fn"), 1, &pipe_val);
+      thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "LibZMQ"), "Thread_fn"), 1, &pipe_val);
       success = TRUE;
       mrb->jmp = prev_jmp;
     }
@@ -279,7 +279,7 @@ mrb_zmq_thread_fn(void *pipe)
 
     zmq_send(pipe, &success, sizeof(mrb_bool), 0);
 
-    if (success) {
+    if (likely(success)) {
       mrb_funcall(mrb, thread_fn, "run", 0, NULL);
     }
 
@@ -291,8 +291,10 @@ mrb_zmq_thread_fn(void *pipe)
 }
 
 static mrb_value
-mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
+mrb_zmq_threadstart(mrb_state *mrb, mrb_value actor_class)
 {
+  mrb_value self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(actor_class)));
+
   mrb_value zmqpair = mrb_fixnum_value(ZMQ_PAIR);
   mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"), 1, &zmqpair);
   mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
@@ -303,10 +305,10 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
     mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
   }
 
-  char endpoint[32];
+  char endpoint[256];
   do {
     errno = 0;
-    snprintf(endpoint, sizeof(endpoint), "inproc://pipe-%04x-%04x", mrb_sysrandom_uniform(0x10000), mrb_sysrandom_uniform(0x10000));
+    snprintf(endpoint, sizeof(endpoint), "inproc://mrb-actor-pipe-%04x-%04x", mrb_sysrandom_uniform(0x10000), mrb_sysrandom_uniform(0x10000));
     if (zmq_bind(frontend, endpoint) == 0) {
       break;
     }
@@ -319,7 +321,6 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
   int rc = zmq_connect(backend, endpoint);
   mrb_assert(rc != -1);
 
-  errno = 0;
   void *thread = zmq_threadstart(mrb_zmq_thread_fn, backend);
   if (likely(thread)) {
     mrb_data_init(self, thread, &mrb_zmq_thread_type);
@@ -331,7 +332,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
 
   mrb_bool success = FALSE;
   zmq_recv(frontend, &success, sizeof(mrb_bool), 0);
-  if (!success) {
+  if (unlikely(!success)) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot initialize ZMQ Thread");
   }
 
@@ -341,7 +342,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "*&", &argv, &argv_len, &block);
 
-  mrb_funcall_with_block(mrb, self, mrb_intern_lit(mrb, "setup"), argv_len, argv, block);
+  mrb_funcall_with_block(mrb, self, mrb_intern_lit(mrb, "initialize"), argv_len, argv, block);
 
   return self;
 }
@@ -349,7 +350,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value self)
 void
 mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
 {
-  struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_thread_class;
+  struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_actor_class;
 
   void *context = zmq_ctx_new();
   if (getenv("ZMQ_IO_THREADS")) {
@@ -405,9 +406,9 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_socket_class, "initialize", mrb_zmq_socket, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, zmq_socket_class, "recv", mrb_zmq_socket_recv, MRB_ARGS_OPT(1));
 
-  zmq_thread_class = mrb_define_class_under(mrb, zmq_mod, "Thread", mrb->object_class);
-  MRB_SET_INSTANCE_TT(zmq_thread_class, MRB_TT_DATA);
-  mrb_define_method(mrb, zmq_thread_class, "initialize", mrb_zmq_threadstart, (MRB_ARGS_ANY()|MRB_ARGS_BLOCK()));
+  zmq_actor_class = mrb_define_class_under(mrb, zmq_mod, "Actor", mrb->object_class);
+  MRB_SET_INSTANCE_TT(zmq_actor_class, MRB_TT_DATA);
+  mrb_define_class_method(mrb, zmq_actor_class, "new", mrb_zmq_threadstart, (MRB_ARGS_ANY()|MRB_ARGS_BLOCK()));
 }
 
 void

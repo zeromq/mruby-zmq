@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include <mruby.h>
+#ifdef MRB_INT16
+ #error "MRB_INT16 is too small for mruby-libzmq4"
+#endif
 #include <zmq.h>
 #if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
   #error "mruby-libzmq4 needs at least libzmq-4.1"
@@ -17,8 +20,6 @@
 #include <mruby/value.h>
 #include <mruby/throw.h>
 #include <mruby/sysrandom.h>
-#include <unistd.h>
-
 
 #define MRB_LIBZMQ_CONTEXT() (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
 #define MRB_LIBZMQ_SOCKETS() (mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Sockets")))
