@@ -1,7 +1,19 @@
 module ZMQ
   class Socket
-    def close
-      LibZMQ.close(self)
+    def bind(endpoint)
+      LibZMQ.bind(self, endpoint)
+    end
+
+    def close(blocky = true)
+      LibZMQ.close(self, blocky)
+    end
+
+    def connect(endpoint)
+      LibZMQ.connect(self, endpoint)
+    end
+
+    def disconnect(endpoint)
+      LibZMQ.disconnect(self, endpoint)
     end
 
     def send(data, flags = 0)
@@ -19,17 +31,113 @@ module ZMQ
       end
       self
     end
+
+    def unbind(endpoint)
+      LibZMQ.unbind(self, endpoint)
+    end
   end
 
-  class Dealer
-    def self.new(endpoint, bind = false)
-      instance = ZMQ::Socket.new(LibZMQ::DEALER)
-      if bind
-        LibZMQ.bind(instance, endpoint)
-      else
-        LibZMQ.connect(instance, endpoint)
+  class Pub < Socket
+    def initialize(endpoint = nil, connect = false)
+      super(LibZMQ::PUB)
+      if endpoint
+        if connect
+          LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
+        end
       end
-      instance
+    end
+  end
+
+  class Sub < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::SUB)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class XPub < Socket
+    def initialize(endpoint = nil, connect = false)
+      super(LibZMQ::XPUB)
+      if endpoint
+        if connect
+          LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class XSub < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::XSUB)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Push < Socket
+    def initialize(endpoint = nil, connect = false)
+      super(LibZMQ::PUSH)
+      if endpoint
+        if connect
+          LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Pull < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::PULL)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Stream < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::STREAM)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Pair < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::PAIR)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
     end
   end
 end

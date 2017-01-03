@@ -25,8 +25,8 @@ module LibZMQ
     end
 
     def run
-      while true
-        msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      until (msg = @pipe.recv.to_str(true)) == "TERM$"
+        msg = MessagePack.unpack(msg)
         begin
           case msg[:type]
           when :new
@@ -48,6 +48,10 @@ module LibZMQ
                 puts e.inspect
               end
             end
+          when :finalize
+            @instances.delete(msg[:object_id])
+          when :term
+            break
           end
         rescue => e
           LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)
@@ -58,7 +62,7 @@ module LibZMQ
 end
 
 module ZMQ
-  class Actor
+  class Thread
     def initialize(*args, &block)
     end
 
@@ -89,6 +93,17 @@ module ZMQ
 
     def async_send(object_id, method, *args)
       LibZMQ.send(@pipe, {type: :async_send, object_id: object_id, method: method, args: args}.to_msgpack, 0)
+      self
+    end
+
+    def finalize(object_id)
+      LibZMQ.send(@pipe, {type: :finalize, object_id: object_id}.to_msgpack, 0)
+      self
+    end
+
+    def close
+      LibZMQ.threadclose(self)
+      nil
     end
   end
 
@@ -112,6 +127,14 @@ module ZMQ
         raise ArgumentError, "blocks cannot be migrated"
       end
       @thread.async_send(@object_id, m, *args)
+      nil
+    end
+
+    def finalize
+      @thread.finalize(@object_id)
+      remove_instance_variable(:@thread)
+      remove_instance_variable(:@object_id)
+      nil
     end
 
     def respond_to?(m)
