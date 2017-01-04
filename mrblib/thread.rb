@@ -50,8 +50,6 @@ module LibZMQ
             end
           when :finalize
             @instances.delete(msg[:object_id])
-          when :term
-            break
           end
         rescue => e
           LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)

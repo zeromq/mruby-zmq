@@ -92,7 +92,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
   size_t option_len;
   int rc;
 
-  if (option_class == mrb->false_class||option_class == mrb->false_class) {
+  if (option_class == mrb->true_class||option_class == mrb->false_class) {
     int boolean;
     option_len = sizeof(mrb_bool);
     rc = zmq_getsockopt(socket, option_name, &boolean, &option_len);
@@ -353,7 +353,7 @@ mrb_zmq_thread_fn(void *pipe)
 }
 
 static mrb_value
-mrb_zmq_threadstart(mrb_state *mrb, mrb_value actor_class)
+mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
 {
   void *backend = NULL;
   mrb_zmq_thread_pipe_t *thread_pipe = NULL;
@@ -367,7 +367,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value actor_class)
   {
     mrb->jmp = &c_jmp;
 
-    self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(actor_class)));
+    self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(thread_class)));
     mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), 0, NULL);
     mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
     void *frontend = DATA_PTR(frontend_val);
@@ -419,7 +419,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value actor_class)
   MRB_CATCH(&c_jmp)
   {
     mrb->jmp = prev_jmp;
-    if (thread_pipe && !thread) {
+    if (thread_pipe && !thread_pipe->thread) {
       mrb_free(mrb, thread_pipe);
     }
     if (backend && !success) {
@@ -445,6 +445,7 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
     mrb_assert(mrb_type(frontend_val) == MRB_TT_DATA && DATA_TYPE(frontend_val) == &mrb_zmq_socket_type);
     zmq_send(thread_pipe->pipe, "TERM$", 5, 0);
     zmq_close(thread_pipe->pipe);
+    mrb_data_init(frontend_val, NULL, NULL);
     zmq_threadclose(thread_pipe->thread);
     mrb_free(mrb, DATA_PTR(thread_val));
     mrb_data_init(thread_val, NULL, NULL);
