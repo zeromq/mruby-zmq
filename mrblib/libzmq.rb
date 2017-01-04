@@ -1,6 +1,18 @@
 module LibZMQ
-  def self.finalizer
-    ObjectSpace.each_object(ZMQ::Thread) {|thread| thread.close}
-    ObjectSpace.each_object(ZMQ::Socket) {|socket| socket.close(false)}
+  private
+
+  def self._finalizer
+    ObjectSpace.each_object(ZMQ::Thread) do |thread|
+      begin
+        thread.close
+      rescue
+      end
+    end
+    ObjectSpace.each_object(ZMQ::Socket) do |socket|
+      begin
+        socket.close(false)
+      rescue
+      end
+    end
   end
 end

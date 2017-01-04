@@ -16,14 +16,8 @@ MessagePack.register_unpack_type(3) do |data|
   exception
 end
 
-
 module LibZMQ
   class Thread_fn
-    def initialize(pipe)
-      @pipe = pipe
-      @instances = {}
-    end
-
     def run
       until (msg = @pipe.recv.to_str(true)) == "TERM$"
         msg = MessagePack.unpack(msg)
@@ -61,9 +55,6 @@ end
 
 module ZMQ
   class Thread
-    def initialize(*args, &block)
-    end
-
     def new(mrb_class, *args)
       if block_given?
         raise ArgumentError, "blocks cannot be migrated"
@@ -120,7 +111,7 @@ module ZMQ
       @thread.send(@object_id, m, *args)
     end
 
-    def send(m, *args)
+    def async_send(m, *args)
       if block_given?
         raise ArgumentError, "blocks cannot be migrated"
       end

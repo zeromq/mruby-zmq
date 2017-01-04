@@ -42,8 +42,6 @@ mrb_zmq_close(mrb_state *mrb, mrb_value self)
       mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
     }
     mrb_data_init(socket_val, NULL, NULL);
-  } else {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected a zmq socket");
   }
 
   return mrb_nil_value();
@@ -168,8 +166,8 @@ mrb_zmq_msg_gets(mrb_state *mrb, mrb_value self)
 {
   zmq_msg_t *msg;
   char *property;
-  mrb_bool static_string;
-  mrb_get_args(mrb, "dzb", &msg, &mrb_zmq_msg_type, &property, &static_string);
+  mrb_bool static_string = FALSE;
+  mrb_get_args(mrb, "dz|b", &msg, &mrb_zmq_msg_type, &property, &static_string);
 
   const char *prop = zmq_msg_gets(msg, property);
   if (prop) {
@@ -178,11 +176,9 @@ mrb_zmq_msg_gets(mrb_state *mrb, mrb_value self)
     } else {
       return mrb_str_new_cstr(mrb, prop);
     }
-  } else {
-    mrb_sys_fail(mrb, "zmq_msg_gets");
   }
 
-  return self;
+  return mrb_nil_value();
 }
 
 static mrb_value
@@ -328,7 +324,9 @@ mrb_zmq_thread_fn(void *pipe)
       mrb->jmp = &c_jmp;
       mrb_value pipe_val = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair")));
       mrb_data_init(pipe_val, pipe, &mrb_zmq_socket_type);
-      thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "LibZMQ"), "Thread_fn"), 1, &pipe_val);
+      thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "LibZMQ"), "Thread_fn"), 0, NULL);
+      mrb_iv_set(mrb, thread_fn, mrb_intern_lit(mrb, "@instances"), mrb_hash_new(mrb));
+      mrb_iv_set(mrb, thread_fn, mrb_intern_lit(mrb, "@pipe"), pipe_val);
       success = TRUE;
       mrb->jmp = prev_jmp;
     }
@@ -410,7 +408,6 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     mrb_value *argv;
     mrb_int argv_len;
     mrb_value block = mrb_nil_value();
-
     mrb_get_args(mrb, "*&", &argv, &argv_len, &block);
 
     mrb_funcall_with_block(mrb, self, mrb_intern_lit(mrb, "initialize"), argv_len, argv, block);
@@ -449,8 +446,6 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
     zmq_threadclose(thread_pipe->thread);
     mrb_free(mrb, DATA_PTR(thread_val));
     mrb_data_init(thread_val, NULL, NULL);
-  } else {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected a zmq thread");
   }
 
   return mrb_nil_value();
@@ -498,7 +493,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
 #ifdef ZMQ_HAS_CAPABILITIES
   mrb_define_module_function(mrb, libzmq_mod, "has?", mrb_zmq_has, MRB_ARGS_REQ(1));
 #endif
-  mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_REQ(3));
+  mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_ARG(2, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_send", mrb_zmq_msg_send, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "send", mrb_zmq_send, MRB_ARGS_REQ(3));
   //mrb_define_module_function(mrb, libzmq_mod, "setsockopt", mrb_zmq_setsockopt, MRB_ARGS_REQ(3));
@@ -527,7 +522,7 @@ mrb_mruby_libzmq4_gem_final(mrb_state* mrb)
   void *context = MRB_LIBZMQ_CONTEXT();
   zmq_ctx_shutdown(context);
 
-  mrb_funcall(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), "finalizer", 0, NULL);
+  mrb_funcall(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), "_finalizer", 0, NULL);
 
   zmq_ctx_term(context);
 }
