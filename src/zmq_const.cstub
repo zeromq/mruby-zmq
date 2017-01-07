@@ -1,0 +1,345 @@
+#ifdef ZMQ_IO_THREADS
+mrb_zmq_define_const("IO_THREADS", ZMQ_IO_THREADS);
+#endif
+#ifdef ZMQ_MAX_SOCKETS
+mrb_zmq_define_const("MAX_SOCKETS", ZMQ_MAX_SOCKETS);
+#endif
+#ifdef ZMQ_SOCKET_LIMIT
+mrb_zmq_define_const("SOCKET_LIMIT", ZMQ_SOCKET_LIMIT);
+#endif
+#ifdef ZMQ_THREAD_PRIORITY
+mrb_zmq_define_const("THREAD_PRIORITY", ZMQ_THREAD_PRIORITY);
+#endif
+#ifdef ZMQ_THREAD_SCHED_POLICY
+mrb_zmq_define_const("THREAD_SCHED_POLICY", ZMQ_THREAD_SCHED_POLICY);
+#endif
+#ifdef ZMQ_MAX_MSGSZ
+mrb_zmq_define_const("MAX_MSGSZ", ZMQ_MAX_MSGSZ);
+#endif
+#ifdef ZMQ_IO_THREADS_DFLT
+mrb_zmq_define_const("IO_THREADS_DFLT", ZMQ_IO_THREADS_DFLT);
+#endif
+#ifdef ZMQ_MAX_SOCKETS_DFLT
+mrb_zmq_define_const("MAX_SOCKETS_DFLT", ZMQ_MAX_SOCKETS_DFLT);
+#endif
+#ifdef ZMQ_THREAD_PRIORITY_DFLT
+mrb_zmq_define_const("THREAD_PRIORITY_DFLT", ZMQ_THREAD_PRIORITY_DFLT);
+#endif
+#ifdef ZMQ_THREAD_SCHED_POLICY_DFLT
+mrb_zmq_define_const("THREAD_SCHED_POLICY_DFLT", ZMQ_THREAD_SCHED_POLICY_DFLT);
+#endif
+#ifdef ZMQ_PAIR
+mrb_zmq_define_const("PAIR", ZMQ_PAIR);
+#endif
+#ifdef ZMQ_PUB
+mrb_zmq_define_const("PUB", ZMQ_PUB);
+#endif
+#ifdef ZMQ_SUB
+mrb_zmq_define_const("SUB", ZMQ_SUB);
+#endif
+#ifdef ZMQ_REQ
+mrb_zmq_define_const("REQ", ZMQ_REQ);
+#endif
+#ifdef ZMQ_REP
+mrb_zmq_define_const("REP", ZMQ_REP);
+#endif
+#ifdef ZMQ_DEALER
+mrb_zmq_define_const("DEALER", ZMQ_DEALER);
+#endif
+#ifdef ZMQ_ROUTER
+mrb_zmq_define_const("ROUTER", ZMQ_ROUTER);
+#endif
+#ifdef ZMQ_PULL
+mrb_zmq_define_const("PULL", ZMQ_PULL);
+#endif
+#ifdef ZMQ_PUSH
+mrb_zmq_define_const("PUSH", ZMQ_PUSH);
+#endif
+#ifdef ZMQ_XPUB
+mrb_zmq_define_const("XPUB", ZMQ_XPUB);
+#endif
+#ifdef ZMQ_XSUB
+mrb_zmq_define_const("XSUB", ZMQ_XSUB);
+#endif
+#ifdef ZMQ_STREAM
+mrb_zmq_define_const("STREAM", ZMQ_STREAM);
+#endif
+#ifdef ZMQ_AFFINITY
+mrb_zmq_define_const("AFFINITY", ZMQ_AFFINITY);
+#endif
+#ifdef ZMQ_IDENTITY
+mrb_zmq_define_const("IDENTITY", ZMQ_IDENTITY);
+#endif
+#ifdef ZMQ_SUBSCRIBE
+mrb_zmq_define_const("SUBSCRIBE", ZMQ_SUBSCRIBE);
+#endif
+#ifdef ZMQ_UNSUBSCRIBE
+mrb_zmq_define_const("UNSUBSCRIBE", ZMQ_UNSUBSCRIBE);
+#endif
+#ifdef ZMQ_RATE
+mrb_zmq_define_const("RATE", ZMQ_RATE);
+#endif
+#ifdef ZMQ_RECONNECT_IVL
+mrb_zmq_define_const("RECONNECT_IVL", ZMQ_RECONNECT_IVL);
+#endif
+#ifdef ZMQ_SNDBUF
+mrb_zmq_define_const("SNDBUF", ZMQ_SNDBUF);
+#endif
+#ifdef ZMQ_RCVBUF
+mrb_zmq_define_const("RCVBUF", ZMQ_RCVBUF);
+#endif
+#ifdef ZMQ_RCVMORE
+mrb_zmq_define_const("RCVMORE", ZMQ_RCVMORE);
+#endif
+#ifdef ZMQ_FD
+mrb_zmq_define_const("FD", ZMQ_FD);
+#endif
+#ifdef ZMQ_EVENTS
+mrb_zmq_define_const("EVENTS", ZMQ_EVENTS);
+#endif
+#ifdef ZMQ_TYPE
+mrb_zmq_define_const("TYPE", ZMQ_TYPE);
+#endif
+#ifdef ZMQ_LINGER
+mrb_zmq_define_const("LINGER", ZMQ_LINGER);
+#endif
+#ifdef ZMQ_RECOVERY_IVL
+mrb_zmq_define_const("RECOVERY_IVL", ZMQ_RECOVERY_IVL);
+#endif
+#ifdef ZMQ_BACKLOG
+mrb_zmq_define_const("BACKLOG", ZMQ_BACKLOG);
+#endif
+#ifdef ZMQ_RECONNECT_IVL_MAX
+mrb_zmq_define_const("RECONNECT_IVL_MAX", ZMQ_RECONNECT_IVL_MAX);
+#endif
+#ifdef ZMQ_MAXMSGSIZE
+mrb_zmq_define_const("MAXMSGSIZE", ZMQ_MAXMSGSIZE);
+#endif
+#ifdef ZMQ_SNDHWM
+mrb_zmq_define_const("SNDHWM", ZMQ_SNDHWM);
+#endif
+#ifdef ZMQ_RCVHWM
+mrb_zmq_define_const("RCVHWM", ZMQ_RCVHWM);
+#endif
+#ifdef ZMQ_MULTICAST_HOPS
+mrb_zmq_define_const("MULTICAST_HOPS", ZMQ_MULTICAST_HOPS);
+#endif
+#ifdef ZMQ_RCVTIMEO
+mrb_zmq_define_const("RCVTIMEO", ZMQ_RCVTIMEO);
+#endif
+#ifdef ZMQ_SNDTIMEO
+mrb_zmq_define_const("SNDTIMEO", ZMQ_SNDTIMEO);
+#endif
+#ifdef ZMQ_LAST_ENDPOINT
+mrb_zmq_define_const("LAST_ENDPOINT", ZMQ_LAST_ENDPOINT);
+#endif
+#ifdef ZMQ_ROUTER_MANDATORY
+mrb_zmq_define_const("ROUTER_MANDATORY", ZMQ_ROUTER_MANDATORY);
+#endif
+#ifdef ZMQ_TCP_KEEPALIVE
+mrb_zmq_define_const("TCP_KEEPALIVE", ZMQ_TCP_KEEPALIVE);
+#endif
+#ifdef ZMQ_TCP_KEEPALIVE_CNT
+mrb_zmq_define_const("TCP_KEEPALIVE_CNT", ZMQ_TCP_KEEPALIVE_CNT);
+#endif
+#ifdef ZMQ_TCP_KEEPALIVE_IDLE
+mrb_zmq_define_const("TCP_KEEPALIVE_IDLE", ZMQ_TCP_KEEPALIVE_IDLE);
+#endif
+#ifdef ZMQ_TCP_KEEPALIVE_INTVL
+mrb_zmq_define_const("TCP_KEEPALIVE_INTVL", ZMQ_TCP_KEEPALIVE_INTVL);
+#endif
+#ifdef ZMQ_IMMEDIATE
+mrb_zmq_define_const("IMMEDIATE", ZMQ_IMMEDIATE);
+#endif
+#ifdef ZMQ_XPUB_VERBOSE
+mrb_zmq_define_const("XPUB_VERBOSE", ZMQ_XPUB_VERBOSE);
+#endif
+#ifdef ZMQ_IPV6
+mrb_zmq_define_const("IPV6", ZMQ_IPV6);
+#endif
+#ifdef ZMQ_MECHANISM
+mrb_zmq_define_const("MECHANISM", ZMQ_MECHANISM);
+#endif
+#ifdef ZMQ_PLAIN_SERVER
+mrb_zmq_define_const("PLAIN_SERVER", ZMQ_PLAIN_SERVER);
+#endif
+#ifdef ZMQ_PLAIN_USERNAME
+mrb_zmq_define_const("PLAIN_USERNAME", ZMQ_PLAIN_USERNAME);
+#endif
+#ifdef ZMQ_PLAIN_PASSWORD
+mrb_zmq_define_const("PLAIN_PASSWORD", ZMQ_PLAIN_PASSWORD);
+#endif
+#ifdef ZMQ_CURVE_SERVER
+mrb_zmq_define_const("CURVE_SERVER", ZMQ_CURVE_SERVER);
+#endif
+#ifdef ZMQ_CURVE_PUBLICKEY
+mrb_zmq_define_const("CURVE_PUBLICKEY", ZMQ_CURVE_PUBLICKEY);
+#endif
+#ifdef ZMQ_CURVE_SECRETKEY
+mrb_zmq_define_const("CURVE_SECRETKEY", ZMQ_CURVE_SECRETKEY);
+#endif
+#ifdef ZMQ_CURVE_SERVERKEY
+mrb_zmq_define_const("CURVE_SERVERKEY", ZMQ_CURVE_SERVERKEY);
+#endif
+#ifdef ZMQ_PROBE_ROUTER
+mrb_zmq_define_const("PROBE_ROUTER", ZMQ_PROBE_ROUTER);
+#endif
+#ifdef ZMQ_REQ_CORRELATE
+mrb_zmq_define_const("REQ_CORRELATE", ZMQ_REQ_CORRELATE);
+#endif
+#ifdef ZMQ_REQ_RELAXED
+mrb_zmq_define_const("REQ_RELAXED", ZMQ_REQ_RELAXED);
+#endif
+#ifdef ZMQ_CONFLATE
+mrb_zmq_define_const("CONFLATE", ZMQ_CONFLATE);
+#endif
+#ifdef ZMQ_ZAP_DOMAIN
+mrb_zmq_define_const("ZAP_DOMAIN", ZMQ_ZAP_DOMAIN);
+#endif
+#ifdef ZMQ_ROUTER_HANDOVER
+mrb_zmq_define_const("ROUTER_HANDOVER", ZMQ_ROUTER_HANDOVER);
+#endif
+#ifdef ZMQ_TOS
+mrb_zmq_define_const("TOS", ZMQ_TOS);
+#endif
+#ifdef ZMQ_CONNECT_RID
+mrb_zmq_define_const("CONNECT_RID", ZMQ_CONNECT_RID);
+#endif
+#ifdef ZMQ_GSSAPI_SERVER
+mrb_zmq_define_const("GSSAPI_SERVER", ZMQ_GSSAPI_SERVER);
+#endif
+#ifdef ZMQ_GSSAPI_PRINCIPAL
+mrb_zmq_define_const("GSSAPI_PRINCIPAL", ZMQ_GSSAPI_PRINCIPAL);
+#endif
+#ifdef ZMQ_GSSAPI_SERVICE_PRINCIPAL
+mrb_zmq_define_const("GSSAPI_SERVICE_PRINCIPAL", ZMQ_GSSAPI_SERVICE_PRINCIPAL);
+#endif
+#ifdef ZMQ_GSSAPI_PLAINTEXT
+mrb_zmq_define_const("GSSAPI_PLAINTEXT", ZMQ_GSSAPI_PLAINTEXT);
+#endif
+#ifdef ZMQ_HANDSHAKE_IVL
+mrb_zmq_define_const("HANDSHAKE_IVL", ZMQ_HANDSHAKE_IVL);
+#endif
+#ifdef ZMQ_SOCKS_PROXY
+mrb_zmq_define_const("SOCKS_PROXY", ZMQ_SOCKS_PROXY);
+#endif
+#ifdef ZMQ_BLOCKY
+mrb_zmq_define_const("BLOCKY", ZMQ_BLOCKY);
+#endif
+#ifdef ZMQ_XPUB_MANUAL
+mrb_zmq_define_const("XPUB_MANUAL", ZMQ_XPUB_MANUAL);
+#endif
+#ifdef ZMQ_XPUB_WELCOME_MSG
+mrb_zmq_define_const("XPUB_WELCOME_MSG", ZMQ_XPUB_WELCOME_MSG);
+#endif
+#ifdef ZMQ_STREAM_NOTIFY
+mrb_zmq_define_const("STREAM_NOTIFY", ZMQ_STREAM_NOTIFY);
+#endif
+#ifdef ZMQ_INVERT_MATCHING
+mrb_zmq_define_const("INVERT_MATCHING", ZMQ_INVERT_MATCHING);
+#endif
+#ifdef ZMQ_HEARTBEAT_IVL
+mrb_zmq_define_const("HEARTBEAT_IVL", ZMQ_HEARTBEAT_IVL);
+#endif
+#ifdef ZMQ_HEARTBEAT_TTL
+mrb_zmq_define_const("HEARTBEAT_TTL", ZMQ_HEARTBEAT_TTL);
+#endif
+#ifdef ZMQ_HEARTBEAT_TIMEOUT
+mrb_zmq_define_const("HEARTBEAT_TIMEOUT", ZMQ_HEARTBEAT_TIMEOUT);
+#endif
+#ifdef ZMQ_XPUB_VERBOSER
+mrb_zmq_define_const("XPUB_VERBOSER", ZMQ_XPUB_VERBOSER);
+#endif
+#ifdef ZMQ_CONNECT_TIMEOUT
+mrb_zmq_define_const("CONNECT_TIMEOUT", ZMQ_CONNECT_TIMEOUT);
+#endif
+#ifdef ZMQ_TCP_MAXRT
+mrb_zmq_define_const("TCP_MAXRT", ZMQ_TCP_MAXRT);
+#endif
+#ifdef ZMQ_THREAD_SAFE
+mrb_zmq_define_const("THREAD_SAFE", ZMQ_THREAD_SAFE);
+#endif
+#ifdef ZMQ_MULTICAST_MAXTPDU
+mrb_zmq_define_const("MULTICAST_MAXTPDU", ZMQ_MULTICAST_MAXTPDU);
+#endif
+#ifdef ZMQ_VMCI_BUFFER_SIZE
+mrb_zmq_define_const("VMCI_BUFFER_SIZE", ZMQ_VMCI_BUFFER_SIZE);
+#endif
+#ifdef ZMQ_VMCI_BUFFER_MIN_SIZE
+mrb_zmq_define_const("VMCI_BUFFER_MIN_SIZE", ZMQ_VMCI_BUFFER_MIN_SIZE);
+#endif
+#ifdef ZMQ_VMCI_BUFFER_MAX_SIZE
+mrb_zmq_define_const("VMCI_BUFFER_MAX_SIZE", ZMQ_VMCI_BUFFER_MAX_SIZE);
+#endif
+#ifdef ZMQ_VMCI_CONNECT_TIMEOUT
+mrb_zmq_define_const("VMCI_CONNECT_TIMEOUT", ZMQ_VMCI_CONNECT_TIMEOUT);
+#endif
+#ifdef ZMQ_USE_FD
+mrb_zmq_define_const("USE_FD", ZMQ_USE_FD);
+#endif
+#ifdef ZMQ_MORE
+mrb_zmq_define_const("MORE", ZMQ_MORE);
+#endif
+#ifdef ZMQ_SHARED
+mrb_zmq_define_const("SHARED", ZMQ_SHARED);
+#endif
+#ifdef ZMQ_DONTWAIT
+mrb_zmq_define_const("DONTWAIT", ZMQ_DONTWAIT);
+#endif
+#ifdef ZMQ_SNDMORE
+mrb_zmq_define_const("SNDMORE", ZMQ_SNDMORE);
+#endif
+#ifdef ZMQ_NULL
+mrb_zmq_define_const("NULL", ZMQ_NULL);
+#endif
+#ifdef ZMQ_PLAIN
+mrb_zmq_define_const("PLAIN", ZMQ_PLAIN);
+#endif
+#ifdef ZMQ_CURVE
+mrb_zmq_define_const("CURVE", ZMQ_CURVE);
+#endif
+#ifdef ZMQ_GSSAPI
+mrb_zmq_define_const("GSSAPI", ZMQ_GSSAPI);
+#endif
+#ifdef ZMQ_GROUP_MAX_LENGTH
+mrb_zmq_define_const("GROUP_MAX_LENGTH", ZMQ_GROUP_MAX_LENGTH);
+#endif
+#ifdef ZMQ_POLLIN
+mrb_zmq_define_const("POLLIN", ZMQ_POLLIN);
+#endif
+#ifdef ZMQ_POLLOUT
+mrb_zmq_define_const("POLLOUT", ZMQ_POLLOUT);
+#endif
+#ifdef ZMQ_POLLERR
+mrb_zmq_define_const("POLLERR", ZMQ_POLLERR);
+#endif
+#ifdef ZMQ_POLLPRI
+mrb_zmq_define_const("POLLPRI", ZMQ_POLLPRI);
+#endif
+#ifdef ZMQ_POLLITEMS_DFLT
+mrb_zmq_define_const("POLLITEMS_DFLT", ZMQ_POLLITEMS_DFLT);
+#endif
+#ifdef ZMQ_SERVER
+mrb_zmq_define_const("SERVER", ZMQ_SERVER);
+#endif
+#ifdef ZMQ_CLIENT
+mrb_zmq_define_const("CLIENT", ZMQ_CLIENT);
+#endif
+#ifdef ZMQ_RADIO
+mrb_zmq_define_const("RADIO", ZMQ_RADIO);
+#endif
+#ifdef ZMQ_DISH
+mrb_zmq_define_const("DISH", ZMQ_DISH);
+#endif
+#ifdef ZMQ_GATHER
+mrb_zmq_define_const("GATHER", ZMQ_GATHER);
+#endif
+#ifdef ZMQ_SCATTER
+mrb_zmq_define_const("SCATTER", ZMQ_SCATTER);
+#endif
+#ifdef ZMQ_DGRAM
+mrb_zmq_define_const("DGRAM", ZMQ_DGRAM);
+#endif
+#ifdef ZMQ_VERSION
+mrb_zmq_define_const("VERSION", ZMQ_VERSION);
+#endif

@@ -46,14 +46,23 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 
 typedef struct {
   void *thread;
-  void *pipe;
+  void *frontend;
+  void *backend;
+  void *backend_ctx;
 } mrb_zmq_thread_pipe_t;
 
 static void
 mrb_gc_zmq_threadclose(mrb_state *mrb, void *thread_pipe_)
 {
   mrb_zmq_thread_pipe_t *thread_pipe = (mrb_zmq_thread_pipe_t *) thread_pipe_;
-  zmq_send(thread_pipe->pipe, "TERM$", 5, 0);
+  int sndtimeo = 0;
+  zmq_setsockopt(thread_pipe->frontend, ZMQ_SNDTIMEO, &sndtimeo, sizeof(sndtimeo));
+  zmq_send(thread_pipe->frontend, "TERM$", 5, 0);
+  int linger = 0;
+  zmq_setsockopt(thread_pipe->frontend, ZMQ_LINGER, &linger, sizeof(linger));
+  zmq_close(thread_pipe->frontend);
+  zmq_ctx_shutdown(thread_pipe->backend_ctx);
+  zmq_close(thread_pipe->backend);
   zmq_threadclose(thread_pipe->thread);
   mrb_free(mrb, thread_pipe_);
 }

@@ -17,6 +17,7 @@ MessagePack.register_unpack_type(3) do |data|
 end
 
 module LibZMQ
+  private
   class Thread_fn
     def run
       until (msg = @pipe.recv.to_str(true)) == "TERM$"
@@ -36,11 +37,7 @@ module LibZMQ
             end
           when :async_send
             if (instance = @instances[msg[:object_id]])
-              begin
-                instance.__send__(msg[:method], *msg[:args])
-              rescue => e
-                puts e.inspect
-              end
+              instance.__send__(msg[:method], *msg[:args])
             end
           when :finalize
             @instances.delete(msg[:object_id])
@@ -90,8 +87,8 @@ module ZMQ
       self
     end
 
-    def close
-      LibZMQ.threadclose(self)
+    def close(blocky = true)
+      LibZMQ.threadclose(self, blocky)
       nil
     end
   end
