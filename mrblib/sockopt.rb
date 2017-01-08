@@ -1,22 +1,21 @@
 module ZMQ
   class Socket
-    [
-      "backlog", "events", "fd", "handshake_ivl", "linger", "multicast_hops", "rate", "rcvhwm", "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max",
+    ["backlog", "events", "fd", "handshake_ivl", "linger", "multicast_hops", "rate", "rcvhwm", "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max",
       "recovery_ivl", "sndbuf", "sndhwm", "sndtimeo", "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos"
     ].each do |int|
-      if LibZMQ.const_defined?(int.upcase)
-        const = LibZMQ.const_get(int.upcase)
+      upint = int.upcase
+      if LibZMQ.const_defined?(upint)
+        const = LibZMQ.const_get(upint)
         define_method(int) do
           LibZMQ.getsockopt(self, const, Fixnum)
         end
       end
     end
 
-    alias :to_i :fd
-
     ["gssapi_plaintext", "gssapi_server", "immediate", "ipv6", "plain_server", "rcvmore"].each do |boolean|
-      if LibZMQ.const_defined?(boolean.upcase)
-        const = LibZMQ.const_get(boolean.upcase)
+      upbool = boolean.upcase
+      if LibZMQ.const_defined?(upbool)
+        const = LibZMQ.const_get(upbool)
         define_method("#{boolean}?") do
           LibZMQ.getsockopt(self, const, TrueClass)
         end
@@ -24,8 +23,9 @@ module ZMQ
     end
 
     ["gssapi_principal", "gssapi_service_principal", "last_endpoint", "plain_password", "plain_username", "zap_domain"].each do |char|
-      if LibZMQ.const_defined?(char.upcase)
-        const = LibZMQ.const_get(char.upcase)
+      upchar = char.upcase
+      if LibZMQ.const_defined?(upchar)
+        const = LibZMQ.const_get(upchar)
         define_method(char) do
           LibZMQ.getsockopt(self, const, String).chop!
         end
@@ -33,8 +33,9 @@ module ZMQ
     end
 
     ["curve_publickey", "curve_secretkey", "curve_serverkey"].each do |curve|
-      if LibZMQ.const_defined?(curve.upcase)
-        const = LibZMQ.const_get(curve.upcase)
+      upcurve = curve.upcase
+      if LibZMQ.const_defined?(upcurve)
+        const = LibZMQ.const_get(upcurve)
         define_method(curve) do
           LibZMQ.getsockopt(self, const, String, 32)
         end
@@ -50,32 +51,31 @@ module ZMQ
     end
 
     ["affinity", "maxmsgsize"].each do |int64|
-      if LibZMQ.const_defined?(int64.upcase)
-        const = LibZMQ.const_get(int64.upcase)
+      upint64 = int64.upcase
+      if LibZMQ.const_defined?(upint64)
+        const = LibZMQ.const_get(upint64)
         define_method(int64) do
           LibZMQ.getsockopt(self, const, Float)
         end
       end
     end
 
-    [
-      "backlog", "handshake_ivl", "linger", "multicast_hops", "rate", "rcvhwm", "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max", "recovery_ivl",
-      "sndbuf", "sndhwm", "sndtimeo", "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos"
-    ].each do |int|
-      if LibZMQ.const_defined?(int.upcase)
-        const = LibZMQ.const_get(int.upcase)
+    ["backlog", "handshake_ivl", "linger", "multicast_hops", "rate", "rcvhwm", "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max", "recovery_ivl",
+      "sndbuf", "sndhwm", "sndtimeo", "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos"].each do |int|
+        upint = int.upcase
+      if LibZMQ.const_defined?(upint)
+        const = LibZMQ.const_get(upint)
         define_method("#{int}=") do |option_value|
           LibZMQ.setsockopt(self, const, option_value.to_int)
         end
       end
     end
 
-    [
-      "connect_rid", "curve_publickey", "curve_secretkey", "curve_serverkey", "gssapi_principal", "gssapi_service_principal", "plain_password",
-      "plain_username", "subscribe", "unsubscribe", "zap_domain"
-    ].each do |data|
-      if LibZMQ.const_defined?(data.upcase)
-        const = LibZMQ.const_get(data.upcase)
+    ["connect_rid", "curve_publickey", "curve_secretkey", "curve_serverkey", "gssapi_principal", "gssapi_service_principal", "plain_password",
+      "plain_username", "subscribe", "unsubscribe", "zap_domain"].each do |data|
+        updata = data.upcase
+      if LibZMQ.const_defined?(update)
+        const = LibZMQ.const_get(update)
         define_method("#{data}=") do |option_value = nil|
           if option_value
             LibZMQ.setsockopt(self, const, option_value.to_str)
@@ -87,20 +87,20 @@ module ZMQ
     end
 
     ["affinity", "maxmsgsize"].each do |int64|
-      if LibZMQ.const_defined?(int64.upcase)
-        const = LibZMQ.const_get(int64.upcase)
+      upint64 = int64.upcase
+      if LibZMQ.const_defined?(upint64)
+        const = LibZMQ.const_get(upint64)
         define_method("#{int64}=") do |option_value|
           LibZMQ.setsockopt(self, const, option_value.to_f)
         end
       end
     end
 
-    [
-      "conflate", "curve_server", "gssapi_plaintext", "gssapi_server", "immediate", "ipv6", "plain_server", "probe_router", "req_collerate",
-      "req_relaxed", "router_handhover", "router_mandatory", "xpub_verbose"
-    ].each do |boolean|
-      if LibZMQ.const_defined?(boolean.upcase)
-        const = LibZMQ.const_get(boolean.upcase)
+    ["conflate", "curve_server", "gssapi_plaintext", "gssapi_server", "immediate", "ipv6", "plain_server", "probe_router", "req_collerate",
+      "req_relaxed", "router_handhover", "router_mandatory", "xpub_verbose"].each do |boolean|
+        upbool = boolean.upcase
+      if LibZMQ.const_defined?(upbool)
+        const = LibZMQ.const_get(upbool)
         define_method("#{boolean}=") do |option_value|
           LibZMQ.setsockopt(self, const, option_value ? true : false)
         end

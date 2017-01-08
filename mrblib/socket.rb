@@ -25,7 +25,7 @@ module ZMQ
           LibZMQ.send(self, data[i], LibZMQ::SNDMORE)
           i += 1
         end
-        LibZMQ.send(self, data.last, 0)
+        LibZMQ.send(self, data[i], 0)
       else
         LibZMQ.send(self, data, flags)
       end

@@ -2,18 +2,18 @@ MessagePack.register_pack_type(1, Symbol) { |sym| String(sym) }
 MessagePack.register_unpack_type(1) { |data| data.to_sym }
 MessagePack.register_pack_type(2, Class) { |cls| String(cls) }
 MessagePack.register_unpack_type(2) { |data| data.constantize }
-MessagePack.register_pack_type(3, Exception) do |exception|
+MessagePack.register_pack_type(3, Exception) do |exe|
   {
-    class: exception.class,
-    message: exception.message,
-    backtrace: exception.backtrace
+    class: exe.class,
+    message: exe.message,
+    backtrace: exe.backtrace
   }.to_msgpack
 end
 MessagePack.register_unpack_type(3) do |data|
   data = MessagePack.unpack(data)
-  exception = data[:class].new(data[:message])
-  exception.set_backtrace(data[:backtrace])
-  exception
+  exe = data[:class].new(data[:message])
+  exe.set_backtrace(data[:backtrace])
+  exe
 end
 
 module LibZMQ
@@ -37,7 +37,11 @@ module LibZMQ
             end
           when :async_send
             if (instance = @instances[msg[:object_id]])
-              instance.__send__(msg[:method], *msg[:args])
+              begin
+                instance.__send__(msg[:method], *msg[:args])
+              rescue => e
+                puts e.inspect
+              end
             end
           when :finalize
             @instances.delete(msg[:object_id])
@@ -89,7 +93,6 @@ module ZMQ
 
     def close(blocky = true)
       LibZMQ.threadclose(self, blocky)
-      nil
     end
   end
 
