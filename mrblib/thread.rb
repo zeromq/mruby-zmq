@@ -83,12 +83,10 @@ module ZMQ
 
     def async_send(object_id, method, *args)
       LibZMQ.send(@pipe, {type: :async_send, object_id: object_id, method: method, args: args}.to_msgpack, 0)
-      self
     end
 
     def finalize(object_id)
       LibZMQ.send(@pipe, {type: :finalize, object_id: object_id}.to_msgpack, 0)
-      self
     end
 
     def close(blocky = true)

@@ -74,8 +74,8 @@ module ZMQ
     ["connect_rid", "curve_publickey", "curve_secretkey", "curve_serverkey", "gssapi_principal", "gssapi_service_principal", "plain_password",
       "plain_username", "subscribe", "unsubscribe", "zap_domain"].each do |data|
         updata = data.upcase
-      if LibZMQ.const_defined?(update)
-        const = LibZMQ.const_get(update)
+      if LibZMQ.const_defined?(updata)
+        const = LibZMQ.const_get(updata)
         define_method("#{data}=") do |option_value = nil|
           if option_value
             LibZMQ.setsockopt(self, const, option_value.to_str)
