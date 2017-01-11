@@ -39,8 +39,7 @@ module LibZMQ
             if (instance = @instances[msg[:object_id]])
               begin
                 instance.__send__(msg[:method], *msg[:args])
-              rescue => e
-                puts e.inspect
+              rescue
               end
             end
           when :finalize

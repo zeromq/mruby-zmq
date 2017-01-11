@@ -2,10 +2,6 @@
 #define MRB_LIBZMQ_H
 
 #include <stdlib.h>
-#include <mruby.h>
-#ifdef MRB_INT16
- #error "MRB_INT16 is too small for mruby-libzmq4"
-#endif
 #include <zmq.h>
 #if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
   #error "mruby-libzmq4 needs at least libzmq-4.1"
@@ -70,5 +66,17 @@ mrb_gc_zmq_threadclose(mrb_state *mrb, void *mrb_zmq_thread_)
 static const struct mrb_data_type mrb_zmq_thread_type = {
   "$i_mrb_zmq_thread_type", mrb_gc_zmq_threadclose
 };
+
+#ifdef ZMQ_HAVE_POLLER
+static void
+mrb_gc_zmq_poller_destroy(mrb_state *mrb, void *poller)
+{
+  zmq_poller_destroy(&poller);
+}
+
+static const struct mrb_data_type mrb_zmq_poller_type = {
+  "$i_mrb_zmq_poller_type", mrb_gc_zmq_poller_destroy
+};
+#endif
 
 #endif

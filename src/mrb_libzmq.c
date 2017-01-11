@@ -1,3 +1,4 @@
+#include "mruby/zmq.h"
 #include "mrb_libzmq.h"
 
 #if (__GNUC__ >= 3) || (__INTEL_COMPILER >= 800) || defined(__clang__)
@@ -10,6 +11,28 @@
 
 #define MRB_LIBZMQ_CONTEXT() (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
 
+MRB_INLINE void
+mrb_zmq_handle_error(mrb_state *mrb, const char *func)
+{
+  switch(zmq_errno()) {
+    case EFSM: {
+      mrb_raisef(mrb, E_EFSM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(zmq_errno())));
+    } break;
+    case ENOCOMPATPROTO: {
+      mrb_raisef(mrb, E_ENOCOMPATPROTO_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(zmq_errno())));
+    } break;
+    case ETERM: {
+      mrb_raisef(mrb, E_ETERM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(zmq_errno())));
+    } break;
+    case EMTHREAD: {
+      mrb_raisef(mrb, E_EMTHREAD_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(zmq_errno())));
+    } break;
+    default: {
+      mrb_sys_fail(mrb, func);
+    }
+  }
+}
+
 static mrb_value
 mrb_zmq_bind(mrb_state *mrb, mrb_value self)
 {
@@ -19,7 +42,7 @@ mrb_zmq_bind(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_bind(socket, endpoint);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_bind");
   }
 
   return self;
@@ -39,7 +62,7 @@ mrb_zmq_close(mrb_state *mrb, mrb_value self)
     }
     int rc = zmq_close(DATA_PTR(socket_val));
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_close");
     }
     mrb_data_init(socket_val, NULL, NULL);
   }
@@ -56,7 +79,7 @@ mrb_zmq_connect(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_connect(socket, endpoint);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_connect");
   }
 
   return self;
@@ -71,7 +94,7 @@ mrb_zmq_disconnect(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_disconnect(socket, endpoint);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_disconnect");
   }
 
   return self;
@@ -100,7 +123,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     option_len = sizeof(fd);
     rc = zmq_getsockopt(socket, option_name, &fd, &option_len);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
     if (MRB_INT_MAX < fd) {
       return mrb_float_value(mrb, fd);
@@ -113,7 +136,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     option_len = sizeof(boolean);
     rc = zmq_getsockopt(socket, option_name, &boolean, &option_len);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
     return mrb_bool_value(boolean);
   }
@@ -122,7 +145,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
     return mrb_fixnum_value(number);
   }
@@ -131,7 +154,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
 #ifdef MRB_INT64
     return mrb_fixnum_value(number);
@@ -144,7 +167,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     option_len = RSTRING_CAPA(buf);
     rc = zmq_getsockopt(socket, option_name, RSTRING_PTR(buf), &option_len);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
 
     return mrb_str_resize(mrb, buf, option_len);
@@ -212,7 +235,7 @@ mrb_zmq_msg_send(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_msg_send(msg, socket, flags);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_msg_send");
   }
 
   return mrb_nil_value();
@@ -247,7 +270,7 @@ mrb_zmq_send(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_send(socket, RSTRING_PTR(message), RSTRING_LEN(message), flags);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_send");
   }
 
   return mrb_fixnum_value(rc);
@@ -262,55 +285,41 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dio", &socket, &mrb_zmq_socket_type, &option_name, &option_value);
   mrb_assert(option_name >= INT_MIN && option_name <= INT_MAX);
 
-  int rc;
+  int rc = -1;
 
   switch(mrb_type(option_value)) {
     case MRB_TT_FALSE: {
       if (!mrb_fixnum(option_value)) {
         rc = zmq_setsockopt(socket, option_name, NULL, 0);
-        if (unlikely(rc == -1)) {
-          mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-        }
       } else {
         int boolean = 0;
         rc = zmq_setsockopt(socket, option_name, &boolean, sizeof(boolean));
-        if (unlikely(rc == -1)) {
-          mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-        }
       }
     } break;
     case MRB_TT_TRUE: {
       int boolean = 1;
       rc = zmq_setsockopt(socket, option_name, &boolean, sizeof(boolean));
-      if (unlikely(rc == -1)) {
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-      }
     } break;
     case MRB_TT_FIXNUM: {
       mrb_assert(mrb_fixnum(option_value) >= INT_MIN && mrb_fixnum(option_value) <= INT_MAX);
       int number = (int) mrb_fixnum(option_value);
       rc = zmq_setsockopt(socket, option_name, &number, sizeof(number));
-      if (unlikely(rc == -1)) {
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-      }
     } break;
     case MRB_TT_FLOAT: {
       mrb_assert(mrb_float(option_value) >= INT64_MIN && mrb_float(option_value) <= INT64_MAX);
       int64_t number = (int64_t) mrb_float(option_value);
       rc = zmq_setsockopt(socket, option_name, &number, sizeof(number));
-      if (unlikely(rc == -1)) {
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-      }
     } break;
     case MRB_TT_STRING: {
       rc = zmq_setsockopt(socket, option_name, RSTRING_PTR(option_value), RSTRING_LEN(option_value));
-      if (unlikely(rc == -1)) {
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
-      }
     } break;
     default: {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "expected nil|false|true|fixnum|float|string");
     }
+  }
+
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_setsockopt");
   }
 
   return self;
@@ -325,7 +334,7 @@ mrb_zmq_unbind(mrb_state *mrb, mrb_value self)
 
   int rc = zmq_unbind(socket, endpoint);
   if (unlikely(rc == -1)) {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_unbind");
   }
 
   return self;
@@ -346,7 +355,7 @@ mrb_zmq_socket(mrb_state *mrb, mrb_value self)
   if (likely(socket)) {
     mrb_data_init(self, socket, &mrb_zmq_socket_type);
   } else {
-    mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+    mrb_zmq_handle_error(mrb, "zmq_socket");
   }
 
   return self;
@@ -369,7 +378,7 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
 
     int rc = zmq_msg_recv (msg, DATA_PTR(self), flags);
     if (unlikely(rc == -1)) {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_msg_recv");
     }
     more = zmq_msg_more(msg);
     if (more) {
@@ -416,7 +425,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_)
       int rc = zmq_send(mrb_zmq_thread->backend, &success, sizeof(success), 0);
       if (unlikely(rc == -1)) {
         success = FALSE;
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+        mrb_zmq_handle_error(mrb, "zmq_send");
       }
       mrb->jmp = prev_jmp;
     }
@@ -468,7 +477,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     if (likely(backend)) {
       mrb_zmq_thread->backend = backend;
     } else {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_socket");
     }
 
     char endpoint[256];
@@ -479,7 +488,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
         break;
       }
       else if (errno != EADDRINUSE) {
-        mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+        mrb_zmq_handle_error(mrb, "zmq_bind");
       }
     } while(TRUE);
 
@@ -491,7 +500,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
       mrb_zmq_thread->thread = thread;
       mrb_data_init(self, mrb_zmq_thread, &mrb_zmq_thread_type);
     } else {
-      mrb_sys_fail(mrb, zmq_strerror(zmq_errno()));
+      mrb_zmq_handle_error(mrb, "zmq_threadstart");
     }
 
     zmq_recv(frontend, &success, sizeof(mrb_bool), 0);
@@ -545,8 +554,10 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
     }
     zmq_close(mrb_zmq_thread->frontend);
     mrb_data_init(frontend_val, NULL, NULL);
-    zmq_ctx_shutdown(mrb_zmq_thread->backend_ctx);
-    zmq_close(mrb_zmq_thread->backend);
+    if (!blocky) {
+      zmq_ctx_shutdown(mrb_zmq_thread->backend_ctx);
+      zmq_close(mrb_zmq_thread->backend);
+    }
     zmq_threadclose(mrb_zmq_thread->thread);
     mrb_free(mrb, DATA_PTR(thread_val));
     mrb_data_init(thread_val, NULL, NULL);
@@ -554,6 +565,96 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
 
   return mrb_nil_value();
 }
+
+#ifdef ZMQ_HAVE_POLLER
+static mrb_value
+mrb_zmq_poller_new(mrb_state *mrb, mrb_value self)
+{
+  if (unlikely(DATA_PTR(self))) {
+    mrb_free(mrb, DATA_PTR(self));
+  }
+
+  void *poller = zmq_poller_new();
+  mrb_data_init(self, poller, &mrb_zmq_poller_type);
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
+{
+  mrb_value socket;
+  mrb_int events = ZMQ_POLLIN;
+  mrb_get_args(mrb, "o|i", &socket, &events);
+  mrb_assert(events >= SHRT_MIN && events <= SHRT_MAX);
+
+  if (mrb_type(socket) == MRB_TT_DATA && DATA_TYPE(socket) == &mrb_zmq_socket_type) {
+    int rc = zmq_poller_add(DATA_PTR(self), DATA_PTR(socket), mrb_ptr(socket), events);
+    if (unlikely(rc == -1)) {
+      mrb_zmq_handle_error(mrb, "zmq_poller_add");
+    }
+  } else {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected ZMQ Socket");
+  }
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
+{
+  mrb_value socket;
+  mrb_int events = ZMQ_POLLIN;
+  mrb_get_args(mrb, "o|i", &socket, &events);
+  mrb_assert(events >= SHRT_MIN && events <= SHRT_MAX);
+
+  if (mrb_type(socket) == MRB_TT_DATA && DATA_TYPE(socket) == &mrb_zmq_socket_type) {
+    int rc = zmq_poller_modify(DATA_PTR(self), DATA_PTR(socket), events);
+    if (unlikely(rc == -1)) {
+      mrb_zmq_handle_error(mrb, "zmq_poller_modify");
+    }
+  } else {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected ZMQ Socket");
+  }
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
+{
+  mrb_value socket;
+  mrb_get_args(mrb, "o", &socket);
+
+  if (mrb_type(socket) == MRB_TT_DATA && DATA_TYPE(socket) == &mrb_zmq_socket_type) {
+    int rc = zmq_poller_remove(DATA_PTR(self), DATA_PTR(socket));
+    if (unlikely(rc == -1)) {
+      mrb_zmq_handle_error(mrb, "zmq_poller_remove");
+    }
+  } else {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected ZMQ Socket");
+  }
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
+{
+  mrb_int timeout = -1;
+  mrb_get_args(mrb, "|i", &timeout);
+  mrb_assert(timeout >= LONG_MIN && timeout <= LONG_MAX);
+
+  zmq_poller_event_t event;
+  int rc = zmq_poller_wait(DATA_PTR(self), &event, timeout);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_poller_wait");
+  }
+
+
+  return mrb_obj_value(event.user_data);
+}
+#endif
 
 void
 mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
@@ -569,7 +670,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
     zmq_ctx_set(context, ZMQ_THREAD_PRIORITY, atoi(getenv("ZMQ_THREAD_PRIORITY")));
   }
 
-  struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_thread_class;
+  struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_thread_class, *zmq_poller_class;
 
   libzmq_mod = mrb_define_module(mrb, "LibZMQ");
   mrb_define_const(mrb, libzmq_mod, "_Context", mrb_cptr_value(mrb, context));
@@ -602,6 +703,16 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   zmq_thread_class = mrb_define_class_under(mrb, zmq_mod, "Thread", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_thread_class, MRB_TT_DATA);
   mrb_define_class_method(mrb, zmq_thread_class, "new", mrb_zmq_threadstart, (MRB_ARGS_ANY()|MRB_ARGS_BLOCK()));
+
+#ifdef ZMQ_HAVE_POLLER
+  zmq_poller_class = mrb_define_class_under(mrb, libzmq_mod, "Poller", mrb->object_class);
+  MRB_SET_INSTANCE_TT(zmq_poller_class, MRB_TT_DATA);
+  mrb_define_method(mrb, zmq_poller_class, "initialize", mrb_zmq_poller_new, MRB_ARGS_NONE());
+  mrb_define_method(mrb, zmq_poller_class, "add", mrb_zmq_poller_add, MRB_ARGS_ARG(1, 1));
+  mrb_define_method(mrb, zmq_poller_class, "modify", mrb_zmq_poller_modify, MRB_ARGS_ARG(1, 1));
+  mrb_define_method(mrb, zmq_poller_class, "remove", mrb_zmq_poller_remove, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, zmq_poller_class, "wait", mrb_zmq_poller_wait, MRB_ARGS_OPT(1));
+#endif
 
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \
   do { \

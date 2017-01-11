@@ -7,5 +7,6 @@ MRuby::Gem::Specification.new('mruby-libzmq4') do |spec|
   spec.add_dependency 'mruby-simplemsgpack'
   spec.add_dependency 'mruby-objectspace'
   spec.add_dependency 'mruby-exit'
+  spec.cc.defines << 'ZMQ_BUILD_DRAFT_API'
   spec.linker.libraries << 'zmq'
 end
