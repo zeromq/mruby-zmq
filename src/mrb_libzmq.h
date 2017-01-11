@@ -43,6 +43,7 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 typedef struct {
   void *frontend;
   void *backend;
+  char *class_path;
   void *thread;
   void *backend_ctx;
 } mrb_zmq_thread_t;
@@ -60,6 +61,7 @@ mrb_gc_zmq_threadclose(mrb_state *mrb, void *mrb_zmq_thread_)
   zmq_ctx_shutdown(mrb_zmq_thread->backend_ctx);
   zmq_close(mrb_zmq_thread->backend);
   zmq_threadclose(mrb_zmq_thread->thread);
+  free(mrb_zmq_thread->class_path);
   mrb_free(mrb, mrb_zmq_thread_);
 }
 

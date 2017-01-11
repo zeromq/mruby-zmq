@@ -418,8 +418,13 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_)
       mrb->jmp = &c_jmp;
       pipe_val = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair")));
       mrb_data_init(pipe_val, mrb_zmq_thread->backend, &mrb_zmq_socket_type);
-      thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "LibZMQ"), "Thread_fn"), 0, NULL);
-      mrb_iv_set(mrb, thread_fn, mrb_intern_lit(mrb, "@instances"), mrb_hash_new(mrb));
+      if (mrb_zmq_thread->class_path) {
+        mrb_value class_path_val = mrb_str_new_static(mrb, mrb_zmq_thread->class_path, strlen(mrb_zmq_thread->class_path));
+        mrb_value bg_class = mrb_funcall(mrb, class_path_val, "constantize", 0);
+        thread_fn = mrb_obj_new(mrb, mrb_class_ptr(bg_class), 0, NULL);
+      } else {
+        thread_fn = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "LibZMQ"), "Thread_fn"), 0, NULL);
+      }
       mrb_iv_set(mrb, thread_fn, mrb_intern_lit(mrb, "@pipe"), pipe_val);
       success = TRUE;
       int rc = zmq_send(mrb_zmq_thread->backend, &success, sizeof(success), 0);
@@ -458,6 +463,10 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   void *backend = NULL;
   mrb_bool success = FALSE;
 
+  mrb_value *argv = NULL;
+  mrb_int argv_len = 0;
+  mrb_get_args(mrb, "*&", &argv, &argv_len);
+
   struct mrb_jmpbuf* prev_jmp = mrb->jmp;
   struct mrb_jmpbuf c_jmp;
 
@@ -469,8 +478,8 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), 0, NULL);
     mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
     void *frontend = DATA_PTR(frontend_val);
-    mrb_zmq_thread = mrb_malloc(mrb, sizeof(mrb_zmq_thread_t));
-    memset(mrb_zmq_thread, 0, sizeof(mrb_zmq_thread_t));
+    mrb_zmq_thread = mrb_malloc(mrb, sizeof(*mrb_zmq_thread));
+    memset(mrb_zmq_thread, 0, sizeof(*mrb_zmq_thread));
     mrb_zmq_thread->frontend = frontend;
 
     void *backend = zmq_socket(MRB_LIBZMQ_CONTEXT(), ZMQ_PAIR);
@@ -495,6 +504,16 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     int rc = zmq_connect(backend, endpoint);
     mrb_assert(rc != -1);
 
+    if (argv_len > 0) {
+      if (mrb_type(argv[0]) == MRB_TT_CLASS) {
+        mrb_value class_path = mrb_class_path(mrb, mrb_class_ptr(argv[0]));
+        mrb_zmq_thread->class_path = strdup(mrb_string_value_cstr(mrb, &class_path));
+        if (!mrb_zmq_thread->class_path) {
+          mrb_exc_raise(mrb, mrb_obj_value(mrb->nomem_err));
+        }
+      }
+    }
+
     void *thread = zmq_threadstart(&mrb_zmq_thread_fn, mrb_zmq_thread);
     if (likely(thread)) {
       mrb_zmq_thread->thread = thread;
@@ -503,23 +522,19 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
       mrb_zmq_handle_error(mrb, "zmq_threadstart");
     }
 
-    zmq_recv(frontend, &success, sizeof(mrb_bool), 0);
+    zmq_recv(frontend, &success, sizeof(success), 0);
     if (unlikely(!success)) {
       mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot initialize ZMQ Thread");
     }
 
-    mrb_value *argv = NULL;
-    mrb_int argv_len = 0;
-    mrb_value block = mrb_nil_value();
-    mrb_get_args(mrb, "*&", &argv, &argv_len, &block);
-
-    mrb_funcall_with_block(mrb, self, mrb_intern_lit(mrb, "initialize"), argv_len, argv, block);
+    mrb_funcall_argv(mrb, self, mrb_intern_lit(mrb, "initialize"), argv_len, argv);
     mrb->jmp = prev_jmp;
   }
   MRB_CATCH(&c_jmp)
   {
     mrb->jmp = prev_jmp;
     if (mrb_zmq_thread && !mrb_zmq_thread->thread) {
+      free(mrb_zmq_thread->class_path);
       mrb_free(mrb, mrb_zmq_thread);
     }
     if (backend && !success) {
@@ -559,6 +574,7 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
       zmq_close(mrb_zmq_thread->backend);
     }
     zmq_threadclose(mrb_zmq_thread->thread);
+    free(mrb_zmq_thread->class_path);
     mrb_free(mrb, DATA_PTR(thread_val));
     mrb_data_init(thread_val, NULL, NULL);
   }
@@ -651,8 +667,40 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
     mrb_zmq_handle_error(mrb, "zmq_poller_wait");
   }
 
-
   return mrb_obj_value(event.user_data);
+}
+
+static mrb_value
+mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
+{
+  mrb_int n_events, timeout = -1;
+  mrb_value block = mrb_nil_value();
+  mrb_get_args(mrb, "i|i&", &n_events, &timeout, &block);
+  mrb_assert(n_events >= 0 && n_events <= INT_MAX);
+  mrb_assert(timeout >= LONG_MIN && timeout <= LONG_MAX);
+  if (mrb_nil_p(block)) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
+  }
+
+  int rc = -1;
+  if (n_events > 0) {
+    zmq_poller_event_t events[n_events];
+    rc = zmq_poller_wait_all(DATA_PTR(self), events, n_events, timeout);
+    for (int i = 0; i < rc; i++) {
+      mrb_value argv[2];
+      argv[0] = mrb_obj_value(events[i].user_data);
+      argv[1] = mrb_fixnum_value(events[i].events);
+      mrb_yield_argv(mrb, block, 2, argv);
+    }
+  } else {
+    rc = zmq_poller_wait_all(DATA_PTR(self), NULL, 0, timeout);
+  }
+
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_poller_wait_all");
+  }
+
+  return self;
 }
 #endif
 
@@ -702,7 +750,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
 
   zmq_thread_class = mrb_define_class_under(mrb, zmq_mod, "Thread", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_thread_class, MRB_TT_DATA);
-  mrb_define_class_method(mrb, zmq_thread_class, "new", mrb_zmq_threadstart, (MRB_ARGS_ANY()|MRB_ARGS_BLOCK()));
+  mrb_define_class_method(mrb, zmq_thread_class, "new", mrb_zmq_threadstart, MRB_ARGS_ANY());
 
 #ifdef ZMQ_HAVE_POLLER
   zmq_poller_class = mrb_define_class_under(mrb, libzmq_mod, "Poller", mrb->object_class);
@@ -712,6 +760,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_poller_class, "modify", mrb_zmq_poller_modify, MRB_ARGS_ARG(1, 1));
   mrb_define_method(mrb, zmq_poller_class, "remove", mrb_zmq_poller_remove, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, zmq_poller_class, "wait", mrb_zmq_poller_wait, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, zmq_poller_class, "wait_all", mrb_zmq_poller_wait_all, (MRB_ARGS_ARG(1, 1)|MRB_ARGS_BLOCK()));
 #endif
 
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \

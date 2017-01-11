@@ -17,8 +17,11 @@ MessagePack.register_unpack_type(3) do |data|
 end
 
 module LibZMQ
-  private
   class Thread_fn
+    def iniitialize
+      @instances = {}
+    end
+
     def run
       until (msg = @pipe.recv.to_str(true)) == "TERM$"
         msg = MessagePack.unpack(msg)
