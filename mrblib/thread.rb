@@ -16,14 +16,39 @@ MessagePack.register_unpack_type(3) do |data|
   exe
 end
 
-module LibZMQ
+module ZMQ
   class Thread_fn
-    def iniitialize
+    def initialize
+      if ZMQ.const_defined?("Poller")
+        @poller = ZMQ::Poller.new
+        @poller << @pipe
+      end
+      @interrupted = false
       @instances = {}
     end
 
     def run
-      until (msg = @pipe.recv.to_str(true)) == "TERM$"
+      if @poller
+        until @interrupted
+          @poller.wait_all do |socket, events|
+            case socket
+            when @pipe
+              handle_pipe
+            end
+          end
+        end
+      else
+        until @interrupted
+          handle_pipe
+        end
+      end
+    end
+
+    def handle_pipe
+      msg = @pipe.recv.to_str(true)
+      if msg == "TERM$"
+        @interrupted = true
+      else
         msg = MessagePack.unpack(msg)
         begin
           case msg[:type]
@@ -54,9 +79,7 @@ module LibZMQ
       end
     end
   end
-end
 
-module ZMQ
   class Thread
     def new(mrb_class, *args)
       if block_given?
