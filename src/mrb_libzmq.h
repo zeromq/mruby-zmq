@@ -18,7 +18,7 @@
 #include <mruby/sysrandom.h>
 
 static void
-mrb_gc_zmq_close(mrb_state *mrb, void *socket)
+mrb_zmq_gc_close(mrb_state *mrb, void *socket)
 {
   int linger = 0;
   zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
@@ -26,18 +26,18 @@ mrb_gc_zmq_close(mrb_state *mrb, void *socket)
 }
 
 static const struct mrb_data_type mrb_zmq_socket_type = {
-  "$i_mrb_zmq_socket_type", mrb_gc_zmq_close
+  "$i_mrb_zmq_socket_type", mrb_zmq_gc_close
 };
 
 static void
-mrb_gc_zmq_msg_close(mrb_state *mrb, void *msg)
+mrb_zmq_gc_msg_close(mrb_state *mrb, void *msg)
 {
   zmq_msg_close((zmq_msg_t *) msg);
   mrb_free(mrb, msg);
 }
 
 static const struct mrb_data_type mrb_zmq_msg_type = {
-  "$i_mrb_zmq_msg_type", mrb_gc_zmq_msg_close
+  "$i_mrb_zmq_msg_type", mrb_zmq_gc_msg_close
 };
 
 typedef struct {
@@ -46,38 +46,38 @@ typedef struct {
   char *class_path;
   void *thread;
   void *backend_ctx;
-} mrb_zmq_thread_t;
+} mrb_zmq_thread_data_t;
 
 static void
-mrb_gc_zmq_threadclose(mrb_state *mrb, void *mrb_zmq_thread_)
+mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
 {
-  mrb_zmq_thread_t *mrb_zmq_thread = (mrb_zmq_thread_t *) mrb_zmq_thread_;
+  mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
   int sndtimeo = 0;
-  zmq_setsockopt(mrb_zmq_thread->frontend, ZMQ_SNDTIMEO, &sndtimeo, sizeof(sndtimeo));
-  zmq_send(mrb_zmq_thread->frontend, "TERM$", 5, 0);
+  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &sndtimeo, sizeof(sndtimeo));
+  zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
   int linger = 0;
-  zmq_setsockopt(mrb_zmq_thread->frontend, ZMQ_LINGER, &linger, sizeof(linger));
-  zmq_close(mrb_zmq_thread->frontend);
-  zmq_ctx_shutdown(mrb_zmq_thread->backend_ctx);
-  zmq_close(mrb_zmq_thread->backend);
-  zmq_threadclose(mrb_zmq_thread->thread);
-  free(mrb_zmq_thread->class_path);
-  mrb_free(mrb, mrb_zmq_thread_);
+  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &linger, sizeof(linger));
+  zmq_close(mrb_zmq_thread_data->frontend);
+  zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
+  zmq_close(mrb_zmq_thread_data->backend);
+  zmq_threadclose(mrb_zmq_thread_data->thread);
+  free(mrb_zmq_thread_data->class_path);
+  mrb_free(mrb, mrb_zmq_thread_data_);
 }
 
 static const struct mrb_data_type mrb_zmq_thread_type = {
-  "$i_mrb_zmq_thread_type", mrb_gc_zmq_threadclose
+  "$i_mrb_zmq_thread_type", mrb_zmq_gc_threadclose
 };
 
 #ifdef ZMQ_HAVE_POLLER
 static void
-mrb_gc_zmq_poller_destroy(mrb_state *mrb, void *poller)
+mrb_zmq_gc_poller_destroy(mrb_state *mrb, void *poller)
 {
   zmq_poller_destroy(&poller);
 }
 
 static const struct mrb_data_type mrb_zmq_poller_type = {
-  "$i_mrb_zmq_poller_type", mrb_gc_zmq_poller_destroy
+  "$i_mrb_zmq_poller_type", mrb_zmq_gc_poller_destroy
 };
 #endif
 

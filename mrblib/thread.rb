@@ -30,7 +30,7 @@ module ZMQ
     def run
       if @poller
         until @interrupted
-          @poller.wait_all do |socket, events|
+          @poller.wait do |socket, events|
             case socket
             when @pipe
               handle_pipe
