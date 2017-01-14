@@ -304,6 +304,42 @@ mrb_zmq_define_const("GSSAPI", ZMQ_GSSAPI);
 #ifdef ZMQ_GROUP_MAX_LENGTH
 mrb_zmq_define_const("GROUP_MAX_LENGTH", ZMQ_GROUP_MAX_LENGTH);
 #endif
+#ifdef ZMQ_EVENT_CONNECTED
+mrb_zmq_define_const("EVENT_CONNECTED", ZMQ_EVENT_CONNECTED);
+#endif
+#ifdef ZMQ_EVENT_CONNECT_DELAYED
+mrb_zmq_define_const("EVENT_CONNECT_DELAYED", ZMQ_EVENT_CONNECT_DELAYED);
+#endif
+#ifdef ZMQ_EVENT_CONNECT_RETRIED
+mrb_zmq_define_const("EVENT_CONNECT_RETRIED", ZMQ_EVENT_CONNECT_RETRIED);
+#endif
+#ifdef ZMQ_EVENT_LISTENING
+mrb_zmq_define_const("EVENT_LISTENING", ZMQ_EVENT_LISTENING);
+#endif
+#ifdef ZMQ_EVENT_BIND_FAILED
+mrb_zmq_define_const("EVENT_BIND_FAILED", ZMQ_EVENT_BIND_FAILED);
+#endif
+#ifdef ZMQ_EVENT_ACCEPTED
+mrb_zmq_define_const("EVENT_ACCEPTED", ZMQ_EVENT_ACCEPTED);
+#endif
+#ifdef ZMQ_EVENT_ACCEPT_FAILED
+mrb_zmq_define_const("EVENT_ACCEPT_FAILED", ZMQ_EVENT_ACCEPT_FAILED);
+#endif
+#ifdef ZMQ_EVENT_CLOSED
+mrb_zmq_define_const("EVENT_CLOSED", ZMQ_EVENT_CLOSED);
+#endif
+#ifdef ZMQ_EVENT_CLOSE_FAILED
+mrb_zmq_define_const("EVENT_CLOSE_FAILED", ZMQ_EVENT_CLOSE_FAILED);
+#endif
+#ifdef ZMQ_EVENT_DISCONNECTED
+mrb_zmq_define_const("EVENT_DISCONNECTED", ZMQ_EVENT_DISCONNECTED);
+#endif
+#ifdef ZMQ_EVENT_MONITOR_STOPPED
+mrb_zmq_define_const("EVENT_MONITOR_STOPPED", ZMQ_EVENT_MONITOR_STOPPED);
+#endif
+#ifdef ZMQ_EVENT_ALL
+mrb_zmq_define_const("EVENT_ALL", ZMQ_EVENT_ALL);
+#endif
 #ifdef ZMQ_POLLIN
 mrb_zmq_define_const("POLLIN", ZMQ_POLLIN);
 #endif
@@ -339,6 +375,12 @@ mrb_zmq_define_const("SCATTER", ZMQ_SCATTER);
 #endif
 #ifdef ZMQ_DGRAM
 mrb_zmq_define_const("DGRAM", ZMQ_DGRAM);
+#endif
+#ifdef ZMQ_EVENT_HANDSHAKE_FAILED
+mrb_zmq_define_const("EVENT_HANDSHAKE_FAILED", ZMQ_EVENT_HANDSHAKE_FAILED);
+#endif
+#ifdef ZMQ_EVENT_HANDSHAKE_SUCCEED
+mrb_zmq_define_const("EVENT_HANDSHAKE_SUCCEED", ZMQ_EVENT_HANDSHAKE_SUCCEED);
 #endif
 #ifdef ZMQ_VERSION
 mrb_zmq_define_const("VERSION", ZMQ_VERSION);

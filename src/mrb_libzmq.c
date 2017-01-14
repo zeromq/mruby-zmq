@@ -362,6 +362,23 @@ mrb_zmq_socket(mrb_state *mrb, mrb_value self)
 }
 
 static mrb_value
+mrb_zmq_socket_monitor(mrb_state *mrb, mrb_value self)
+{
+  void *socket;
+  char *addr;
+  mrb_int events;
+  mrb_get_args(mrb, "dzi", &socket, &mrb_zmq_socket_type, &addr, &events);
+  mrb_assert(events >= 0 && events <= INT_MAX);
+
+  int rc = zmq_socket_monitor(socket, addr, events);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_socket_monitor");
+  }
+
+  return self;
+}
+
+static mrb_value
 mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
 {
   mrb_int flags = 0;
@@ -398,7 +415,7 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
   return data;
 }
 
-MRB_INLINE void
+static void
 mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 {
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
@@ -810,6 +827,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "msg_send", mrb_zmq_msg_send, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "send", mrb_zmq_send, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "setsockopt", mrb_zmq_setsockopt, MRB_ARGS_REQ(3));
+  mrb_define_module_function(mrb, libzmq_mod, "socket_monitor", mrb_zmq_socket_monitor, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "threadclose", mrb_zmq_threadclose, MRB_ARGS_ARG(1, 1));
   mrb_define_module_function(mrb, libzmq_mod, "unbind", mrb_zmq_unbind, MRB_ARGS_REQ(2));
 

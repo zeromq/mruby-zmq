@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <zmq.h>
-#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
-  #error "mruby-libzmq4 needs at least libzmq-4.1"
+#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,2,0)
+  #error "mruby-libzmq4 needs at least libzmq-4.2"
 #endif
 #include <mruby/data.h>
 #include <mruby/error.h>

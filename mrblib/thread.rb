@@ -18,13 +18,17 @@ end
 
 module ZMQ
   class Thread_fn
-    def initialize
+    def setup
       if ZMQ.const_defined?("Poller")
         @poller = ZMQ::Poller.new
         @poller << @pipe
       end
       @interrupted = false
       @instances = {}
+    end
+
+    def initialize
+      setup
     end
 
     def run

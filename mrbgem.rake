@@ -7,6 +7,11 @@ MRuby::Gem::Specification.new('mruby-libzmq4') do |spec|
   spec.add_dependency 'mruby-sysrandom'
   spec.add_dependency 'mruby-simplemsgpack'
   spec.add_dependency 'mruby-objectspace'
-  spec.cc.defines << 'ZMQ_BUILD_DRAFT_API'
-  spec.linker.libraries << 'zmq'
+  spec.add_dependency 'mruby-pack'
+  `pkg-config --cflags libzmq`.split("\s").each do |cflag|
+    spec.cc.flags << cflag
+  end
+  `pkg-config --libs libzmq`.split("\s").each do |lib|
+    spec.linker.flags << lib
+  end
 end
