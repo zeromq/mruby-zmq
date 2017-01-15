@@ -48,6 +48,16 @@ module ZMQ
       LibZMQ.socket_monitor(self, "inproc://mrb-zmq-monitor-#{object_id}", events)
       Monitor.new("inproc://mrb-zmq-mionitor-#{object_id}")
     end
+
+    if LibZMQ.respond_to?("join")
+      def join(group)
+        LibZMQ.join(self, group)
+      end
+
+      def leave(group)
+        LibZMQ.leave(self, group)
+      end
+    end
   end
 
   class Pub < Socket

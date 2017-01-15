@@ -19,12 +19,14 @@ module ZMQ
         EventLookup[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
       end
 
+      attr_reader :socket
+
       def initialize(addr)
-        @monitor = ZMQ::Pair.new(addr)
+        @socket = ZMQ::Pair.new(addr)
       end
 
       def recv
-        msg = @monitor.recv
+        msg = @socket.recv
         number, value = msg[0].to_str(true).unpack('SL')
         {event: EventLookup[number], value: value, endpoint: msg[1].to_str}
       end

@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <zmq.h>
-#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,2,0)
-  #error "mruby-libzmq4 needs at least libzmq-4.2"
+#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
+  #error "mruby-libzmq4 needs at least libzmq-4.1"
 #endif
 #include <mruby/data.h>
 #include <mruby/error.h>
@@ -16,6 +16,10 @@
 #include <mruby/value.h>
 #include <mruby/throw.h>
 #include <mruby/sysrandom.h>
+
+#if !defined(SOCKET) && !defined(_WIN32)
+#define SOCKET int
+#endif
 
 static void
 mrb_zmq_gc_close(mrb_state *mrb, void *socket)
@@ -79,6 +83,6 @@ mrb_zmq_gc_poller_destroy(mrb_state *mrb, void *poller)
 static const struct mrb_data_type mrb_zmq_poller_type = {
   "$i_mrb_zmq_poller_type", mrb_zmq_gc_poller_destroy
 };
-#endif
+#endif //ZMQ_HAVE_POLLER
 
 #endif

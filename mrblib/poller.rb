@@ -8,9 +8,11 @@ if LibZMQ.const_defined?("Poller")
 
       def add(socket, events = LibZMQ::POLLIN)
         if socket.respond_to?(:to_i)
-          @poller.add_fd(socket, events)
+          @poller.add_fd(socket, socket, events)
+        elsif socket.respond_to?(:socket)
+          @poller.add(socket.socket, socket, events)
         else
-          @poller.add(socket, events)
+          @poller.add(socket, socket, events)
         end
         @sockets << socket
         self
@@ -21,6 +23,8 @@ if LibZMQ.const_defined?("Poller")
       def modify(socket, events)
         if socket.respond_to?(:to_i)
           @poller.modify_fd(socket, events)
+        elsif socket.respond_to?(:socket)
+          @poller.modify(socket.socket, events)
         else
           @poller.modify(socket, events)
         end
@@ -30,6 +34,8 @@ if LibZMQ.const_defined?("Poller")
       def remove(socket)
         if socket.respond_to?(:to_i)
           @poller.remove_fd(socket)
+        elsif socket.respond_to?(:socket)
+          @poller.remove(socket.socket)
         else
           @poller.remove(socket)
         end
