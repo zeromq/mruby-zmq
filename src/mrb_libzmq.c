@@ -131,7 +131,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
   mrb_assert(string_return_len >= 0);
 
   struct RClass* option_class = mrb_class_ptr(option_type);
-  size_t option_len;
+  size_t option_len = 0;
   int rc = -1;
 
   if (option_name == ZMQ_FD) {
@@ -268,6 +268,29 @@ mrb_zmq_msg_send(mrb_state *mrb, mrb_value self)
   }
 
   return mrb_nil_value();
+}
+
+static mrb_value
+mrb_zmq_proxy(mrb_state *mrb, mrb_value self)
+{
+  void *frontend, *backend, *capture = NULL;
+  mrb_get_args(mrb, "dd|d!", &frontend, &mrb_zmq_socket_type, &backend, &mrb_zmq_socket_type, &capture, &mrb_zmq_socket_type);
+
+  zmq_proxy(frontend, backend, capture);
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_proxy_steerable(mrb_state *mrb, mrb_value self)
+{
+  void *frontend, *backend, *control, *capture = NULL;
+  mrb_get_args(mrb, "ddd|d!", &frontend, &mrb_zmq_socket_type, &backend, &mrb_zmq_socket_type, &control, &mrb_zmq_socket_type,
+    &capture, &mrb_zmq_socket_type);
+
+  zmq_proxy_steerable(frontend, backend, capture, control);
+
+  return self;
 }
 
 static mrb_value
@@ -599,12 +622,12 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     MRB_CATCH(&c_jmp)
     {
       mrb->jmp = prev_jmp;
+      mrb_print_error(mrb);
       success = FALSE;
       zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
       if (mrb_nil_p(pipe_val)) {
         zmq_close(mrb_zmq_thread_data->backend);
       }
-      mrb_print_error(mrb);
     }
     MRB_END_EXC(&c_jmp);
 
@@ -652,7 +675,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
       mrb_zmq_handle_error(mrb, "zmq_socket");
     }
 
-    char endpoint[256];
+    char endpoint[255];
     memset(endpoint, 0, sizeof(endpoint));
     do {
       errno = 0;
@@ -955,6 +978,8 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "getsockopt", mrb_zmq_getsockopt, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_ARG(2, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_send", mrb_zmq_msg_send, MRB_ARGS_REQ(3));
+  mrb_define_module_function(mrb, libzmq_mod, "proxy", mrb_zmq_proxy, MRB_ARGS_ARG(2, 1));
+  mrb_define_module_function(mrb, libzmq_mod, "proxy_steerable", mrb_zmq_proxy_steerable, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "send", mrb_zmq_send, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "setsockopt", mrb_zmq_setsockopt, MRB_ARGS_REQ(3));
   mrb_define_module_function(mrb, libzmq_mod, "socket_monitor", mrb_zmq_socket_monitor, MRB_ARGS_REQ(3));

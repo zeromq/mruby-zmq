@@ -2,18 +2,22 @@ module ZMQ
   class Socket
     def bind(endpoint)
       LibZMQ.bind(self, endpoint)
+      self
     end
 
     def close(blocky = true)
       LibZMQ.close(self, blocky)
+      self
     end
 
     def connect(endpoint)
       LibZMQ.connect(self, endpoint)
+      self
     end
 
     def disconnect(endpoint)
       LibZMQ.disconnect(self, endpoint)
+      self
     end
 
     def send(data, flags = 0)
@@ -22,10 +26,10 @@ module ZMQ
         i = 0
         size = data.size - 1
         while i < size
-          LibZMQ.send(self, data[i], LibZMQ::SNDMORE)
+          LibZMQ.send(self, data[i], LibZMQ::SNDMORE|flags)
           i += 1
         end
-        LibZMQ.send(self, data[i], 0)
+        LibZMQ.send(self, data[i], 0|flags)
       else
         LibZMQ.send(self, data, flags)
       end
@@ -34,6 +38,7 @@ module ZMQ
 
     def unbind(endpoint)
       LibZMQ.unbind(self, endpoint)
+      self
     end
 
     def readable?
@@ -52,11 +57,27 @@ module ZMQ
     if LibZMQ.respond_to?("join")
       def join(group)
         LibZMQ.join(self, group)
+        self
       end
 
       def leave(group)
         LibZMQ.leave(self, group)
+        self
       end
+    end
+
+    def curve_security(options = {})
+      if options[:type] == :server
+        curve_server = true
+        curve_publickey = options[:public_key]
+        curve_secretkey = options[:secret_key]
+        zap_domain = options[:zap_domain]
+      elsif options[:type] == :client
+        curve_serverkey = options[:server_key]
+        curve_publickey = options[:public_key]
+        curve_secretkey = options[:secret_key]
+      end
+      self
     end
   end
 

@@ -4,8 +4,8 @@ module ZMQ
       LibZMQ.msg_send(self, socket, flags)
     end
 
-    def gets(property, static_string = false)
-      LibZMQ.msg_gets(self, property, static_string)
+    def [](property)
+      LibZMQ.msg_gets(self, property, false)
     end
 
     if LibZMQ.respond_to?("routing_id")

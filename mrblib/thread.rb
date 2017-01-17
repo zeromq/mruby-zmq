@@ -22,6 +22,7 @@ module ZMQ
       if ZMQ.const_defined?("Poller")
         @poller = ZMQ::Poller.new
         @poller << @pipe
+        @auth = nil
       end
       @interrupted = false
       @instances = {}
@@ -38,6 +39,8 @@ module ZMQ
             case socket
             when @pipe
               handle_pipe
+            when @auth
+              @auth.handle_zap
             end
           end
         end
