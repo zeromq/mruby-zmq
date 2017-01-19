@@ -7,7 +7,7 @@ module ZMQ
 
     def close(blocky = true)
       LibZMQ.close(self, blocky)
-      self
+      nil
     end
 
     def connect(endpoint)
@@ -66,6 +66,16 @@ module ZMQ
       end
     end
 
+    def subscribe(subscribe)
+      LibZMQ.setsockopt(self, LibZMQ::SUBSCRIBE, subscribe)
+      self
+    end
+
+    def unsubscribe(unsubscribe)
+      LibZMQ.setsockopt(self, LibZMQ::UNSUBSCRIBE, unsubscribe)
+      self
+    end
+
     def curve_security(options = {})
       if options[:type] == :server
         curve_server = true
@@ -78,6 +88,64 @@ module ZMQ
         curve_secretkey = options[:secret_key]
       end
       self
+    end
+  end
+
+  if LibZMQ.const_defined?("CLIENT")
+    class Server < Socket
+      def initialize(endpoint = nil, connect = false)
+        super(LibZMQ::SERVER)
+        if endpoint
+          if connect
+            LibZMQ.connect(self, endpoint)
+          else
+            LibZMQ.bind(self, endpoint)
+          end
+        end
+      end
+    end
+
+    class Client < Socket
+      def initialize(endpoint = nil, bind = false)
+        super(LibZMQ::CLIENT)
+        if endpoint
+          if bind
+            LibZMQ.bind(self, endpoint)
+          else
+            LibZMQ.connect(self, endpoint)
+          end
+        end
+      end
+    end
+  end
+
+  if LibZMQ.const_defined?("DISH")
+    class Radio < Socket
+      def initialize(endpoint = nil, connect = false)
+        super(LibZMQ::RADIO)
+        if endpoint
+          if connect
+            LibZMQ.connect(self, endpoint)
+          else
+            LibZMQ.bind(self, endpoint)
+          end
+        end
+      end
+    end
+
+    class Dish < Socket
+      def initialize(endpoint = nil, group = nil, bind = false)
+        super(LibZMQ::DISH)
+        if endpoint
+          if bind
+            LibZMQ.bind(self, endpoint)
+            join(group) if group
+          else
+            LibZMQ.connect(self, endpoint)
+            join(group) if group
+          end
+        end
+      end
     end
   end
 
@@ -95,13 +163,15 @@ module ZMQ
   end
 
   class Sub < Socket
-    def initialize(endpoint = nil, bind = false)
+    def initialize(endpoint = nil, subs = nil, bind = false)
       super(LibZMQ::SUB)
       if endpoint
         if bind
           LibZMQ.bind(self, endpoint)
+          subscribe(subs) if subs
         else
           LibZMQ.connect(self, endpoint)
+          subscribe(subs) if subs
         end
       end
     end
@@ -134,26 +204,26 @@ module ZMQ
   end
 
   class Push < Socket
-    def initialize(endpoint = nil, connect = false)
+    def initialize(endpoint = nil, bind = false)
       super(LibZMQ::PUSH)
       if endpoint
-        if connect
-          LibZMQ.connect(self, endpoint)
-        else
+        if bind
           LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
         end
       end
     end
   end
 
   class Pull < Socket
-    def initialize(endpoint = nil, bind = false)
+    def initialize(endpoint = nil, connect = false)
       super(LibZMQ::PULL)
       if endpoint
-        if bind
-          LibZMQ.bind(self, endpoint)
-        else
+        if connect
           LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
         end
       end
     end
@@ -175,6 +245,32 @@ module ZMQ
   class Pair < Socket
     def initialize(endpoint = nil, bind = false)
       super(LibZMQ::PAIR)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Router < Socket
+    def initialize(endpoint = nil, connect = false)
+      super(LibZMQ::ROUTER)
+      if endpoint
+        if connect
+          LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Dealer < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::DEALER)
       if endpoint
         if bind
           LibZMQ.bind(self, endpoint)

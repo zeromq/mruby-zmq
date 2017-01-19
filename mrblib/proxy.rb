@@ -34,7 +34,10 @@ module ZMQ
 
     def terminate
       @control.send("TERMINATE")
+      @control.close
+      @proxy.finalize
       @thread.close
+      remove_instance_variable(:@control)
       remove_instance_variable(:@thread)
       remove_instance_variable(:@proxy)
       nil
