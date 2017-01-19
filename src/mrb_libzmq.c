@@ -48,7 +48,7 @@ mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
       }
     }
     default: {
-      mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected a ZMQ Socket");
+      mrb_raise(mrb, E_TYPE_ERROR, "Expected a ZMQ Socket");
     }
   }
 }
@@ -189,7 +189,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     return mrb_str_resize(mrb, buf, option_len);
   }
   else {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "Expected True-/FalseClass|Fixnum|Float|String");
+    mrb_raise(mrb, E_TYPE_ERROR, "Expected True-/FalseClass|Fixnum|Float|String");
   }
 
   return self;
@@ -225,8 +225,11 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
       }
       memcpy(zmq_msg_data(msg), RSTRING_PTR(data), RSTRING_LEN(data));
     } break;
-    default: {
+    case MRB_TT_FALSE: {
       zmq_msg_init(msg);
+    } break;
+    default: {
+      mrb_raise(mrb, E_TYPE_ERROR, "only works (optionally) with Fixnum and String types");
     }
   }
 
@@ -386,7 +389,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
       rc = zmq_setsockopt(socket, option_name, RSTRING_PTR(option_value), RSTRING_LEN(option_value));
     } break;
     default: {
-      mrb_raise(mrb, E_ARGUMENT_ERROR, "expected nil|false|true|fixnum|float|string");
+      mrb_raise(mrb, E_TYPE_ERROR, "expected nil|false|true|fixnum|float|string");
     }
   }
 
@@ -929,6 +932,7 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
       argv[1] = mrb_fixnum_value(events[i].events);
       mrb_yield_argv(mrb, block, 2, argv);
     }
+
   } else {
     zmq_poller_event_t event;
     rc = zmq_poller_wait_all(DATA_PTR(self), &event, 0, timeout);
@@ -967,7 +971,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   }
 
   struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_thread_class;
-  int ai = mrb_gc_arena_save(mrb);
+  int arena_index = mrb_gc_arena_save(mrb);
 
   libzmq_mod = mrb_define_module(mrb, "LibZMQ");
   mrb_define_const(mrb, libzmq_mod, "_Context", mrb_cptr_value(mrb, context));
@@ -1029,12 +1033,12 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_poller_class, "wait_all", mrb_zmq_poller_wait_all, (MRB_ARGS_REQ(2)|MRB_ARGS_BLOCK()));
 #endif
 
-  mrb_gc_arena_restore(mrb, ai);
+  mrb_gc_arena_restore(mrb, arena_index);
 
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \
   do { \
     mrb_define_const(mrb, libzmq_mod, ZMQ_CONST_NAME, mrb_fixnum_value(ZMQ_CONST)); \
-    mrb_gc_arena_restore(mrb, ai); \
+    mrb_gc_arena_restore(mrb, arena_index); \
   } while(0)
 
 #include "zmq_const.cstub"

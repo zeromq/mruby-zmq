@@ -76,18 +76,22 @@ module ZMQ
       self
     end
 
-    def curve_security(options = {})
-      if options[:type] == :server
-        curve_server = true
-        curve_publickey = options[:public_key]
-        curve_secretkey = options[:secret_key]
-        zap_domain = options[:zap_domain]
-      elsif options[:type] == :client
-        curve_serverkey = options[:server_key]
-        curve_publickey = options[:public_key]
-        curve_secretkey = options[:secret_key]
+    if LibZMQ.respond_to?("has?") && LibZMQ.has?("curve")
+      def curve_security(options = {})
+        if options[:type] == :server
+          curve_server = true
+          curve_publickey = options.fetch(:public_key)
+          curve_secretkey = options.fetch(:secret_key)
+          zap_domain = options.fetch(:zap_domain)
+        elsif options[:type] == :client
+          curve_serverkey = options.fetch(:server_key)
+          curve_publickey = options.fetch(:public_key)
+          curve_secretkey = options.fetch(:secret_key)
+        else
+          raise ArgumentError, ":type can only be :server or :client"
+        end
+        self
       end
-      self
     end
   end
 
@@ -136,12 +140,11 @@ module ZMQ
     class Dish < Socket
       def initialize(endpoint = nil, group = nil, bind = false)
         super(LibZMQ::DISH)
+        join(group) if group
         if endpoint
           if bind
-            join(group) if group
             LibZMQ.bind(self, endpoint)
           else
-            join(group) if group
             LibZMQ.connect(self, endpoint)
           end
         end
@@ -165,12 +168,11 @@ module ZMQ
   class Sub < Socket
     def initialize(endpoint = nil, subs = nil, bind = false)
       super(LibZMQ::SUB)
+      subscribe(subs) if subs
       if endpoint
         if bind
-          subscribe(subs) if subs
           LibZMQ.bind(self, endpoint)
         else
-          subscribe(subs) if subs
           LibZMQ.connect(self, endpoint)
         end
       end
@@ -271,6 +273,32 @@ module ZMQ
   class Dealer < Socket
     def initialize(endpoint = nil, bind = false)
       super(LibZMQ::DEALER)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Rep < Socket
+    def initialize(endpoint = nil, connect = false)
+      super(LibZMQ::REP)
+      if endpoint
+        if connect
+          LibZMQ.connect(self, endpoint)
+        else
+          LibZMQ.bind(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Req < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::REQ)
       if endpoint
         if bind
           LibZMQ.bind(self, endpoint)

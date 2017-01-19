@@ -70,7 +70,7 @@ module ZMQ
             else
               LibZMQ.send(@pipe, {type: :exception, exception: ArgumentError.new("No such Instance")}.to_msgpack, 0)
             end
-          when :async_send
+          when :async
             if (instance = @instances[msg[:object_id]])
               begin
                 instance.__send__(msg[:method], *msg[:args])
@@ -96,7 +96,7 @@ module ZMQ
       msg = MessagePack.unpack(@pipe.recv.to_str(true))
       case msg[:type]
       when :instance
-        Proxy.new(self, msg[:object_id])
+        ThreadProxy.new(self, msg[:object_id])
       when :exception
         raise msg[:exception]
       end
@@ -113,8 +113,8 @@ module ZMQ
       end
     end
 
-    def async_send(object_id, method, *args)
-      LibZMQ.send(@pipe, {type: :async_send, object_id: object_id, method: method, args: args}.to_msgpack, 0)
+    def async(object_id, method, *args)
+      LibZMQ.send(@pipe, {type: :async, object_id: object_id, method: method, args: args}.to_msgpack, 0)
     end
 
     def finalize(object_id)
@@ -126,7 +126,7 @@ module ZMQ
     end
   end
 
-  class Proxy
+  class ThreadProxy
     attr_reader :object_id
 
     def initialize(thread, object_id)
@@ -141,11 +141,11 @@ module ZMQ
       @thread.send(@object_id, m, *args)
     end
 
-    def async_send(m, *args)
+    def async(m, *args)
       if block_given?
         raise ArgumentError, "blocks cannot be migrated"
       end
-      @thread.async_send(@object_id, m, *args)
+      @thread.async(@object_id, m, *args)
       nil
     end
 
@@ -158,6 +158,13 @@ module ZMQ
 
     def respond_to?(m)
       super(m) || @thread.send(@object_id, :respond_to?, m)
+    end
+
+    def method_missing(method, *args)
+      if block_given?
+        raise ArgumentError, "blocks cannot be migrated"
+      end
+      @thread.send(@object_id, method, *args)
     end
   end
 end

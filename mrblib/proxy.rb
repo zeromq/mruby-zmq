@@ -19,7 +19,7 @@ module ZMQ
       options[:_control_endpoint] = @control.last_endpoint
       @thread = ZMQ::Thread.new
       @proxy = @thread.new(ZMQ::Proxy_fn, options)
-      @proxy.async_send(:run)
+      @proxy.async(:run)
     end
 
     def pause
@@ -35,7 +35,6 @@ module ZMQ
     def terminate
       @control.send("TERMINATE")
       @control.close
-      @proxy.finalize
       @thread.close
       remove_instance_variable(:@control)
       remove_instance_variable(:@thread)
