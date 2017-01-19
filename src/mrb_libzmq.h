@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <zmq.h>
 #if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
-  #error "mruby-libzmq4 needs at least libzmq-4.1"
+  #error "mruby-zmq needs at least libzmq-4.1"
 #endif
 #include <mruby/data.h>
 #include <mruby/error.h>
@@ -15,7 +15,6 @@
 #include <mruby/array.h>
 #include <mruby/value.h>
 #include <mruby/throw.h>
-#include <mruby/sysrandom.h>
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int

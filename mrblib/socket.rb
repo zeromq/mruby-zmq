@@ -41,57 +41,9 @@ module ZMQ
       self
     end
 
-    def readable?
-      events & LibZMQ::POLLIN != 0
-    end
-
-    def writable?
-      events & LibZMQ::POLLOUT != 0
-    end
-
     def monitor(events = LibZMQ::EVENT_ALL)
       LibZMQ.socket_monitor(self, "inproc://mrb-zmq-monitor-#{object_id}", events)
       Monitor.new("inproc://mrb-zmq-mionitor-#{object_id}")
-    end
-
-    if LibZMQ.respond_to?("join")
-      def join(group)
-        LibZMQ.join(self, group)
-        self
-      end
-
-      def leave(group)
-        LibZMQ.leave(self, group)
-        self
-      end
-    end
-
-    def subscribe(subscribe)
-      LibZMQ.setsockopt(self, LibZMQ::SUBSCRIBE, subscribe)
-      self
-    end
-
-    def unsubscribe(unsubscribe)
-      LibZMQ.setsockopt(self, LibZMQ::UNSUBSCRIBE, unsubscribe)
-      self
-    end
-
-    if LibZMQ.respond_to?("has?") && LibZMQ.has?("curve")
-      def curve_security(options = {})
-        if options[:type] == :server
-          curve_server = true
-          curve_publickey = options.fetch(:public_key)
-          curve_secretkey = options.fetch(:secret_key)
-          zap_domain = options.fetch(:zap_domain)
-        elsif options[:type] == :client
-          curve_serverkey = options.fetch(:server_key)
-          curve_publickey = options.fetch(:public_key)
-          curve_secretkey = options.fetch(:secret_key)
-        else
-          raise ArgumentError, ":type can only be :server or :client"
-        end
-        self
-      end
     end
   end
 

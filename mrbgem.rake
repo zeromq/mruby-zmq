@@ -4,7 +4,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.summary = 'mruby bindings for libzmq4'
   spec.add_conflict 'mruby-czmq'
   spec.add_dependency 'mruby-errno'
-  spec.add_dependency 'mruby-sysrandom'
   spec.add_dependency 'mruby-simplemsgpack'
   spec.add_dependency 'mruby-objectspace'
   spec.add_dependency 'mruby-pack'

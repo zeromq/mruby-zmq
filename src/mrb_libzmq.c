@@ -33,26 +33,6 @@ mrb_zmq_handle_error(mrb_state *mrb, const char *func)
   }
 }
 
-MRB_INLINE void *
-mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
-{
-  switch(mrb_type(socket)) {
-    case MRB_TT_CPTR: {
-      // No way to check here if its a legitmate zmq socket, if something else is passed libzmq asserts and aborts the programm.
-      // Also: when handed a raw c pointer only allow the poller to handle it because we cannot know from which thread this socket comes.
-      return mrb_cptr(socket);
-    } break;
-    case MRB_TT_DATA: {
-      if (DATA_TYPE(socket) == &mrb_zmq_socket_type) {
-        return DATA_PTR(socket);
-      }
-    }
-    default: {
-      mrb_raise(mrb, E_TYPE_ERROR, "Expected a ZMQ Socket");
-    }
-  }
-}
-
 static mrb_value
 mrb_zmq_bind(mrb_state *mrb, mrb_value self)
 {
@@ -100,6 +80,37 @@ mrb_zmq_connect(mrb_state *mrb, mrb_value self)
   int rc = zmq_connect(socket, endpoint);
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_connect");
+  }
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_ctx_get(mrb_state *mrb, mrb_value self)
+{
+  mrb_int option_name;
+  mrb_get_args(mrb, "i", &option_name);
+  mrb_assert(option_name >= INT_MIN && option_name <= INT_MAX);
+
+  int rc = zmq_ctx_get(MRB_LIBZMQ_CONTEXT(), option_name);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_ctx_get");
+  }
+
+  return mrb_fixnum_value(rc);
+}
+
+static mrb_value
+mrb_zmq_ctx_set(mrb_state *mrb, mrb_value self)
+{
+  mrb_int option_name, option_value;
+  mrb_get_args(mrb, "ii", &option_name, &option_value);
+  mrb_assert(option_name >= INT_MIN && option_name <= INT_MAX);
+  mrb_assert(option_value >= INT_MIN && option_value <= INT_MAX);
+
+  int rc = zmq_ctx_set(MRB_LIBZMQ_CONTEXT(), option_name, option_value);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_ctx_set");
   }
 
   return self;
@@ -389,7 +400,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
       rc = zmq_setsockopt(socket, option_name, RSTRING_PTR(option_value), RSTRING_LEN(option_value));
     } break;
     default: {
-      mrb_raise(mrb, E_TYPE_ERROR, "expected nil|false|true|fixnum|float|string");
+      mrb_raise(mrb, E_TYPE_ERROR, "expected nil|false|true|Fixnum|Float|String");
     }
   }
 
@@ -664,7 +675,11 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     mrb->jmp = &c_jmp;
 
     self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(thread_class)));
-    mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), 0, NULL);
+    mrb_value args[2];
+    args[0] = mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self)));
+    const char *endpoint = mrb_string_value_cstr(mrb, &args[0]);
+    args[1] = mrb_true_value();
+    mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), 2, args);
     mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
     void *frontend = DATA_PTR(frontend_val);
     mrb_zmq_thread_data = mrb_malloc(mrb, sizeof(*mrb_zmq_thread_data));
@@ -677,19 +692,6 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     } else {
       mrb_zmq_handle_error(mrb, "zmq_socket");
     }
-
-    char endpoint[255];
-    memset(endpoint, 0, sizeof(endpoint));
-    do {
-      errno = 0;
-      snprintf(endpoint, sizeof(endpoint), "inproc://mrb-actor-pipe-%04x-%04x", mrb_sysrandom_uniform(0x10000), mrb_sysrandom_uniform(0x10000));
-      if (likely(zmq_bind(frontend, endpoint) == 0)) {
-        break;
-      }
-      else if (errno != EADDRINUSE) {
-        mrb_zmq_handle_error(mrb, "zmq_bind");
-      }
-    } while(TRUE);
 
     int rc = zmq_connect(backend, endpoint);
     mrb_assert(rc != -1);
@@ -773,6 +775,26 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
 }
 
 #ifdef ZMQ_HAVE_POLLER
+MRB_INLINE void *
+mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
+{
+  switch(mrb_type(socket)) {
+    case MRB_TT_CPTR: {
+      // No way to check here if its a legitmate zmq socket, if something else is passed libzmq asserts and aborts the programm.
+      // Also: when handed a raw c pointer only allow the poller to handle it because we cannot know from which thread this socket comes.
+      return mrb_cptr(socket);
+    } break;
+    case MRB_TT_DATA: {
+      if (DATA_TYPE(socket) == &mrb_zmq_socket_type) {
+        return DATA_PTR(socket);
+      }
+    }
+    default: {
+      mrb_raise(mrb, E_TYPE_ERROR, "Expected a ZMQ Socket");
+    }
+  }
+}
+
 static mrb_value
 mrb_zmq_poller_new(mrb_state *mrb, mrb_value self)
 {
@@ -978,6 +1000,8 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "bind", mrb_zmq_bind, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "close", mrb_zmq_close, MRB_ARGS_ARG(1, 1));
   mrb_define_module_function(mrb, libzmq_mod, "connect", mrb_zmq_connect, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, libzmq_mod, "ctx_get", mrb_zmq_ctx_get, MRB_ARGS_REQ(1));
+  mrb_define_module_function(mrb, libzmq_mod, "ctx_set", mrb_zmq_ctx_set, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "disconnect", mrb_zmq_disconnect, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "getsockopt", mrb_zmq_getsockopt, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_ARG(2, 1));
