@@ -957,7 +957,7 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
 #endif // ZMQ_HAVE_POLLER
 
 void
-mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
+mrb_mruby_zmq_gem_init(mrb_state* mrb)
 {
   void *context = zmq_ctx_new();
   if (getenv("ZMQ_IO_THREADS")) {
@@ -1045,7 +1045,7 @@ mrb_mruby_libzmq4_gem_init(mrb_state* mrb)
 }
 
 void
-mrb_mruby_libzmq4_gem_final(mrb_state* mrb)
+mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
   void *context = MRB_LIBZMQ_CONTEXT();
   zmq_ctx_shutdown(context);

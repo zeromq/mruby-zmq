@@ -4,7 +4,7 @@
 #include <mruby.h>
 
 #ifdef MRB_INT16
-# error MRB_INT16 is too small for mruby-libzmq4.
+# error MRB_INT16 is too small for mruby-zmq.
 #endif
 
 MRB_BEGIN_DECL
