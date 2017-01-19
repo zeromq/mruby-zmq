@@ -8,7 +8,7 @@ module ZMQ
       LibZMQ.msg_gets(self, property, false)
     end
 
-    if LibZMQ.respond_to?("routing_id")
+    if LibZMQ.respond_to?("msg_routing_id")
       def routing_id
         LibZMQ.msg_routing_id(self)
       end

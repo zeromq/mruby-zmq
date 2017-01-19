@@ -138,11 +138,11 @@ module ZMQ
         super(LibZMQ::DISH)
         if endpoint
           if bind
+            join(group) if group
             LibZMQ.bind(self, endpoint)
-            join(group) if group
           else
-            LibZMQ.connect(self, endpoint)
             join(group) if group
+            LibZMQ.connect(self, endpoint)
           end
         end
       end
@@ -167,11 +167,11 @@ module ZMQ
       super(LibZMQ::SUB)
       if endpoint
         if bind
+          subscribe(subs) if subs
           LibZMQ.bind(self, endpoint)
-          subscribe(subs) if subs
         else
-          LibZMQ.connect(self, endpoint)
           subscribe(subs) if subs
+          LibZMQ.connect(self, endpoint)
         end
       end
     end
