@@ -68,7 +68,7 @@ module ZMQ
               result = instance.__send__(msg[:method], *msg[:args])
               LibZMQ.send(@pipe, {type: :result, result: result}.to_msgpack, 0)
             else
-              LibZMQ.send(@pipe, {type: :exception, exception: ArgumentError.new("No such Instance")}.to_msgpack, 0)
+              raise ArgumentError, "No such Instance"
             end
           when :async
             if (instance = @instances[msg[:object_id]])
@@ -79,6 +79,21 @@ module ZMQ
             end
           when :finalize
             @instances.delete(msg[:object_id])
+          when :auth
+            unless @poller
+              raise RuntimeError, "libzmq was compiled without poller support"
+            end
+            if @auth
+              raise ArgumentError, "Authenticator exists"
+            else
+              if msg[:class]
+                authenticator = msg[:class].new(*msg[:args])
+                @auth = Zap.new(authenticator: authenticator)
+              else
+                @auth = Zap.new
+              end
+              LibZMQ.send(@pipe, {type: :result, result: true}.to_msgpack, 0)
+            end
           end
         rescue => e
           LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)
@@ -123,6 +138,20 @@ module ZMQ
 
     def close(blocky = true)
       LibZMQ.threadclose(self, blocky)
+    end
+
+    def auth(mrb_class = nil, *args)
+      if block_given?
+        raise ArgumentError, "blocks cannot be migrated"
+      end
+      LibZMQ.send(@pipe, {type: :auth, class: mrb_class, args: args}.to_msgpack, 0)
+      msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      case msg[:type]
+      when :result
+        msg[:result]
+      when :exception
+        raise msg[:exception]
+      end
     end
   end
 

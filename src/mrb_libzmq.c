@@ -62,7 +62,8 @@ mrb_zmq_close(mrb_state *mrb, mrb_value self)
     }
     int rc = zmq_close(DATA_PTR(socket_val));
     if (unlikely(rc == -1)) {
-      mrb_zmq_handle_error(mrb, "zmq_close");
+      if (!mrb_test(mrb_gv_get(mrb, mrb_intern_lit(mrb, "$zmq_ctx_term"))))
+        mrb_zmq_handle_error(mrb, "zmq_close");
     }
     mrb_data_init(socket_val, NULL, NULL);
   }
@@ -1071,6 +1072,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 void
 mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
+  mrb_gv_set(mrb, mrb_intern_lit(mrb, "$zmq_ctx_term"), mrb_true_value());
   void *context = MRB_LIBZMQ_CONTEXT();
   zmq_ctx_shutdown(context);
   mrb_funcall(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), "_finalizer", 0, NULL);

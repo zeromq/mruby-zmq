@@ -26,7 +26,7 @@ module ZMQ
     end
   end
 
-  class Auth
+  class Zap
     attr_reader :socket
 
     def initialize(options = {})
@@ -63,7 +63,7 @@ module ZMQ
       LibZMQ.send(@socket, status_code, LibZMQ::SNDMORE)
       LibZMQ.send(@socket, reason, LibZMQ::SNDMORE)
       LibZMQ.send(@socket, user, LibZMQ::SNDMORE)
-      if metadata
+      if metadata.respond_to?(:each)
         meta = ""
         metadata.each do |key, value|
           key, value = String(key), String(value)

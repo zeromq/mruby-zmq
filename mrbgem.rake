@@ -7,6 +7,9 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-simplemsgpack'
   spec.add_dependency 'mruby-objectspace'
   spec.add_dependency 'mruby-pack'
+  spec.add_dependency 'mruby-env'
+  spec.add_dependency 'mruby-print'
+  spec.add_dependency 'mruby-time'
   if spec.build.toolchains.include? 'visualcpp'
     spec.cc.flags << 'libzmq'
   else
