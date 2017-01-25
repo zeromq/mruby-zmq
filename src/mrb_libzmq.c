@@ -1160,6 +1160,7 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
     zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     int linger = 0;
     zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &linger, sizeof(linger));
+    zmq_close(mrb_zmq_thread_data->frontend);
     mrb_data_init(frontend_val, NULL, NULL);
     zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
     zmq_close(mrb_zmq_thread_data->backend);
