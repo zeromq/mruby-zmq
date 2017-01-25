@@ -1123,9 +1123,7 @@ mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *ud)
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), target_module)) {
     mrb_value socket_val = mrb_obj_value(obj);
-    int linger = 0;
-    zmq_setsockopt(DATA_PTR(socket_val), ZMQ_LINGER, &linger, sizeof(linger));
-    zmq_close(DATA_PTR(socket_val));
+    mrb_zmq_gc_close(mrb, DATA_PTR(socket_val));
     mrb_data_init(socket_val, NULL, NULL);
   }
 }
@@ -1152,21 +1150,9 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value thread_val = mrb_obj_value(obj);
-    mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) DATA_PTR(thread_val);
-
+    mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
     mrb_value frontend_val = mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
-    int timeo = 0;
-    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &timeo, sizeof(timeo));
-    zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
-    int linger = 0;
-    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &linger, sizeof(linger));
-    zmq_close(mrb_zmq_thread_data->frontend);
     mrb_data_init(frontend_val, NULL, NULL);
-    zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
-    zmq_close(mrb_zmq_thread_data->backend);
-    zmq_threadclose(mrb_zmq_thread_data->thread);
-    free(mrb_zmq_thread_data->class_path);
-    mrb_free(mrb, DATA_PTR(thread_val));
     mrb_data_init(thread_val, NULL, NULL);
   }
 }
