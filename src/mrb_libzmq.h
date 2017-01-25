@@ -15,6 +15,7 @@
 #include <mruby/array.h>
 #include <mruby/value.h>
 #include <mruby/throw.h>
+#include <mruby/gc.h>
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int

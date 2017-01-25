@@ -62,8 +62,7 @@ mrb_zmq_close(mrb_state *mrb, mrb_value self)
     }
     int rc = zmq_close(DATA_PTR(socket_val));
     if (unlikely(rc == -1)) {
-      if (!mrb_test(mrb_gv_get(mrb, mrb_intern_lit(mrb, "$zmq_ctx_term"))))
-        mrb_zmq_handle_error(mrb, "zmq_close");
+      mrb_zmq_handle_error(mrb, "zmq_close");
     }
     mrb_data_init(socket_val, NULL, NULL);
   }
@@ -115,6 +114,36 @@ mrb_zmq_ctx_set(mrb_state *mrb, mrb_value self)
   }
 
   return self;
+}
+
+static mrb_value
+mrb_zmq_curve_keypair(mrb_state *mrb, mrb_value self)
+{
+  char z85_public_key[41], z85_secret_key[41];
+
+  int rc = zmq_curve_keypair(z85_public_key, z85_secret_key);
+  if (rc == -1) {
+    mrb_zmq_handle_error(mrb, "zmq_curve_keypair");
+  }
+
+  mrb_value public_key = mrb_str_new(mrb, NULL, 32);
+  uint8_t *pub = zmq_z85_decode((uint8_t *) RSTRING_PTR(public_key), z85_public_key);
+  if (unlikely(!pub)) {
+    mrb_zmq_handle_error(mrb, "zmq_z85_decode");
+  }
+
+  mrb_value secret_key = mrb_str_new(mrb, NULL, 32);
+  uint8_t *sec = zmq_z85_decode((uint8_t *) RSTRING_PTR(secret_key), z85_secret_key);
+  if (unlikely(!sec)) {
+    mrb_zmq_handle_error(mrb, "zmq_z85_decode");
+  }
+
+  mrb_value keypair = mrb_hash_new_capa(mrb, 2);
+  mrb_hash_set(mrb, keypair, mrb_symbol_value(mrb_intern_lit(mrb, "public_key")), public_key);
+  mrb_hash_set(mrb, keypair, mrb_symbol_value(mrb_intern_lit(mrb, "secret_key")), secret_key);
+
+  return keypair;
+
 }
 
 static mrb_value
@@ -1003,6 +1032,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "connect", mrb_zmq_connect, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "ctx_get", mrb_zmq_ctx_get, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, libzmq_mod, "ctx_set", mrb_zmq_ctx_set, MRB_ARGS_REQ(2));
+  mrb_define_module_function(mrb, libzmq_mod, "curve_keypair", mrb_zmq_curve_keypair, MRB_ARGS_NONE());
   mrb_define_module_function(mrb, libzmq_mod, "disconnect", mrb_zmq_disconnect, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "getsockopt", mrb_zmq_getsockopt, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_ARG(2, 1));
@@ -1069,12 +1099,83 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 #include "zmq_const.cstub"
 }
 
+static void
+mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *ud)
+{
+  struct RClass *target_module = (struct RClass *)ud;
+
+  /* filter dead objects */
+  if (mrb_object_dead_p(mrb, obj)) {
+    return;
+  }
+
+  /* filter internal objects */
+  switch (obj->tt) {
+  case MRB_TT_ENV:
+  case MRB_TT_ICLASS:
+    return;
+  default:
+    break;
+  }
+
+  /* filter half baked (or internal) objects */
+  if (!obj->c) return;
+
+  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), target_module)) {
+    mrb_value socket_val = mrb_obj_value(obj);
+    int linger = 0;
+    zmq_setsockopt(DATA_PTR(socket_val), ZMQ_LINGER, &linger, sizeof(linger));
+    zmq_close(DATA_PTR(socket_val));
+    mrb_data_init(socket_val, NULL, NULL);
+  }
+}
+
+static void
+mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
+{
+  /* filter dead objects */
+  if (mrb_object_dead_p(mrb, obj)) {
+    return;
+  }
+
+  /* filter internal objects */
+  switch (obj->tt) {
+  case MRB_TT_ENV:
+  case MRB_TT_ICLASS:
+    return;
+  default:
+    break;
+  }
+
+  /* filter half baked (or internal) objects */
+  if (!obj->c) return;
+
+  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
+    mrb_value thread_val = mrb_obj_value(obj);
+    mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) DATA_PTR(thread_val);
+
+    mrb_value frontend_val = mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
+    int timeo = 0;
+    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &timeo, sizeof(timeo));
+    zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
+    int linger = 0;
+    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &linger, sizeof(linger));
+    mrb_data_init(frontend_val, NULL, NULL);
+    zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
+    zmq_close(mrb_zmq_thread_data->backend);
+    zmq_threadclose(mrb_zmq_thread_data->thread);
+    free(mrb_zmq_thread_data->class_path);
+    mrb_free(mrb, DATA_PTR(thread_val));
+    mrb_data_init(thread_val, NULL, NULL);
+  }
+}
+
 void
 mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
-  mrb_gv_set(mrb, mrb_intern_lit(mrb, "$zmq_ctx_term"), mrb_true_value());
   void *context = MRB_LIBZMQ_CONTEXT();
   zmq_ctx_shutdown(context);
-  mrb_funcall(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), "_finalizer", 0, NULL);
+  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"));
+  mrb_objspace_each_objects(mrb, mrb_zmq_thread_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread"));
   zmq_ctx_term(context);
 }
