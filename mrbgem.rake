@@ -15,13 +15,13 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   end
 
   if spec.build.toolchains.include? 'visualcpp'
-    spec.cc.flags << 'libzmq'
+    spec.linker.libraries << 'libzmq'
   else
     `pkg-config --cflags libzmq`.split("\s").each do |cflag|
       spec.cc.flags << cflag
     end
     `pkg-config --libs libzmq`.split("\s").each do |lib|
-      spec.linker.flags << lib
+      spec.linker.flags_before_libraries << lib
     end
   end
 end

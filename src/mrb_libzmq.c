@@ -1046,12 +1046,14 @@ mrb_zmq_get_interface_names(mrb_state *mrb, mrb_value self)
 {
   mrb_value interfaces = mrb_ary_new(mrb);
 
-  struct ifaddrs *ifp = NULL;
+  struct ifaddrs *ifp = NULL, *interface = NULL;
   errno = 0;
   int rc = getifaddrs(&ifp);
   if (unlikely(rc == -1)) {
     mrb_sys_fail(mrb, "getifaddrs");
   }
+
+  int sa_family = zmq_ctx_get(MRB_LIBZMQ_CONTEXT(), ZMQ_IPV6) ? AF_INET6 : AF_INET;
 
   struct mrb_jmpbuf* prev_jmp = mrb->jmp;
   struct mrb_jmpbuf c_jmp;
@@ -1059,14 +1061,13 @@ mrb_zmq_get_interface_names(mrb_state *mrb, mrb_value self)
   MRB_TRY(&c_jmp)
   {
     mrb->jmp = &c_jmp;
-    struct ifaddrs *interface = ifp;
-    while (interface) {
+    for (interface = ifp; interface != NULL; interface = interface->ifa_next) {
       if (interface->ifa_broadaddr &&
           interface->ifa_addr &&
+          interface->ifa_addr->sa_family == sa_family &&
           s_valid_flags(interface->ifa_flags)) {
           mrb_ary_push(mrb, interfaces, mrb_str_new_cstr(mrb, interface->ifa_name));
       }
-      interface = interface->ifa_next;
     }
     freeifaddrs(ifp);
     mrb->jmp = prev_jmp;
