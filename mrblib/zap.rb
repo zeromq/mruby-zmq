@@ -30,11 +30,8 @@ module ZMQ
     attr_reader :socket
 
     def initialize(options = {})
-      @socket = ZMQ::Socket.new(LibZMQ::ROUTER)
-      @socket.bind("inproc://zeromq.zap.01")
-      @authenticator = options.fetch(:authenticator) do
-        Authenticator.new
-      end
+      @socket = ZMQ::Router.new("inproc://zeromq.zap.01")
+      @authenticator = options.fetch(:authenticator)
     end
 
     def handle_zap
@@ -49,6 +46,8 @@ module ZMQ
       else
         send_reply(socket_identity, _, 1.0, request_id, 500, 'Version number not valid', nil)
       end
+    rescue => e
+      ZMQ.logger.crash(e)
     end
 
     def send_reply(socket_identity, _, version, request_id, status_code, reason, user, metadata = nil)

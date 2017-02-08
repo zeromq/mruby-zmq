@@ -10,6 +10,10 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-env'
   spec.add_dependency 'mruby-print'
   spec.add_dependency 'mruby-time'
+  if spec.cc.search_header_path('sys/types.h') && spec.cc.search_header_path('net/if.h') && spec.cc.search_header_path('ifaddrs.h')
+    spec.cc.defines << 'MRB_ZMQ_HAS_IFADDRS'
+  end
+
   if spec.build.toolchains.include? 'visualcpp'
     spec.cc.flags << 'libzmq'
   else

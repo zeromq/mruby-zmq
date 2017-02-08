@@ -16,6 +16,11 @@
 #include <mruby/value.h>
 #include <mruby/throw.h>
 #include <mruby/gc.h>
+#ifdef MRB_ZMQ_HAS_IFADDRS
+#include <sys/types.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#endif
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int
@@ -47,7 +52,8 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 typedef struct {
   void *frontend;
   void *backend;
-  char *class_path;
+  char *argv_packed;
+  mrb_int argv_len;
   void *thread;
   void *backend_ctx;
 } mrb_zmq_thread_data_t;
@@ -65,7 +71,7 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
   zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
   zmq_close(mrb_zmq_thread_data->backend);
   zmq_threadclose(mrb_zmq_thread_data->thread);
-  free(mrb_zmq_thread_data->class_path);
+  mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
   mrb_free(mrb, mrb_zmq_thread_data_);
 }
 

@@ -22,13 +22,20 @@ module ZMQ
       if ZMQ.const_defined?("Poller")
         @poller = ZMQ::Poller.new
         @poller << @pipe
-        @auth = nil
       end
       @interrupted = false
       @instances = {}
+      if @options[:auth]
+        unless @poller
+          raise RuntimeError, "libzmq was compiled without poller support"
+        end
+        authenticator = @options[:auth][:class].new(*@options[:auth][:args])
+        @auth = Zap.new(authenticator: authenticator)
+      end
     end
 
-    def initialize
+    def initialize(options = {})
+      @options = {}.merge(options)
       setup
     end
 
@@ -79,21 +86,6 @@ module ZMQ
             end
           when :finalize
             @instances.delete(msg[:object_id])
-          when :auth
-            unless @poller
-              raise RuntimeError, "libzmq was compiled without poller support"
-            end
-            if @auth
-              raise ArgumentError, "Authenticator exists"
-            else
-              if msg[:class]
-                authenticator = msg[:class].new(*msg[:args])
-                @auth = Zap.new(authenticator: authenticator)
-              else
-                @auth = Zap.new
-              end
-              LibZMQ.send(@pipe, {type: :result, result: true}.to_msgpack, 0)
-            end
           end
         rescue => e
           LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)
@@ -138,20 +130,6 @@ module ZMQ
 
     def close(blocky = true)
       LibZMQ.threadclose(self, blocky)
-    end
-
-    def auth(mrb_class = nil, *args)
-      if block_given?
-        raise ArgumentError, "blocks cannot be migrated"
-      end
-      LibZMQ.send(@pipe, {type: :auth, class: mrb_class, args: args}.to_msgpack, 0)
-      msg = MessagePack.unpack(@pipe.recv.to_str(true))
-      case msg[:type]
-      when :result
-        msg[:result]
-      when :exception
-        raise msg[:exception]
-      end
     end
   end
 

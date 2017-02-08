@@ -5,11 +5,11 @@ module ZMQ
 
   class Logger
     def initialize(endpoint = nil, ident = nil)
-      @pub = ZMQ::Pub.new(endpoint) if endpoint
+      @pub = ZMQ::Pub.new(endpoint, true) if endpoint
       @ident = ident if ident
     end
 
-    def log(level = "I", message)
+    def log(level, message)
       msg = level << ", "
       msg << "(" << @ident << ") " if @ident
       msg << Time.now.utc.to_s << " " << message
