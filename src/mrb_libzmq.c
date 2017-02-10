@@ -1034,7 +1034,6 @@ s_valid_flags (unsigned int flags)
 {
     return (flags & IFF_UP)             //  Only use interfaces that are running
            && !(flags & IFF_LOOPBACK)   //  Ignore loopback interface
-           && (flags & IFF_BROADCAST)   //  Only use interfaces that have BROADCAST
 #   if defined (IFF_SLAVE)
            && !(flags & IFF_SLAVE)      //  Ignore devices that are bonding slaves.
 #   endif
@@ -1062,8 +1061,7 @@ mrb_zmq_get_interface_names(mrb_state *mrb, mrb_value self)
   {
     mrb->jmp = &c_jmp;
     for (interface = ifp; interface != NULL; interface = interface->ifa_next) {
-      if (interface->ifa_broadaddr &&
-          interface->ifa_addr &&
+      if (interface->ifa_addr &&
           interface->ifa_addr->sa_family == sa_family &&
           s_valid_flags(interface->ifa_flags)) {
           mrb_ary_push(mrb, interfaces, mrb_str_new_cstr(mrb, interface->ifa_name));

@@ -10,9 +10,11 @@ module ZMQ
     end
 
     def log(level, message)
-      msg = level << ", "
-      msg << "(" << @ident << ") " if @ident
-      msg << Time.now.utc.to_s << " " << message
+      if @ident
+        msg = sprintf("%s, (%s) %s %s", level, @ident, Time.now.utc.to_s, message)
+      else
+        msg = sprintf("%s, %s %s", level, Time.now.utc.to_s, message)
+      end
       puts msg
       @pub.send(msg) if @pub
       true
