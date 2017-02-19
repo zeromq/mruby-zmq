@@ -1,7 +1,7 @@
 module ZMQ
   class Socket
     class Monitor
-      EventLookup = {
+      Events = {
         LibZMQ::EVENT_CONNECTED => :connected,
         LibZMQ::EVENT_CONNECT_DELAYED => :connect_delayed,
         LibZMQ::EVENT_CONNECT_RETRIED => :connect_retried,
@@ -15,20 +15,20 @@ module ZMQ
         LibZMQ::EVENT_MONITOR_STOPPED => :monitor_stopped
       }
       if LibZMQ.const_defined?("EVENT_HANDSHAKE_FAILED")
-        EventLookup[LibZMQ::EVENT_HANDSHAKE_FAILED] = :handshake_failed
-        EventLookup[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
+        Events[LibZMQ::EVENT_HANDSHAKE_FAILED] = :handshake_failed
+        Events[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
       end
 
       attr_reader :socket
 
-      def initialize(addr)
-        @socket = ZMQ::Pair.new(addr)
+      def initialize(endpoint)
+        @socket = ZMQ::Pair.new(endpoint)
       end
 
       def recv
         msg = @socket.recv
-        number, value = msg[0].to_str(true).unpack('SL')
-        {event: EventLookup[number], value: value, endpoint: msg[1].to_str}
+        event, value = msg[0].to_str(true).unpack('SL')
+        {event: Events[event], value: value, endpoint: msg[1].to_str}
       end
     end
   end

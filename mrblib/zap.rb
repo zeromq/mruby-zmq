@@ -30,8 +30,8 @@ module ZMQ
     attr_reader :socket
 
     def initialize(options = {})
-      @socket = ZMQ::Router.new("inproc://zeromq.zap.01")
       @authenticator = options.fetch(:authenticator)
+      @socket = ZMQ::Router.new("inproc://zeromq.zap.01")
     end
 
     def handle_zap
@@ -51,14 +51,14 @@ module ZMQ
     end
 
     def send_reply(socket_identity, _, version, request_id, status_code, reason, user, metadata = nil)
-      socket_identity.send(@socket, LibZMQ::SNDMORE)
-      _.send(@socket, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(socket_identity, @socket, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(_, @socket, LibZMQ::SNDMORE)
       if version.is_a?(ZMQ::Msg)
-        version.send(@socket, LibZMQ::SNDMORE)
+        LibZMQ.msg_send(version, @socket, LibZMQ::SNDMORE)
       else
         LibZMQ.send(@socket, version, LibZMQ::SNDMORE)
       end
-      request_id.send(@socket, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(request_id, @socket, LibZMQ::SNDMORE)
       LibZMQ.send(@socket, status_code, LibZMQ::SNDMORE)
       LibZMQ.send(@socket, reason, LibZMQ::SNDMORE)
       LibZMQ.send(@socket, user, LibZMQ::SNDMORE)
@@ -69,8 +69,7 @@ module ZMQ
           if key.bytesize > 255
             raise ArgumentError, "metadata keys can only be 8 bit long"
           else
-            meta << [key.bytesize].pack('C') << key
-            meta << [value.bytesize].pack('N') << value
+            meta << sprintf("%s%s%s%s", [key.bytesize].pack('C'), key, [value.bytesize].pack('N'), value)
           end
         end
         LibZMQ.send(@socket, meta, 0)

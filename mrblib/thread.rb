@@ -25,12 +25,12 @@ module ZMQ
       end
       @interrupted = false
       @instances = {}
-      if @options[:auth]
+      if @options[:auth].is_a?(Hash)
         unless @poller
           raise RuntimeError, "libzmq was compiled without poller support"
         end
-        authenticator = @options[:auth][:class].new(*@options[:auth][:args])
-        @auth = Zap.new(authenticator: authenticator)
+        @auth = Zap.new(authenticator: @options[:auth][:class].new(*@options[:auth][:args]))
+        @poller << @auth
       end
     end
 
@@ -68,27 +68,24 @@ module ZMQ
           case msg[:type]
           when :new
             instance = msg[:class].new(*msg[:args])
-            @instances[instance.__id__] = instance
-            LibZMQ.send(@pipe, {type: :instance, object_id: instance.__id__}.to_msgpack, 0)
+            id = instance.__id__
+            @instances[id] = instance
+            LibZMQ.send(@pipe, id.to_msgpack, 0)
           when :send
-            if (instance = @instances[msg[:object_id]])
-              result = instance.__send__(msg[:method], *msg[:args])
-              LibZMQ.send(@pipe, {type: :result, result: result}.to_msgpack, 0)
-            else
-              raise ArgumentError, "No such Instance"
-            end
+            LibZMQ.send(@pipe, @instances.fetch(msg[:object_id]).__send__(msg[:method], *msg[:args]).to_msgpack, 0)
           when :async
             if (instance = @instances[msg[:object_id]])
               begin
                 instance.__send__(msg[:method], *msg[:args])
-              rescue
+              rescue => e
+                ZMQ.logger.crash(e)
               end
             end
           when :finalize
             @instances.delete(msg[:object_id])
           end
         rescue => e
-          LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)
+          LibZMQ.send(@pipe, e.to_msgpack, 0)
         end
       end
     end
@@ -100,23 +97,21 @@ module ZMQ
         raise ArgumentError, "blocks cannot be migrated"
       end
       LibZMQ.send(@pipe, {type: :new, class: mrb_class, args: args}.to_msgpack, 0)
-      msg = MessagePack.unpack(@pipe.recv.to_str(true))
-      case msg[:type]
-      when :instance
-        ThreadProxy.new(self, msg[:object_id])
-      when :exception
-        raise msg[:exception]
+      result = MessagePack.unpack(@pipe.recv.to_str(true))
+      if result.is_a?(Exception)
+        raise result
+      else
+        ThreadProxy.new(self, result)
       end
     end
 
     def send(object_id, method, *args)
       LibZMQ.send(@pipe, {type: :send, object_id: object_id, method: method, args: args}.to_msgpack, 0)
-      msg = MessagePack.unpack(@pipe.recv.to_str(true))
-      case msg[:type]
-      when :result
-        msg[:result]
-      when :exception
-        raise msg[:exception]
+      result = MessagePack.unpack(@pipe.recv.to_str(true))
+      if result.is_a?(Exception)
+        raise result
+      else
+        result
       end
     end
 

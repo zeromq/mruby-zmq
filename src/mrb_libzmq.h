@@ -16,11 +16,6 @@
 #include <mruby/value.h>
 #include <mruby/throw.h>
 #include <mruby/gc.h>
-#ifdef MRB_ZMQ_HAS_IFADDRS
-#include <sys/types.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#endif
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int
@@ -29,8 +24,8 @@
 static void
 mrb_zmq_gc_close(mrb_state *mrb, void *socket)
 {
-  int linger = 0;
-  zmq_setsockopt(socket, ZMQ_LINGER, &linger, sizeof(linger));
+  int disable = 0;
+  zmq_setsockopt(socket, ZMQ_LINGER, &disable, sizeof(disable));
   zmq_close(socket);
 }
 
@@ -62,11 +57,10 @@ static void
 mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
 {
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
-  int sndtimeo = 0;
-  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &sndtimeo, sizeof(sndtimeo));
+  int disable = 0;
+  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
   zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
-  int linger = 0;
-  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &linger, sizeof(linger));
+  zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &disable, sizeof(disable));
   zmq_close(mrb_zmq_thread_data->frontend);
   zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
   zmq_close(mrb_zmq_thread_data->backend);

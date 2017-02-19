@@ -42,10 +42,11 @@ module ZMQ
     end
 
     def monitor(events = LibZMQ::EVENT_ALL)
-      LibZMQ.socket_monitor(self, "inproc://mrb-zmq-monitor-#{object_id}", events)
-      Monitor.new("inproc://mrb-zmq-mionitor-#{object_id}")
+      endpoint = "inproc://mrb-zmq-monitor-#{object_id}"
+      LibZMQ.socket_monitor(self, endpoint, events)
+      Monitor.new(endpoint)
     end
-  end
+  end # Socket
 
   if LibZMQ.const_defined?("CLIENT")
     class Server < Socket
