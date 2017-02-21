@@ -70,9 +70,9 @@ module ZMQ
             instance = msg[:class].new(*msg[:args])
             id = instance.__id__
             @instances[id] = instance
-            LibZMQ.send(@pipe, id.to_msgpack, 0)
+            LibZMQ.send(@pipe, {type: :instance, object_id: id}.to_msgpack, 0)
           when :send
-            LibZMQ.send(@pipe, @instances.fetch(msg[:object_id]).__send__(msg[:method], *msg[:args]).to_msgpack, 0)
+            LibZMQ.send(@pipe, {type: :result, result: @instances.fetch(msg[:object_id]).__send__(msg[:method], *msg[:args])}.to_msgpack, 0)
           when :async
             if (instance = @instances[msg[:object_id]])
               begin
@@ -85,7 +85,7 @@ module ZMQ
             @instances.delete(msg[:object_id])
           end
         rescue => e
-          LibZMQ.send(@pipe, e.to_msgpack, 0)
+          LibZMQ.send(@pipe, {type: :exception, exception: e}.to_msgpack, 0)
         end
       end
     end
@@ -97,21 +97,23 @@ module ZMQ
         raise ArgumentError, "blocks cannot be migrated"
       end
       LibZMQ.send(@pipe, {type: :new, class: mrb_class, args: args}.to_msgpack, 0)
-      result = MessagePack.unpack(@pipe.recv.to_str(true))
-      if result.is_a?(Exception)
-        raise result
-      else
-        ThreadProxy.new(self, result)
+      msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      case msg[:type]
+      when :instance
+        ThreadProxy.new(self, msg[:object_id])
+      when :exception
+        raise msg[:exception]
       end
     end
 
     def send(object_id, method, *args)
       LibZMQ.send(@pipe, {type: :send, object_id: object_id, method: method, args: args}.to_msgpack, 0)
-      result = MessagePack.unpack(@pipe.recv.to_str(true))
-      if result.is_a?(Exception)
-        raise result
-      else
-        result
+      msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      case msg[:type]
+      when :result
+        msg[:result]
+      when :exception
+        raise msg[:exception]
       end
     end
 

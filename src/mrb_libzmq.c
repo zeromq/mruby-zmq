@@ -1,43 +1,4 @@
-#include "mruby/zmq.h"
 #include "mrb_libzmq.h"
-
-#if (__GNUC__ >= 3) || (__INTEL_COMPILER >= 800) || defined(__clang__)
-# define likely(x) __builtin_expect(!!(x), 1)
-# define unlikely(x) __builtin_expect(!!(x), 0)
-#else
-# define likely(x) (x)
-# define unlikely(x) (x)
-#endif
-
-#ifdef _WIN32
-#define mrb_zmq_errno() zmq_errno()
-#else
-#define mrb_zmq_errno() errno
-#endif
-
-#define MRB_LIBZMQ_CONTEXT() (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
-
-MRB_INLINE void
-mrb_zmq_handle_error(mrb_state *mrb, const char *func)
-{
-  switch(mrb_zmq_errno()) {
-    case EFSM: {
-      mrb_raisef(mrb, E_EFSM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case ENOCOMPATPROTO: {
-      mrb_raisef(mrb, E_ENOCOMPATPROTO_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case ETERM: {
-      mrb_raisef(mrb, E_ETERM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case EMTHREAD: {
-      mrb_raisef(mrb, E_EMTHREAD_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    default: {
-      mrb_sys_fail(mrb, func);
-    }
-  }
-}
 
 static mrb_value
 mrb_zmq_bind(mrb_state *mrb, mrb_value self)
@@ -787,6 +748,9 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
       mrb_free(mrb, mrb_zmq_thread_data);
     }
     if (backend && !success) {
+      int disable = 0;
+      zmq_setsockopt(backend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
+      zmq_setsockopt(backend, ZMQ_LINGER, &disable, sizeof(disable));
       zmq_close(backend);
     }
     MRB_THROW(mrb->jmp);
@@ -1126,72 +1090,12 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 #include "zmq_const.cstub"
 }
 
-static void
-mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
-{
-  /* filter dead objects */
-  if (mrb_object_dead_p(mrb, obj)) {
-    return;
-  }
-
-  /* filter internal objects */
-  switch (obj->tt) {
-  case MRB_TT_ENV:
-  case MRB_TT_ICLASS:
-    return;
-  default:
-    break;
-  }
-
-  /* filter half baked (or internal) objects */
-  if (!obj->c) return;
-
-  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
-    mrb_value socket_val = mrb_obj_value(obj);
-    mrb_zmq_gc_close(mrb, DATA_PTR(socket_val));
-    mrb_data_init(socket_val, NULL, NULL);
-  }
-}
-
-static void
-mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
-{
-  /* filter dead objects */
-  if (mrb_object_dead_p(mrb, obj)) {
-    return;
-  }
-
-  /* filter internal objects */
-  switch (obj->tt) {
-  case MRB_TT_ENV:
-  case MRB_TT_ICLASS:
-    return;
-  default:
-    break;
-  }
-
-  /* filter half baked (or internal) objects */
-  if (!obj->c) return;
-
-  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
-    mrb_value thread_val = mrb_obj_value(obj);
-    mrb_value frontend_val = mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
-    if (mrb_type(frontend_val) == MRB_TT_DATA) {
-      mrb_data_init(frontend_val, NULL, NULL);
-    }
-    if (DATA_PTR(thread_val)) {
-      mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
-    }
-    mrb_data_init(thread_val, NULL, NULL);
-  }
-}
-
 void
 mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
   void *context = MRB_LIBZMQ_CONTEXT();
   zmq_ctx_shutdown(context);
-  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"));
   mrb_objspace_each_objects(mrb, mrb_zmq_thread_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread"));
+  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"));
   zmq_ctx_term(context);
 }
