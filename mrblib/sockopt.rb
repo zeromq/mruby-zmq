@@ -71,13 +71,13 @@ module ZMQ
       end
     end
 
-    def subscribe(subscribe)
-      LibZMQ.setsockopt(self, LibZMQ::SUBSCRIBE, subscribe)
+    def subscribe(topic)
+      LibZMQ.setsockopt(self, LibZMQ::SUBSCRIBE, topic)
       self
     end
 
-    def unsubscribe(unsubscribe)
-      LibZMQ.setsockopt(self, LibZMQ::UNSUBSCRIBE, unsubscribe)
+    def unsubscribe(topic)
+      LibZMQ.setsockopt(self, LibZMQ::UNSUBSCRIBE, topic)
       self
     end
 

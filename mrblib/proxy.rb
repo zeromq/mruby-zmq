@@ -15,10 +15,11 @@ module ZMQ
 
   class Proxy
     def initialize(options = {})
+      @options = {}.merge(options)
       @control = ZMQ::Pair.new("tcp://127.0.0.1:*", true)
-      options[:_control_endpoint] = @control.last_endpoint
+      @options[:_control_endpoint] = @control.last_endpoint
       @thread = ZMQ::Thread.new
-      @proxy = @thread.new(ZMQ::Proxy_fn, options)
+      @proxy = @thread.new(ZMQ::Proxy_fn, @options)
       @proxy.async(:run)
     end
 
@@ -36,6 +37,7 @@ module ZMQ
       @control.send("TERMINATE")
       @control.close
       @thread.close
+      remove_instance_variable(:@options)
       remove_instance_variable(:@control)
       remove_instance_variable(:@thread)
       remove_instance_variable(:@proxy)

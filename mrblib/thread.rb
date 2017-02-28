@@ -58,9 +58,11 @@ module ZMQ
       end
     end
 
+    TERM = "TERM$".freeze
+
     def handle_pipe
       msg = @pipe.recv.to_str(true)
-      if msg == "TERM$"
+      if msg == TERM
         @interrupted = true
       else
         msg = MessagePack.unpack(msg)
@@ -164,11 +166,11 @@ module ZMQ
       super(m) || @thread.send(@object_id, :respond_to?, m)
     end
 
-    def method_missing(method, *args)
+    def method_missing(m, *args)
       if block_given?
         raise ArgumentError, "blocks cannot be migrated"
       end
-      @thread.send(@object_id, method, *args)
+      @thread.send(@object_id, m, *args)
     end
   end
 end
