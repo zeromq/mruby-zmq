@@ -6,6 +6,16 @@ High level ruby functions are inside the ZMQ Namespace, you can find most of it 
 
 As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thread_fn Namespaces.
 
+Installation
+============
+
+You need at least libzmq 4.1 then add
+
+```ruby
+conf.gem mgem: 'mruby-zmq'
+```
+to your build_config.rb
+
 Examples
 ========
 

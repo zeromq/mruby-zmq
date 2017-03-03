@@ -219,14 +219,6 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
   mrb_data_init(self, msg, &mrb_zmq_msg_type);
 
   switch (mrb_type(data)) {
-    case MRB_TT_FIXNUM: {
-      mrb_int size = mrb_fixnum(data);
-      mrb_assert(size >= 0 && size <= SIZE_MAX);
-      int rc = zmq_msg_init_size(msg, size);
-      if (unlikely(rc == -1)) {
-        mrb_zmq_handle_error(mrb, "zmq_msg_init_size");
-      }
-    } break;
     case MRB_TT_STRING: {
       int rc = zmq_msg_init_size(msg, RSTRING_LEN(data));
       if (unlikely(rc == -1)) {
@@ -238,7 +230,7 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
       zmq_msg_init(msg);
     } break;
     default: {
-      mrb_raise(mrb, E_TYPE_ERROR, "only works (optionally) with Fixnum and String types");
+      mrb_raise(mrb, E_TYPE_ERROR, "(optionally) expected a String");
     }
   }
 
