@@ -649,7 +649,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 static mrb_value
 mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
 {
-  if (MRB_INSTANCE_TT(mrb_class_ptr(thread_class)) != MRB_TT_DATA) {
+  if (unlikely(MRB_INSTANCE_TT(mrb_class_ptr(thread_class)) != MRB_TT_DATA)) {
     mrb_raise(mrb, E_TYPE_ERROR, "thread_class instance_tt is not MRB_TT_DATA");
   }
   mrb_value self = mrb_nil_value();

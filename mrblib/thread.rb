@@ -18,29 +18,32 @@ end
 
 module ZMQ
   class Thread_fn
-    def setup
-      if ZMQ.const_defined?("Poller")
+    if ZMQ.const_defined?("Poller")
+      def setup
         @poller = ZMQ::Poller.new
         @poller << @pipe
-      end
-      @interrupted = false
-      @instances = {}
-      if @options[:auth].is_a?(Hash)
-        unless @poller
-          raise RuntimeError, "libzmq was compiled without poller support"
+        @interrupted = false
+        @instances = {}
+        if @options[:auth].is_a?(Hash)
+          @auth = Zap.new(authenticator: @options[:auth].fetch(:class).new(*@options[:auth].fetch(:args)))
+          @poller << @auth
         end
-        @auth = Zap.new(authenticator: @options[:auth][:class].new(*@options[:auth][:args]))
-        @poller << @auth
+      end
+    else
+      def setup
+        @interrupted = false
+        @instances = {}
       end
     end
+
 
     def initialize(options = {})
       @options = {}.merge(options)
       setup
     end
 
-    def run
-      if @poller
+    if ZMQ.const_defined?("Poller")
+      def run
         until @interrupted
           @poller.wait do |socket, events|
             case socket
@@ -51,7 +54,9 @@ module ZMQ
             end
           end
         end
-      else
+      end
+    else
+      def run
         until @interrupted
           handle_pipe
         end

@@ -155,8 +155,10 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value thread_val = mrb_obj_value(obj);
-    mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
     mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
+    mrb_value pipe = mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
+    if (mrb_type(pipe) == MRB_TT_DATA)
+      mrb_data_init(pipe, NULL, NULL);
     mrb_data_init(thread_val, NULL, NULL);
   }
 }

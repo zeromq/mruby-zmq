@@ -1,31 +1,4 @@
 module ZMQ
-  class Authenticator
-    def authenticate(domain, address, identity, mechanism, *credentials)
-      case mechanism
-      when 'NULL'
-        null(domain, address, identity)
-      when 'PLAIN'
-        plain(domain, address, identity, credentials.first.to_str, credentials.last.to_str)
-      when 'CURVE'
-        curve(domain, address, identity, credentials.first.to_str)
-      else
-        raise ArgumentError, "Unknown mechanism #{mechanism.dump}"
-      end
-    end
-
-    def null(domain, address, identity)
-      'anonymous'
-    end
-
-    def plain(domain, address, identity, username, password)
-      'anonymous'
-    end
-
-    def curve(domain, address, identity, public_key)
-      'anonymous'
-    end
-  end
-
   class Zap
     attr_reader :socket
 
@@ -75,6 +48,33 @@ module ZMQ
         LibZMQ.send(@socket, meta, 0)
       else
         LibZMQ.send(@socket, nil, 0)
+      end
+    end
+
+    class Authenticator
+      def authenticate(domain, address, identity, mechanism, *credentials)
+        case mechanism
+        when 'NULL'
+          null(domain, address, identity)
+        when 'PLAIN'
+          plain(domain, address, identity, credentials.first.to_str, credentials.last.to_str)
+        when 'CURVE'
+          curve(domain, address, identity, credentials.first.to_str)
+        else
+          raise ArgumentError, "Unknown mechanism #{mechanism.dump}"
+        end
+      end
+
+      def null(domain, address, identity)
+        'anonymous'
+      end
+
+      def plain(domain, address, identity, username, password)
+        'anonymous'
+      end
+
+      def curve(domain, address, identity, public_key)
+        'anonymous'
       end
     end
   end
