@@ -10,7 +10,7 @@ module ZMQ
     def handle_zap
       socket_identity, _, version, request_id, domain, address, identity, mechanism, *credentials = @socket.recv
       if version.to_str == '1.0'
-        user, metadata = @authenticator.authenticate(domain.to_str, address.to_str, identity.to_str, mechanism.to_str, credentials)
+        user, metadata = @authenticator.authenticate(domain.to_str, address.to_str, identity.to_str, mechanism.to_str, *credentials)
         if user
           send_reply(socket_identity, _, version, request_id, 200, 'OK', user, metadata)
         else

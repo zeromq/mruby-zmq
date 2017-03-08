@@ -84,13 +84,12 @@ module ZMQ
     if LibZMQ.respond_to?("has?") && LibZMQ.has?("curve")
       def curve_security(options = {})
         if options[:type] == :server
-          curve_server = true
-          curve_publickey = options.fetch(:public_key)
-          curve_secretkey = options.fetch(:secret_key)
+          self.curve_server = true
+          self.curve_secretkey = options.fetch(:secret_key)
         elsif options[:type] == :client
-          curve_serverkey = options.fetch(:server_key)
-          curve_publickey = options.fetch(:public_key)
-          curve_secretkey = options.fetch(:secret_key)
+          self.curve_serverkey = options.fetch(:server_key)
+          self.curve_publickey = options.fetch(:public_key)
+          self.curve_secretkey = options.fetch(:secret_key)
         else
           raise ArgumentError, ":type can only be :server or :client"
         end
