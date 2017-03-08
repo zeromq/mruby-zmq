@@ -86,23 +86,12 @@ mrb_zmq_ctx_set(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_curve_keypair(mrb_state *mrb, mrb_value self)
 {
-  char z85_public_key[41], z85_secret_key[41];
+  mrb_value public_key = mrb_str_new(mrb, NULL, 40);
+  mrb_value secret_key = mrb_str_new(mrb, NULL, 40);
 
-  int rc = zmq_curve_keypair(z85_public_key, z85_secret_key);
+  int rc = zmq_curve_keypair(RSTRING_PTR(public_key), RSTRING_PTR(secret_key));
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_curve_keypair");
-  }
-
-  mrb_value public_key = mrb_str_new(mrb, NULL, 32);
-  uint8_t *pub = zmq_z85_decode((uint8_t *) RSTRING_PTR(public_key), z85_public_key);
-  if (unlikely(!pub)) {
-    mrb_zmq_handle_error(mrb, "zmq_z85_decode");
-  }
-
-  mrb_value secret_key = mrb_str_new(mrb, NULL, 32);
-  uint8_t *sec = zmq_z85_decode((uint8_t *) RSTRING_PTR(secret_key), z85_secret_key);
-  if (unlikely(!sec)) {
-    mrb_zmq_handle_error(mrb, "zmq_z85_decode");
   }
 
   mrb_value keypair = mrb_hash_new_capa(mrb, 2);
@@ -585,6 +574,48 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
   return data;
 }
 
+static mrb_value
+mrb_zmq_z85_decode(mrb_state *mrb, mrb_value self)
+{
+  char *string;
+  mrb_get_args(mrb, "z", &string);
+
+  if (unlikely(strlen(string) % 5)) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "string size must be divisible by 5");
+  }
+
+  mrb_value dest = mrb_str_new(mrb, NULL, 0.8 * strlen(string));
+
+  uint8_t *rc = zmq_z85_decode((uint8_t *) RSTRING_PTR(dest), string);
+  if (unlikely(!rc)) {
+    mrb_zmq_handle_error(mrb, "zmq_z85_decode");
+  }
+
+  return dest;
+}
+
+static mrb_value
+mrb_zmq_z85_encode(mrb_state *mrb, mrb_value self)
+{
+  char *data;
+  mrb_int size;
+
+  mrb_get_args(mrb, "s", &data, &size);
+
+  if (unlikely(size % 4)) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "size must be divisible by 4");
+  }
+
+  mrb_value dest = mrb_str_new(mrb, NULL, size * 1.25);
+
+  char *rc = zmq_z85_encode(RSTRING_PTR(dest), (uint8_t *) data, size);
+  if (unlikely(!rc)) {
+    mrb_zmq_handle_error(mrb, "zmq_z85_encode");
+  }
+
+  return dest;
+}
+
 static void
 mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 {
@@ -1022,6 +1053,8 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "msg_group", mrb_zmq_msg_group, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_set_group", mrb_zmq_msg_set_group, MRB_ARGS_REQ(2));
 #endif
+  mrb_define_module_function(mrb, libzmq_mod, "z85_decode", mrb_zmq_z85_decode, MRB_ARGS_REQ(1));
+  mrb_define_module_function(mrb, libzmq_mod, "z85_encode", mrb_zmq_z85_encode, MRB_ARGS_REQ(1));
 
   zmq_mod = mrb_define_module(mrb, "ZMQ");
   zmq_msg_class = mrb_define_class_under(mrb, zmq_mod, "Msg", mrb->object_class);
