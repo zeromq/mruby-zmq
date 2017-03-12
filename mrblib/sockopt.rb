@@ -1,6 +1,6 @@
 module ZMQ
   class Socket
-    ["backlog", "events", "fd", "handshake_ivl", "heartbeat_ivl", "heartbeat_ttl", "heartbeat_timeout", "linger", "multicast_hops", "rate",
+    ["backlog", "events", "fd", "handshake_ivl", "heartbeat_ivl", "heartbeat_ttl", "heartbeat_timeout", "linger", "mechanism", "multicast_hops", "rate",
       "rcvhwm", "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max", "recovery_ivl", "sndbuf", "sndhwm", "sndtimeo",
       "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos"
     ].each do |int|

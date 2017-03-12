@@ -635,6 +635,9 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
       mrb->jmp = &c_jmp;
       mrb_value pipe_val = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair")));
       mrb_data_init(pipe_val, mrb_zmq_thread_data->backend, &mrb_zmq_socket_type);
+      mrb_value timeo = mrb_fixnum_value(120000);
+      mrb_funcall(mrb, pipe_val, "sndtimeo=", 1, timeo);
+      mrb_funcall(mrb, pipe_val, "rcvtimeo=", 1, timeo);
       mrb_value argv_str = mrb_str_new_static(mrb, mrb_zmq_thread_data->argv_packed, mrb_zmq_thread_data->argv_len);
       mrb_value argv = mrb_funcall(mrb, mrb_obj_value(mrb_module_get(mrb, "MessagePack")), "unpack", 1, argv_str);
       mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
@@ -705,6 +708,9 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     const char *endpoint = mrb_string_value_cstr(mrb, &args[0]);
     args[1] = mrb_true_value();
     mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), sizeof(args) / sizeof(args[0]), args);
+    mrb_value timeo = mrb_fixnum_value(120000);
+    mrb_funcall(mrb, frontend_val, "sndtimeo=", 1, timeo);
+    mrb_funcall(mrb, frontend_val, "rcvtimeo=", 1, timeo);
     mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
     void *frontend = DATA_PTR(frontend_val);
     mrb_zmq_thread_data = mrb_malloc(mrb, sizeof(*mrb_zmq_thread_data));

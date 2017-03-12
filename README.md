@@ -24,8 +24,8 @@ Sockets
 Client to Server
 
 ```ruby
-server = ZMQ::Server.new("tcp://127.0.0.1:*") # you can optionally add a boolean argument if it should connect instead of binding
-client = ZMQ::Client.new(server.last_endpoint) # you can optionally add a boolean argument if it should bind instead of connecting
+server = ZMQ::Server.new("tcp://127.0.0.1:*") # you can optionally add a boolean argument if it should connect instead of bind
+client = ZMQ::Client.new(server.last_endpoint) # you can optionally add a boolean argument if it should bind instead of connect
 
 client.send("hello")
 msg = server.recv
@@ -73,7 +73,7 @@ puts string.to_str # this gets routed through method_missing and is as such a bi
 
 Logging
 =======
-You can define a environment variable called ZMQ_LOGGER_ENDPOINT which creates a pub sockets which connects to that endpoint.
+You can define a environment variable called ZMQ_LOGGER_ENDPOINT to create pub sockets which connect to that endpoint.
 There is also a ZMQ_LOGGER_IDENT env var which adds a ident to each msg from ZMQ.logger
 
 ```ruby
