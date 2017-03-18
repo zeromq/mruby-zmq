@@ -25,7 +25,7 @@ module ZMQ
         @interrupted = false
         @instances = {}
         if @options[:auth].is_a?(Hash)
-          @auth = Zap.new(authenticator: @options[:auth].fetch(:class).new(*@options[:auth].fetch(:args)))
+          @auth = Zap.new(authenticator: @options[:auth].fetch(:class).new(*@options[:auth].fetch(:args) { [] } ))
           @poller << @auth
         end
       end
@@ -157,7 +157,7 @@ module ZMQ
         raise ArgumentError, "blocks cannot be migrated"
       end
       @thread.async(@object_id, m, *args)
-      nil
+      self
     end
 
     def finalize

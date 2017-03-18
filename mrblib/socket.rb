@@ -74,7 +74,7 @@ module ZMQ
         end
       end
     end
-  end
+  end # Client
 
   if LibZMQ.const_defined?("DISH")
     class Radio < Socket
@@ -103,7 +103,7 @@ module ZMQ
         end
       end
     end
-  end
+  end # Dish
 
   class Pub < Socket
     def initialize(endpoint = nil, connect = false)

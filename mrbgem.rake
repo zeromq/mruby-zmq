@@ -11,7 +11,9 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-print'
   spec.add_dependency 'mruby-time'
   spec.add_dependency 'mruby-sprintf'
-
+  if spec.cc.search_header_path 'ifaddrs.h'
+    spec.cc.defines << 'HAVE_IFADDRS'
+  end
   if spec.build.toolchains.include? 'visualcpp'
     spec.linker.libraries << 'libzmq'
   else

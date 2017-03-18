@@ -1007,6 +1007,64 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
 }
 #endif // ZMQ_HAVE_POLLER
 
+#ifdef HAVE_IFADDRS
+static mrb_bool
+s_valid_flags (short flags)
+{
+    return (flags & IFF_UP)             //  Only use interfaces that are running
+           && !(flags & IFF_LOOPBACK)   //  Ignore loopback interface
+           && (flags & IFF_BROADCAST)   //  Only use interfaces that have BROADCAST
+#   if defined (IFF_SLAVE)
+           && !(flags & IFF_SLAVE)      //  Ignore devices that are bonding slaves.
+#   endif
+           && !(flags & IFF_POINTOPOINT); //  Ignore point to point interfaces.
+}
+
+static mrb_value
+mrb_network_interfaces(mrb_state *mrb, mrb_value self)
+{
+  int is_ipv6 = zmq_ctx_get(MRB_LIBZMQ_CONTEXT(mrb), ZMQ_IPV6);
+  if (unlikely(is_ipv6 == -1)) {
+    mrb_sys_fail(mrb, "zmq_ctx_get");
+  }
+
+  mrb_value interfaces_ary = mrb_ary_new(mrb);
+  struct ifaddrs *interfaces = NULL;
+
+  struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+  struct mrb_jmpbuf c_jmp;
+
+  MRB_TRY(&c_jmp)
+  {
+    mrb->jmp = &c_jmp;
+    if (getifaddrs (&interfaces) == 0) {
+      struct ifaddrs *interface = interfaces;
+      while (interface) {
+        if (interface->ifa_addr
+          && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)
+          && s_valid_flags(interface->ifa_flags)) {
+          mrb_ary_push(mrb, interfaces_ary, mrb_str_new_cstr(mrb, interface->ifa_name));
+        }
+        interface = interface->ifa_next;
+      }
+      freeifaddrs (interfaces);
+    } else {
+      mrb_sys_fail(mrb, "getifaddrs");
+    }
+    mrb->jmp = prev_jmp;
+  }
+  MRB_CATCH(&c_jmp)
+  {
+    mrb->jmp = prev_jmp;
+    freeifaddrs (interfaces);
+    MRB_THROW(mrb->jmp);
+  }
+  MRB_END_EXC(&c_jmp);
+
+  return interfaces_ary;
+}
+#endif //HAVE_IFADDRS
+
 void
 mrb_mruby_zmq_gem_init(mrb_state* mrb)
 {
@@ -1092,8 +1150,12 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_poller_class, "wait_all", mrb_zmq_poller_wait_all, (MRB_ARGS_REQ(2)|MRB_ARGS_BLOCK()));
 #endif
 
-  mrb_gc_arena_restore(mrb, arena_index);
+#ifdef HAVE_IFADDRS
+  mrb_define_module_function(mrb, zmq_mod, "network_interfaces", mrb_network_interfaces, MRB_ARGS_NONE());
+#endif
 
+  mrb_gc_arena_restore(mrb, arena_index);
+  arena_index = mrb_gc_arena_save(mrb);
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \
   do { \
     mrb_define_const(mrb, libzmq_mod, ZMQ_CONST_NAME, mrb_fixnum_value(ZMQ_CONST)); \
