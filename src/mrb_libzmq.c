@@ -701,7 +701,6 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   MRB_TRY(&c_jmp)
   {
     mrb->jmp = &c_jmp;
-
     self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(thread_class)));
     mrb_value args[2];
     args[0] = mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self)));
@@ -1155,7 +1154,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 #endif
 
   mrb_gc_arena_restore(mrb, arena_index);
-  arena_index = mrb_gc_arena_save(mrb);
+
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \
   do { \
     mrb_define_const(mrb, libzmq_mod, ZMQ_CONST_NAME, mrb_fixnum_value(ZMQ_CONST)); \
@@ -1170,7 +1169,8 @@ mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
   void *context = MRB_LIBZMQ_CONTEXT(mrb);
   zmq_ctx_shutdown(context);
-  mrb_objspace_each_objects(mrb, mrb_zmq_thread_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread"));
-  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"));
+  struct RClass *zmq_mod = mrb_module_get(mrb, "ZMQ");
+  mrb_objspace_each_objects(mrb, mrb_zmq_thread_close_gem_final, mrb_class_get_under(mrb, zmq_mod, "Thread"));
+  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, zmq_mod, "Socket"));
   zmq_ctx_term(context);
 }

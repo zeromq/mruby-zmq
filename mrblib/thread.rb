@@ -76,8 +76,8 @@ module ZMQ
           when :new
             instance = msg[:class].new(*msg[:args])
             id = instance.__id__
-            @instances[id] = instance
             LibZMQ.send(@pipe, {type: :instance, object_id: id}.to_msgpack, 0)
+            @instances[id] = instance
           when :send
             LibZMQ.send(@pipe, {type: :result, result: @instances.fetch(msg[:object_id]).__send__(msg[:method], *msg[:args])}.to_msgpack, 0)
           when :async
