@@ -969,7 +969,7 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "ii&", &n_events, &timeout, &block);
   mrb_assert(n_events >= 0 && n_events <= INT_MAX);
   mrb_assert(timeout >= LONG_MIN && timeout <= LONG_MAX);
-  if (mrb_nil_p(block)) {
+  if (unlikely(mrb_nil_p(block))) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
   }
 
@@ -1034,7 +1034,7 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   mrb_value block = mrb_nil_value();
   mrb_get_args(mrb, "i&", &interval, &block);
   mrb_assert(interval >= 0 && interval <= SIZE_MAX);
-  if (mrb_nil_p(block)) {
+  if (unlikely(mrb_nil_p(block))) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
   }
 
@@ -1044,7 +1044,7 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   timer_fn_arg->mrb = mrb;
   timer_fn_arg->timers = self;
   timer_fn_arg->block = block;
-  mrb_iv_set(mrb, timer_fn_arg, mrb_intern_lit(mrb, "block"), block);
+  mrb_iv_set(mrb, timer, mrb_intern_lit(mrb, "block"), block);
 
   int timer_id = zmq_timers_add(DATA_PTR(self), interval, mrb_zmq_timer_fn, timer_fn_arg);
   if (unlikely(timer_id == -1)) {
@@ -1076,7 +1076,10 @@ static mrb_value
 mrb_zmq_timers_reset(mrb_state *mrb, mrb_value self)
 {
   mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
-  zmq_timers_reset(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
+  int rc = zmq_timers_reset(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_timers_reset");
+  }
 
   return self;
 }
