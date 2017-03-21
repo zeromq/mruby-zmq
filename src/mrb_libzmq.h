@@ -137,6 +137,29 @@ static const struct mrb_data_type mrb_zmq_poller_type = {
 };
 #endif //ZMQ_HAVE_POLLER
 
+#ifdef ZMQ_HAVE_TIMERS
+typedef struct {
+  mrb_state *mrb;
+  mrb_value timers;
+  mrb_value block;
+  int timer_id;
+} mrb_zmq_timers_fn_t;
+
+static const struct mrb_data_type mrb_zmq_timers_fn_type = {
+  "$i_mrb_zmq_timers_fn_type", mrb_free
+};
+
+static void
+mrb_zmq_gc_timers_destroy(mrb_state *mrb, void *timers)
+{
+  zmq_timers_destroy(&timers);
+}
+
+static const struct mrb_data_type mrb_zmq_timers_type = {
+  "$i_mrb_zmq_timers_type", mrb_zmq_gc_timers_destroy
+};
+#endif //ZMQ_HAVE_TIMERS
+
 static void
 mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
 {

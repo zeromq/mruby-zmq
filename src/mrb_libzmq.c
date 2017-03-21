@@ -1006,6 +1006,117 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
 }
 #endif // ZMQ_HAVE_POLLER
 
+#ifdef ZMQ_HAVE_TIMERS
+MRB_INLINE void
+mrb_zmq_timer_fn(int timer_id, void *arg)
+{
+  mrb_yield(((mrb_zmq_timers_fn_t *) arg)->mrb, ((mrb_zmq_timers_fn_t *) arg)->block, mrb_fixnum_value(timer_id));
+}
+
+static mrb_value
+mrb_zmq_timers_new(mrb_state *mrb, mrb_value self)
+{
+  if (unlikely(DATA_PTR(self))) {
+    mrb_free(mrb, DATA_PTR(self));
+    mrb_data_init(self, NULL, NULL);
+  }
+
+  mrb_data_init(self, zmq_timers_new(), &mrb_zmq_timers_type);
+  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "timers"), mrb_hash_new(mrb));
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
+{
+  mrb_int interval;
+  mrb_value block = mrb_nil_value();
+  mrb_get_args(mrb, "i&", &interval, &block);
+  mrb_assert(interval >= 0 && interval <= SIZE_MAX);
+  if (mrb_nil_p(block)) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
+  }
+
+  mrb_value timer = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Timer")));
+  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_malloc(mrb, sizeof(mrb_zmq_timers_fn_t));
+  mrb_data_init(timer, timer_fn_arg, &mrb_zmq_timers_fn_type);
+  timer_fn_arg->mrb = mrb;
+  timer_fn_arg->timers = self;
+  timer_fn_arg->block = block;
+  mrb_iv_set(mrb, timer_fn_arg, mrb_intern_lit(mrb, "block"), block);
+
+  int timer_id = zmq_timers_add(DATA_PTR(self), interval, mrb_zmq_timer_fn, timer_fn_arg);
+  if (unlikely(timer_id == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_timers_add");
+  }
+  timer_fn_arg->timer_id = timer_id;
+  mrb_hash_set(mrb, mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "timers")), mrb_fixnum_value(timer_id), timer);
+
+  return timer;
+}
+
+static mrb_value
+mrb_zmq_timers_set_interval(mrb_state *mrb, mrb_value self)
+{
+  mrb_int interval;
+  mrb_get_args(mrb, "i", &interval);
+  mrb_assert(interval >= 0 && interval <= SIZE_MAX);
+
+  mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+  int rc = zmq_timers_set_interval(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id, interval);
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_timers_set_interval");
+  }
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_timers_reset(mrb_state *mrb, mrb_value self)
+{
+  mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+  zmq_timers_reset(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
+
+  return self;
+}
+
+static mrb_value
+mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
+{
+  if (DATA_PTR(self)) {
+    mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+    int rc = zmq_timers_cancel(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
+    if (unlikely(rc == -1)) {
+      mrb_zmq_handle_error(mrb, "zmq_timers_cancel");
+    }
+    mrb_hash_delete_key(mrb, mrb_iv_get(mrb, timer_fn_arg->timers, mrb_intern_lit(mrb, "timers")), mrb_fixnum_value(timer_fn_arg->timer_id));
+    mrb_free(mrb, timer_fn_arg);
+    mrb_iv_remove(mrb, self, mrb_intern_lit(mrb, "block"));
+    mrb_data_init(self, NULL, NULL);
+  }
+
+  return mrb_nil_value();
+}
+
+static mrb_value
+mrb_zmq_timers_timeout(mrb_state *mrb, mrb_value self)
+{
+  return mrb_fixnum_value(zmq_timers_timeout(DATA_PTR(self)));
+}
+
+static mrb_value
+mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
+{
+  int rc = zmq_timers_execute(DATA_PTR(self));
+  if (unlikely(rc == -1)) {
+    mrb_zmq_handle_error(mrb, "zmq_timers_execute");
+  }
+
+  return self;
+}
+#endif //ZMQ_HAVE_TIMERS
+
 #ifdef HAVE_IFADDRS
 static mrb_bool
 s_valid_flags (short flags)
@@ -1148,6 +1259,21 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_poller_class, "wait", mrb_zmq_poller_wait, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, zmq_poller_class, "wait_all", mrb_zmq_poller_wait_all, (MRB_ARGS_REQ(2)|MRB_ARGS_BLOCK()));
 #endif
+
+#ifdef ZMQ_HAVE_TIMERS
+  struct RClass *zmq_timers_class, *zmq_timers_timer_fn_class;
+  zmq_timers_class = mrb_define_class_under(mrb, libzmq_mod, "Timers", mrb->object_class);
+  MRB_SET_INSTANCE_TT(zmq_timers_class, MRB_TT_DATA);
+  mrb_define_method(mrb, zmq_timers_class, "initialize", mrb_zmq_timers_new, MRB_ARGS_NONE());
+  mrb_define_method(mrb, zmq_timers_class, "add", mrb_zmq_timers_add, (MRB_ARGS_REQ(1)|MRB_ARGS_BLOCK()));
+  mrb_define_method(mrb, zmq_timers_class, "timeout", mrb_zmq_timers_timeout, MRB_ARGS_NONE());
+  mrb_define_method(mrb, zmq_timers_class, "execute", mrb_zmq_timers_execute, MRB_ARGS_NONE());
+  zmq_timers_timer_fn_class = mrb_define_class_under(mrb, zmq_timers_class, "Timer", mrb->object_class);
+  MRB_SET_INSTANCE_TT(zmq_timers_timer_fn_class, MRB_TT_DATA);
+  mrb_define_method(mrb, zmq_timers_timer_fn_class, "interval=", mrb_zmq_timers_set_interval, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, zmq_timers_timer_fn_class, "reset", mrb_zmq_timers_reset, MRB_ARGS_NONE());
+  mrb_define_method(mrb, zmq_timers_timer_fn_class, "cancel", mrb_zmq_timers_cancel, MRB_ARGS_NONE());
+#endif //ZMQ_HAVE_TIMERS
 
 #ifdef HAVE_IFADDRS
   mrb_define_module_function(mrb, zmq_mod, "network_interfaces", mrb_network_interfaces, MRB_ARGS_NONE());
