@@ -42,7 +42,7 @@
 
 #define MRB_LIBZMQ_CONTEXT(mrb) (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
 
-MRB_INLINE void
+static void
 mrb_zmq_handle_error(mrb_state *mrb, const char *func)
 {
   switch(mrb_zmq_errno()) {

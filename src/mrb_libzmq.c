@@ -543,7 +543,6 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
 
   int more = 0;
   struct RClass *zmq_msg_class = mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Msg");
-  int arena_index = 0;
 
   do {
     mrb_value msg_val = mrb_obj_new(mrb, zmq_msg_class, 0, NULL);
@@ -557,14 +556,11 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
     if (more) {
       if (!mrb_array_p(data)) {
         data = mrb_ary_new_capa(mrb, 2); // We have at least two zmq messages at this point.
-        arena_index = mrb_gc_arena_save(mrb);
       }
       mrb_ary_push(mrb, data, msg_val);
-      mrb_gc_arena_restore(mrb, arena_index);
     } else {
       if (mrb_array_p(data)) {
         mrb_ary_push(mrb, data, msg_val);
-        mrb_gc_arena_restore(mrb, arena_index);
       } else {
         data = msg_val;
       }
@@ -977,7 +973,8 @@ mrb_zmq_poller_wait_all(mrb_state *mrb, mrb_value self)
   if (n_events > 0) {
     zmq_poller_event_t events[n_events];
     rc = zmq_poller_wait_all(DATA_PTR(self), events, n_events, timeout);
-    for (int i = 0; i < rc; i++) {
+    int i;
+    for (i = 0; i < rc; i++) {
       mrb_value argv[2];
       argv[0] = mrb_obj_value(events[i].user_data);
       argv[1] = mrb_fixnum_value(events[i].events);
@@ -1094,8 +1091,8 @@ mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
       mrb_zmq_handle_error(mrb, "zmq_timers_cancel");
     }
     mrb_hash_delete_key(mrb, mrb_iv_get(mrb, timer_fn_arg->timers, mrb_intern_lit(mrb, "timers")), mrb_fixnum_value(timer_fn_arg->timer_id));
-    mrb_free(mrb, timer_fn_arg);
     mrb_iv_remove(mrb, self, mrb_intern_lit(mrb, "block"));
+    mrb_free(mrb, timer_fn_arg);
     mrb_data_init(self, NULL, NULL);
   }
 
