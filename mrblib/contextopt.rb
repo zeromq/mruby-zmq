@@ -19,7 +19,17 @@ module ZMQ
     end
   end
 
-  ["blocky", "max_msgsz", "max_sockets", "ipv6"].each do |contextopt|
+  ["blocky", "ipv6"].each do |contextopt|
+    optup = contextopt.upcase
+    if LibZMQ.const_defined?(optup)
+      const = LibZMQ.const_get(optup)
+      define_singleton_method("#{contextopt}=") do |option_value|
+        LibZMQ.ctx_set(const, option_value ? true : false)
+      end
+    end
+  end
+
+  ["max_msgsz", "max_sockets"].each do |contextopt|
     optup = contextopt.upcase
     if LibZMQ.const_defined?(optup)
       const = LibZMQ.const_get(optup)

@@ -21,6 +21,7 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
+#include <assert.h>
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int
