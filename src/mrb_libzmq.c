@@ -1009,7 +1009,7 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   }
 
   mrb_value timer = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Timer")));
-  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_realloc(mrb, DATA_PTR(self), sizeof(mrb_zmq_timers_fn_t));
+  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_realloc(mrb, DATA_PTR(timer), sizeof(mrb_zmq_timers_fn_t));
   mrb_data_init(timer, timer_fn_arg, &mrb_zmq_timers_fn_type);
   timer_fn_arg->mrb = mrb;
   timer_fn_arg->timers = self;
