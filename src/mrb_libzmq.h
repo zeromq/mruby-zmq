@@ -110,14 +110,20 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
       zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &disable, sizeof(disable));
       zmq_close(mrb_zmq_thread_data->frontend);
+      mrb_zmq_thread_data->frontend = NULL;
     }
     if (likely(mrb_zmq_thread_data->backend_ctx))
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
-    if (likely(mrb_zmq_thread_data->backend))
+    if (likely(mrb_zmq_thread_data->backend)) {
       zmq_close(mrb_zmq_thread_data->backend);
-    if (likely(mrb_zmq_thread_data->thread))
+      mrb_zmq_thread_data->backend = NULL;
+    }
+    if (likely(mrb_zmq_thread_data->thread)) {
       zmq_threadclose(mrb_zmq_thread_data->thread);
+      mrb_zmq_thread_data->thread = NULL;
+    }
     mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
+    mrb_zmq_thread_data->argv_packed = NULL;
     mrb_free(mrb, mrb_zmq_thread_data_);
   }
 }
