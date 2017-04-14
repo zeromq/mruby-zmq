@@ -5,8 +5,9 @@
 #if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
   #error "mruby-zmq needs at least libzmq-4.1"
 #endif
-#include "mruby/zmq.h"
+#include <assert.h>
 #include <stdlib.h>
+#include "mruby/zmq.h"
 #include <mruby/data.h>
 #include <mruby/error.h>
 #include <mruby/variable.h>
@@ -17,11 +18,11 @@
 #include <mruby/value.h>
 #include <mruby/throw.h>
 #include <mruby/gc.h>
+#include <mruby/numeric.h>
 #ifdef HAVE_IFADDRS
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
-#include <assert.h>
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int

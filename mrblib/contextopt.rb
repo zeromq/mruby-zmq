@@ -24,7 +24,7 @@ module ZMQ
     if LibZMQ.const_defined?(optup)
       const = LibZMQ.const_get(optup)
       define_singleton_method("#{contextopt}=") do |option_value|
-        LibZMQ.ctx_set(const, option_value ? true : false)
+        LibZMQ.ctx_set(const, option_value ? 1 : 0)
       end
     end
   end

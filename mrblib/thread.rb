@@ -31,6 +31,9 @@ module ZMQ
       end
     else
       def setup
+        if @options[:auth].is_a?(Hash)
+          raise RuntimeError, "authentication: libzmq was compiled without Poller support"
+        end
         @interrupted = false
         @instances = {}
       end

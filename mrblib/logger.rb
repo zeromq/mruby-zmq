@@ -5,7 +5,7 @@ module ZMQ
 
   class Logger
     def initialize(endpoint = nil, ident = nil)
-      @pub = ZMQ::Pub.new(endpoint, true) if endpoint
+      @pub = ZMQ::Pub.new(endpoint, :connect) if endpoint
       @ident = ident if ident
     end
 
