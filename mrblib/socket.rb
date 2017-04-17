@@ -119,9 +119,15 @@ module ZMQ
   end
 
   class Sub < Socket
-    def initialize(endpoint = nil, subs = nil, bind = false)
+    None = Object.new.freeze
+
+    def initialize(endpoint = nil, subs = None, bind = false)
       super(LibZMQ::SUB)
-      subscribe(subs) if subs
+      if subs.respond_to?(:each)
+        subs.each {|sub| subscribe(sub)}
+      elsif subs != None
+        subscribe(subs)
+      end
       if endpoint
         if bind
           LibZMQ.bind(self, endpoint)

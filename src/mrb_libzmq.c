@@ -123,7 +123,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
   void *socket;
   mrb_int option_name;
   mrb_value option_type;
-  mrb_int string_return_len = 4096;
+  mrb_int string_return_len = 4096 - sizeof(mrb_value) - sizeof(struct RString);
   mrb_get_args(mrb, "diC|i", &socket, &mrb_zmq_socket_type, &option_name, &option_type, &string_return_len);
   assert(string_return_len >= 0);
 

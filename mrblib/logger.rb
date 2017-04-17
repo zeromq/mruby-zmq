@@ -11,11 +11,11 @@ module ZMQ
 
     def log(level, message)
       if @ident
-        msg = sprintf("%s, (%s) %s %s", level, @ident, Time.now.utc.to_s, message)
+        msg = [level, ident, Time.now.utc.to_s, message]
       else
-        msg = sprintf("%s, %s %s", level, Time.now.utc.to_s, message)
+        msg = [level, Time.now.utc.to_s, message]
       end
-      puts msg
+      puts msg.join(", ")
       @pub.send(msg) if @pub
       true
     end
@@ -49,6 +49,4 @@ module ZMQ
              end
     end
   end
-
-  self.logger = Logger.new(ENV['ZMQ_LOGGER_ENDPOINT'], ENV['ZMQ_LOGGER_IDENT'])
 end

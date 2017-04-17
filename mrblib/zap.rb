@@ -79,3 +79,5 @@ module ZMQ
     end
   end
 end
+
+ZMQ.logger = ZMQ::Logger.new(ENV['ZMQ_LOGGER_ENDPOINT'], ENV['ZMQ_LOGGER_IDENT'])

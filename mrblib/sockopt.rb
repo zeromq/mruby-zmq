@@ -93,6 +93,9 @@ module ZMQ
         else
           raise ArgumentError, ":type can only be :server or :client"
         end
+        unless mechanism == LibZMQ::CURVE
+          raise LibZMQ::Error, "cannot set curve security"
+        end
         self
       end
     end
