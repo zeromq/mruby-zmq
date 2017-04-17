@@ -599,12 +599,7 @@ mrb_zmq_z85_encode(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "data size must be divisible by 4");
   }
 
-  mrb_int product;
-  if (unlikely(mrb_int_mul_overflow(size, 1.25, &product))) {
-    mrb_raise(mrb, E_RANGE_ERROR, "data size too big");
-  }
-
-  mrb_value dest = mrb_str_new(mrb, NULL, product);
+  mrb_value dest = mrb_str_new(mrb, NULL, size * 1.25);
 
   char *rc = zmq_z85_encode(RSTRING_PTR(dest), (uint8_t *) data, size);
   if (unlikely(!rc)) {
