@@ -11,7 +11,7 @@ module ZMQ
 
     def log(level, message)
       if @ident
-        msg = [level, ident, Time.now.utc.to_s, message]
+        msg = [level, @ident, Time.now.utc.to_s, message]
       else
         msg = [level, Time.now.utc.to_s, message]
       end
