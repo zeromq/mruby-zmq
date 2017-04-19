@@ -645,7 +645,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
         if (ttype == 0) ttype = MRB_TT_OBJECT;
         thread_fn = mrb_obj_value(mrb_obj_alloc(mrb, ttype, mrb_class_ptr(bg_class)));
       } else {
-        thread_fn = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_OBJECT, mrb_class_get_under(mrb, zmq_mod, "Thread_fn")));
+        thread_fn = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_OBJECT, mrb_class_get_under(mrb, mrb_class_get_under(mrb, zmq_mod, "Thread"), "Thread_fn")));
       }
       mrb_iv_set(mrb, thread_fn, mrb_intern_lit(mrb, "@pipe"), pipe_val);
       mrb_funcall_argv(mrb, thread_fn, mrb_intern_lit(mrb, "initialize"), RARRAY_LEN(argv), RARRAY_PTR(argv));
@@ -1018,7 +1018,7 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   }
 
   mrb_value timer = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Timer")));
-  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_realloc(mrb, DATA_PTR(timer), sizeof(mrb_zmq_timers_fn_t));
+  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_realloc(mrb, DATA_PTR(timer), sizeof(*timer_fn_arg));
   mrb_data_init(timer, timer_fn_arg, &mrb_zmq_timers_fn_type);
   timer_fn_arg->mrb = mrb;
   timer_fn_arg->timers = self;
