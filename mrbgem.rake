@@ -1,5 +1,5 @@
 MRuby::Gem::Specification.new('mruby-zmq') do |spec|
-  spec.license = 'Apache-2'
+  spec.license = 'MPL-2.0'
   spec.author  = 'Hendrik Beskow'
   spec.summary = 'mruby bindings for libzmq4'
   spec.add_conflict 'mruby-czmq'
