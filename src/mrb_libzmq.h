@@ -19,6 +19,7 @@
 #include <mruby/throw.h>
 #include <mruby/gc.h>
 #include <mruby/numeric.h>
+#include <mruby/proc.h>
 #ifdef HAVE_IFADDRS
 #include <net/if.h>
 #include <ifaddrs.h>

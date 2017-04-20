@@ -1,7 +1,3 @@
-MessagePack.register_pack_type(1, Symbol) { |sym| sym.to_s }
-MessagePack.register_unpack_type(1) { |data| data.to_sym }
-MessagePack.register_pack_type(2, Class) { |cls| cls.name }
-MessagePack.register_unpack_type(2) { |data| data.constantize }
 MessagePack.register_pack_type(3, Exception) do |exe|
   [
     exe.class,

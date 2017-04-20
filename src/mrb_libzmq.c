@@ -1157,6 +1157,43 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
 }
 #endif //HAVE_IFADDRS
 
+static mrb_value
+mrb_zmq_pack_symbol(mrb_state *mrb, mrb_value self)
+{
+  mrb_sym symbol;
+  mrb_get_args(mrb, "n", &symbol);
+
+  return mrb_sym2str(mrb, symbol);
+}
+
+static mrb_value
+mrb_zmq_unpack_symbol(mrb_state *mrb, mrb_value self)
+{
+  mrb_value string;
+  mrb_get_args(mrb, "S", &string);
+
+  return mrb_symbol_value(mrb_intern_str(mrb, string));
+}
+
+static mrb_value
+mrb_zmq_pack_class(mrb_state *mrb, mrb_value self)
+{
+  mrb_value class;
+  mrb_get_args(mrb, "C", &class);
+
+  mrb_value name = mrb_class_path(mrb, mrb_class_ptr(class));
+  return mrb_nil_p(name)? name : mrb_str_dup(mrb, name);
+}
+
+static mrb_value
+mrb_zmq_unpack_class(mrb_state *mrb, mrb_value self)
+{
+  mrb_value class;
+  mrb_get_args(mrb, "S", &class);
+
+  return mrb_funcall(mrb, class, "constantize", 0);
+}
+
 void
 mrb_mruby_zmq_gem_init(mrb_state* mrb)
 {
@@ -1266,6 +1303,28 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   } while(0)
 
 #include "zmq_const.cstub"
+
+  mrb_value msgpack = mrb_obj_value(mrb_module_get(mrb, "MessagePack"));
+  mrb_sym register_pack_type = mrb_intern_lit(mrb, "register_pack_type");
+  mrb_sym register_unpack_type = mrb_intern_lit(mrb, "register_unpack_type");
+
+  mrb_value pack_sym_args[2] = { mrb_fixnum_value(1), mrb_obj_value(mrb->symbol_class) };
+  mrb_funcall_with_block(mrb, msgpack,
+    register_pack_type, sizeof(pack_sym_args) / sizeof(pack_sym_args[0]), pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_symbol, 1)));
+  mrb_funcall_with_block(mrb, msgpack,
+    register_unpack_type, 1, pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_symbol, 1)));
+
+  mrb_value pack_class_args[2] = { mrb_fixnum_value(2), mrb_obj_value(mrb->class_class) };
+  mrb_funcall_with_block(mrb, msgpack,
+    register_pack_type, sizeof(pack_class_args) / sizeof(pack_class_args[0]), pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
+  mrb_funcall_with_block(mrb, msgpack,
+    register_unpack_type, 1, pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_class, 1)));
+
+  mrb_value pack_module_args[2] = { mrb_fixnum_value(4), mrb_obj_value(mrb->module_class) };
+  mrb_funcall_with_block(mrb, msgpack,
+    register_pack_type, sizeof(pack_module_args) / sizeof(pack_module_args[0]), pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
+  mrb_funcall_with_block(mrb, msgpack,
+    register_unpack_type, 1, pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_class, 1)));
 }
 
 void
