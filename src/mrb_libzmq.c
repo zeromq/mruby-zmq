@@ -1100,8 +1100,8 @@ mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 #endif //ZMQ_HAVE_TIMERS
 
 #ifdef HAVE_IFADDRS
-static mrb_bool
-s_valid_flags (short flags)
+MRB_INLINE mrb_bool
+s_valid_flags (unsigned int flags)
 {
     return (flags & IFF_UP)             //  Only use interfaces that are running
            && !(flags & IFF_LOOPBACK)   //  Ignore loopback interface
@@ -1129,17 +1129,16 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
   MRB_TRY(&c_jmp)
   {
     mrb->jmp = &c_jmp;
-    if (likely(getifaddrs (&interfaces) == 0)) {
-      struct ifaddrs *interface = interfaces;
-      while (interface) {
-        if (interface->ifa_addr
-          && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)
-          && s_valid_flags(interface->ifa_flags)) {
+    if (likely(getifaddrs(&interfaces) == 0)) {
+      struct ifaddrs *interface;
+      for (interface = interfaces; interface; interface = interface->ifa_next) {
+        if (s_valid_flags(interface->ifa_flags)
+          && interface->ifa_addr
+          && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)) {
           mrb_ary_push(mrb, interfaces_ary, mrb_str_new_cstr(mrb, interface->ifa_name));
         }
-        interface = interface->ifa_next;
       }
-      freeifaddrs (interfaces);
+      freeifaddrs(interfaces);
     } else {
       mrb_sys_fail(mrb, "getifaddrs");
     }
@@ -1148,7 +1147,7 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
   MRB_CATCH(&c_jmp)
   {
     mrb->jmp = prev_jmp;
-    freeifaddrs (interfaces);
+    freeifaddrs(interfaces);
     MRB_THROW(mrb->jmp);
   }
   MRB_END_EXC(&c_jmp);
