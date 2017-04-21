@@ -110,22 +110,16 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
       int disable = 0;
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
       zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
-      zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_LINGER, &disable, sizeof(disable));
-      zmq_close(mrb_zmq_thread_data->frontend);
-      mrb_zmq_thread_data->frontend = NULL;
     }
     if (likely(mrb_zmq_thread_data->backend_ctx))
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
-    if (likely(mrb_zmq_thread_data->backend)) {
-      zmq_close(mrb_zmq_thread_data->backend);
-      mrb_zmq_thread_data->backend = NULL;
-    }
     if (likely(mrb_zmq_thread_data->thread)) {
       zmq_threadclose(mrb_zmq_thread_data->thread);
       mrb_zmq_thread_data->thread = NULL;
     }
     mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
     mrb_zmq_thread_data->argv_packed = NULL;
+    mrb_zmq_thread_data->backend_ctx = NULL;
     mrb_free(mrb, mrb_zmq_thread_data_);
   }
 }
@@ -192,9 +186,7 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value thread_val = mrb_obj_value(obj);
     mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
-    mrb_value pipe = mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
-    if (mrb_type(pipe) == MRB_TT_DATA)
-      mrb_data_init(pipe, NULL, NULL);
+    mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
     mrb_data_init(thread_val, NULL, NULL);
   }
 }

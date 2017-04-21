@@ -105,8 +105,8 @@ module ZMQ
 
       if ZMQ.const_defined?("Poller")
         def run
-          until @interrupted
-            @poller.wait do |socket, events|
+          if @auth
+            block = lambda do |socket, events|
               case socket
               when @pipe
                 handle_pipe
@@ -114,10 +114,19 @@ module ZMQ
                 @auth.handle_zap
               end
             end
+            until @interrupted
+              break unless @poller.wait(&block)
+            end
+          else
+            @pipe.rcvtimeo = -1
+            until @interrupted
+              handle_pipe
+            end
           end
         end
-      else
+      else #Poller
         def run
+          @pipe.rcvtimeo = -1
           until @interrupted
             handle_pipe
           end
@@ -140,14 +149,12 @@ module ZMQ
               LibZMQ.send(@pipe, [INSTANCE, id].to_msgpack, 0)
               @instances[id] = instance
             when SEND
-              LibZMQ.send(@pipe, [RESULT, @instances.fetch(msg[1]).__send__(msg[2], *msg[3])].to_msgpack, 0)
+              LibZMQ.send(@pipe, [RESULT, @instances[msg[1]].__send__(msg[2], *msg[3])].to_msgpack, 0)
             when ASYNC
-              if (instance = @instances[msg[1]])
-                begin
-                  instance.__send__(msg[2], *msg[3])
-                rescue => e
-                  ZMQ.logger.crash(e)
-                end
+              begin
+                @instances[msg[1]].__send__(msg[2], *msg[3])
+              rescue => e
+                ZMQ.logger.crash(e)
               end
             when FINALIZE
               @instances.delete(msg[1])
