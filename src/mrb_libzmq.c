@@ -264,7 +264,10 @@ mrb_zmq_proxy(mrb_state *mrb, mrb_value self)
   void *frontend, *backend, *capture = NULL;
   mrb_get_args(mrb, "dd|d!", &frontend, &mrb_zmq_socket_type, &backend, &mrb_zmq_socket_type, &capture, &mrb_zmq_socket_type);
 
-  zmq_proxy(frontend, backend, capture);
+  int rc = zmq_proxy(frontend, backend, capture);
+  if (rc == -1) {
+    mrb_zmq_handle_error(mrb, "zmq_proxy");
+  }
 
   return self;
 }
@@ -276,7 +279,10 @@ mrb_zmq_proxy_steerable(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "ddd|d!", &frontend, &mrb_zmq_socket_type, &backend, &mrb_zmq_socket_type, &control, &mrb_zmq_socket_type,
     &capture, &mrb_zmq_socket_type);
 
-  zmq_proxy_steerable(frontend, backend, capture, control);
+  int rc = zmq_proxy_steerable(frontend, backend, capture, control);
+  if (rc == -1) {
+    mrb_zmq_handle_error(mrb, "zmq_proxy");
+  }
 
   return self;
 }
@@ -752,19 +758,16 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
 
   if (mrb_type(thread_val) == MRB_TT_DATA && DATA_TYPE(thread_val) == &mrb_zmq_thread_type) {
     mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) DATA_PTR(thread_val);
-
     if (!blocky) {
       int timeo = 0;
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &timeo, sizeof(timeo));
     }
-    zmq_send(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
+    zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     if (!blocky) {
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
     }
     zmq_threadclose(mrb_zmq_thread_data->thread);
-    mrb_zmq_thread_data->thread = NULL;
     mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
-    mrb_zmq_thread_data->argv_packed = NULL;
     mrb_free(mrb, mrb_zmq_thread_data);
     mrb_data_init(thread_val, NULL, NULL);
     mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
