@@ -36,6 +36,31 @@ module ZMQ
   class Thread
     include ThreadConstants
 
+    # Rough sketch how the background thread gets started
+    #def self.new(*args)
+    # instance = super()
+    # mrb_zmq_thread_data = malloc(sizeof(mrb_zmq_thread_data_t))
+    # endpoint = "inproc://mrb-zmq-thread-pipe-#{instance.object_id}"
+    # frontend = ZMQ::Pair.new(endpoint, :bind)
+    # frontend.sndtimeo = 12000
+    # frontend.rcvtimeo = 12000
+    # instance.instance_variable_set(:@pipe, frontend)
+    # mrb_zmq_thread_data->frontend = frontend
+    # mrb_zmq_thread_data->backend = ZMQ::Pair.new(endpoint)
+    # mrb_zmq_thread_data->argv_packed = args.to_msgpack
+    # thread = zmq_threadstart(&Thread_fn, mrb_zmq_thread_data)
+    # if thread
+    #   mrb_zmq_thread_data->thread = thread
+    # else
+    #   sys_fail("zmq_threadstart")
+    # end
+    # unless frontend.recv
+    #   raise RuntimeError, "Cannot initialize ZMQ Thread"
+    # end
+    # instance.initialize(*args)
+    # instance
+    #end
+
     def new(mrb_class, *args)
       if block_given?
         raise ArgumentError, "blocks cannot be migrated"
@@ -73,6 +98,45 @@ module ZMQ
       LibZMQ.threadclose(self, blocky)
     end
 
+    # this is a rough Sketch how the background thread runs
+    #def &Thread_fn(mrb_zmq_thread_data)
+    #  success = false
+    #  mrb = mrb_open()
+    #  if (mrb) {
+    #    mrb_zmq_thread_data->backend_ctx = LibZMQ::_Context
+    #    thread_fn = nil
+    #    begin
+    #      pipe = mrb_zmq_thread_data->backend
+    #      pipe.sndtimeo = 12000
+    #      pipe.rcvtimeo = 12000
+    #      argv = MessagePack.unpack(mrb_zmq_thread_data->argv_packed)
+    #      if argv[0].is_a?(Class)
+    #        thread_fn = argv.shift.allocate
+    #      else
+    #        thread_fn = ZMQ::Thread::Thread_fn.allocate
+    #      end
+    #      thread_fn.instance_variable_set(:@pipe, pipe)
+    #      thread_fn.initialize(*argv)
+    #      success = true
+    #      pipe.send(success)
+    #    rescue => e
+    #      success = false
+    #      mrb_zmq_thread_data->backend.send(success)
+    #      mrb_print_error(mrb)
+    #    end
+    #    if success
+    #      thread_fn.run
+    #    end
+    #    if (mrb->exc && mrb_zmq_errno() != ETERM) {
+    #      mrb_print_error(mrb)
+    #    }
+    #    mrb_close(mrb)
+    #  } else {
+    #    mrb_zmq_thread_data->backend.send(success)
+    #    mrb_zmq_thread_data->backend.close
+    #  }
+    #end
+
     class Thread_fn
       include ThreadConstants
 
@@ -97,9 +161,8 @@ module ZMQ
         end
       end
 
-
       def initialize(options = {})
-        @options = {}.merge(options)
+        @options = options
         setup
       end
 
@@ -115,7 +178,7 @@ module ZMQ
               end
             end
             until @interrupted
-              break unless @poller.wait(&block)
+              @poller.wait(&block)
             end
           else
             @pipe.rcvtimeo = -1
