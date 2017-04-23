@@ -590,12 +590,13 @@ mrb_zmq_z85_decode(mrb_state *mrb, mrb_value self)
 {
   char *string;
   mrb_get_args(mrb, "z", &string);
+  size_t string_len = strlen(string);
 
-  if (unlikely(strlen(string) % 5)) {
+  if (unlikely(string_len % 5)) {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "string len must be divisible by 5");
   }
 
-  mrb_value dest = mrb_str_new(mrb, NULL, 0.8 * strlen(string));
+  mrb_value dest = mrb_str_new(mrb, NULL, 0.8 * string_len);
 
   uint8_t *rc = zmq_z85_decode((uint8_t *) RSTRING_PTR(dest), string);
   if (unlikely(!rc)) {
@@ -680,7 +681,8 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
       mrb->jmp = prev_jmp;
       success = FALSE;
       zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
-      mrb_print_error(mrb);
+      zmq_close(mrb_zmq_thread_data->backend);
+      mrb_zmq_thread_data->backend = NULL;
     }
     MRB_END_EXC(&c_jmp);
 
@@ -713,10 +715,11 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   memset(mrb_zmq_thread_data, 0, sizeof(*mrb_zmq_thread_data));
   mrb_data_init(self, mrb_zmq_thread_data, &mrb_zmq_thread_type);
 
-  mrb_value args[2];
-  args[0] = mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self)));
+  mrb_value args[2] = {
+    mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self))),
+    mrb_true_value()
+  };
   const char *endpoint = mrb_string_value_cstr(mrb, &args[0]);
-  args[1] = mrb_true_value();
   mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), sizeof(args) / sizeof(args[0]), args);
   mrb_value timeo = mrb_fixnum_value(120000);
   mrb_funcall(mrb, frontend_val, "sndtimeo=", 1, timeo);
@@ -1188,6 +1191,9 @@ mrb_zmq_unpack_class(mrb_state *mrb, mrb_value self)
 void
 mrb_mruby_zmq_gem_init(mrb_state* mrb)
 {
+  if (sizeof(mrb_int) < sizeof(intptr_t)) {
+    mrb_warn(mrb, "mruby-zmq: mrb_int is smaller than the pointer size of your System, use ZMQ::Thread at your own risk. Compile it with MRB_INT%S, setable in include/mrbconf.h in your mruby dir, to suppress this warning.\n", mrb_fixnum_value(sizeof(intptr_t) * 8));
+  }
   void *context = zmq_ctx_new();
   if (unlikely(!context)) {
     mrb_sys_fail(mrb, "zmq_ctx_new");

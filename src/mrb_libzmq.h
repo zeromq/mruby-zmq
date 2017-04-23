@@ -49,19 +49,18 @@ static void
 mrb_zmq_handle_error(mrb_state *mrb, const char *func)
 {
   switch(mrb_zmq_errno()) {
-    case EFSM: {
+    case EFSM:
       mrb_raisef(mrb, E_EFSM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case ENOCOMPATPROTO: {
+    case ENOCOMPATPROTO:
       mrb_raisef(mrb, E_ENOCOMPATPROTO_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case ETERM: {
+    case ETERM:
       mrb_raisef(mrb, E_ETERM_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
-    case EMTHREAD: {
+    case EMTHREAD:
       mrb_raisef(mrb, E_EMTHREAD_ERROR, "%S: %S", mrb_str_new_cstr(mrb, func), mrb_str_new_cstr(mrb, zmq_strerror(mrb_zmq_errno())));
-    } break;
     default: {
+#ifdef _WIN32
+      errno = mrb_zmq_errno();
+#endif
       mrb_sys_fail(mrb, func);
     }
   }
@@ -160,25 +159,43 @@ static const struct mrb_data_type mrb_zmq_timers_type = {
 };
 #endif //ZMQ_HAVE_TIMERS
 
+#ifdef MRB_EACH_OBJ_OK
+static int
+#else
 static void
+#endif
 mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
 {
   /* filter dead objects */
   if (mrb_object_dead_p(mrb, obj)) {
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
     return;
+#endif
   }
 
   /* filter internal objects */
   switch (obj->tt) {
   case MRB_TT_ENV:
   case MRB_TT_ICLASS:
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
     return;
+#endif
   default:
     break;
   }
 
   /* filter half baked (or internal) objects */
-  if (!obj->c) return;
+  if (!obj->c) {
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
+    return;
+#endif
+  }
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value thread_val = mrb_obj_value(obj);
@@ -186,33 +203,58 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
     mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
     mrb_data_init(thread_val, NULL, NULL);
   }
+
+#ifdef  MRB_EACH_OBJ_OK
+  return MRB_EACH_OBJ_OK;
+#endif
 }
 
+#ifdef MRB_EACH_OBJ_OK
+static int
+#else
 static void
+#endif
 mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
 {
   /* filter dead objects */
   if (mrb_object_dead_p(mrb, obj)) {
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
     return;
+#endif
   }
 
   /* filter internal objects */
   switch (obj->tt) {
   case MRB_TT_ENV:
   case MRB_TT_ICLASS:
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
     return;
+#endif
   default:
     break;
   }
 
   /* filter half baked (or internal) objects */
-  if (!obj->c) return;
+  if (!obj->c) {
+#ifdef MRB_EACH_OBJ_OK
+    return MRB_EACH_OBJ_OK;
+#else
+    return;
+#endif
+  }
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value socket_val = mrb_obj_value(obj);
     mrb_zmq_gc_close(mrb, DATA_PTR(socket_val));
     mrb_data_init(socket_val, NULL, NULL);
   }
+#ifdef  MRB_EACH_OBJ_OK
+  return MRB_EACH_OBJ_OK;
+#endif
 }
 
 #endif
