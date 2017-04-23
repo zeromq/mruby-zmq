@@ -259,6 +259,18 @@ mrb_zmq_msg_send(mrb_state *mrb, mrb_value self)
 }
 
 static mrb_value
+mrb_zmq_msg_size(mrb_state *mrb, mrb_value self)
+{
+  zmq_msg_t *msg;
+  mrb_get_args(mrb, "d", &msg, &mrb_zmq_msg_type);
+
+  size_t size = zmq_msg_size(msg);
+  if (POSFIXABLE(size))
+    return mrb_fixnum_value(size);
+  return mrb_float_value(mrb, size);
+}
+
+static mrb_value
 mrb_zmq_proxy(mrb_state *mrb, mrb_value self)
 {
   void *frontend, *backend, *capture = NULL;
@@ -1204,6 +1216,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_module_function(mrb, libzmq_mod, "getsockopt", mrb_zmq_getsockopt, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_gets", mrb_zmq_msg_gets, MRB_ARGS_ARG(2, 1));
   mrb_define_module_function(mrb, libzmq_mod, "msg_send", mrb_zmq_msg_send, MRB_ARGS_REQ(3));
+  mrb_define_module_function(mrb, libzmq_mod, "msg_size", mrb_zmq_msg_size, MRB_ARGS_NONE());
   mrb_define_module_function(mrb, libzmq_mod, "proxy", mrb_zmq_proxy, MRB_ARGS_ARG(2, 1));
   mrb_define_module_function(mrb, libzmq_mod, "proxy_steerable", mrb_zmq_proxy_steerable, MRB_ARGS_ARG(3, 1));
   mrb_define_module_function(mrb, libzmq_mod, "send", mrb_zmq_send, MRB_ARGS_REQ(3));

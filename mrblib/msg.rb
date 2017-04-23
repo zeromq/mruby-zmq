@@ -4,6 +4,10 @@ module ZMQ
       LibZMQ.msg_send(self, socket, flags)
     end
 
+    def bytesize
+      LibZMQ.msg_size(self)
+    end
+
     def [](property)
       LibZMQ.msg_gets(self, property, false)
     end
