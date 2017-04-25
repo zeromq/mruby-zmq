@@ -61,11 +61,8 @@ module ZMQ
     # instance
     #end
 
-    def new(mrb_class, *args)
-      if block_given?
-        raise ArgumentError, "blocks cannot be migrated"
-      end
-      LibZMQ.send(@pipe, [NEW, mrb_class, args].to_msgpack, 0)
+    def new(mrb_class, *args, &block)
+      LibZMQ.send(@pipe, [NEW, mrb_class, args, block].to_msgpack, 0)
       msg = MessagePack.unpack(@pipe.recv.to_str(true))
       case msg[TYPE]
       when INSTANCE
@@ -75,8 +72,8 @@ module ZMQ
       end
     end
 
-    def send(object_id, method, *args)
-      LibZMQ.send(@pipe, [SEND, object_id, method, args].to_msgpack, 0)
+    def send(object_id, method, *args, &block)
+      LibZMQ.send(@pipe, [SEND, object_id, method, args, block].to_msgpack, 0)
       msg = MessagePack.unpack(@pipe.recv.to_str(true))
       case msg[TYPE]
       when RESULT
@@ -86,8 +83,8 @@ module ZMQ
       end
     end
 
-    def async(object_id, method, *args)
-      LibZMQ.send(@pipe, [ASYNC, object_id, method, args].to_msgpack, 0)
+    def async(object_id, method, *args, &block)
+      LibZMQ.send(@pipe, [ASYNC, object_id, method, args, block].to_msgpack, 0)
     end
 
     def finalize(object_id)
@@ -203,19 +200,19 @@ module ZMQ
         if msg == TERM
           @interrupted = true
         else
-          msg = MessagePack.unpack(msg)
           begin
+            msg = MessagePack.unpack(msg)
             case msg[TYPE]
             when NEW
-              instance = msg[1].new(*msg[2])
+              instance = msg[1].new(*msg[2], &msg[3])
               id = instance.__id__
               LibZMQ.send(@pipe, [INSTANCE, id].to_msgpack, 0)
               @instances[id] = instance
             when SEND
-              LibZMQ.send(@pipe, [RESULT, @instances[msg[1]].__send__(msg[2], *msg[3])].to_msgpack, 0)
+              LibZMQ.send(@pipe, [RESULT, @instances[msg[1]].__send__(msg[2], *msg[3], &msg[4])].to_msgpack, 0)
             when ASYNC
               begin
-                @instances[msg[1]].__send__(msg[2], *msg[3])
+                @instances[msg[1]].__send__(msg[2], *msg[3], &msg[4])
               rescue LibZMQ::ETERMError => e
                 raise e
               rescue => e
@@ -239,18 +236,12 @@ module ZMQ
         @object_id = object_id
       end
 
-      def send(m, *args)
-        if block_given?
-          raise ArgumentError, "blocks cannot be migrated"
-        end
-        @thread.send(@object_id, m, *args)
+      def send(m, *args, &block)
+        @thread.send(@object_id, m, *args, &block)
       end
 
-      def async(m, *args)
-        if block_given?
-          raise ArgumentError, "blocks cannot be migrated"
-        end
-        @thread.async(@object_id, m, *args)
+      def async(m, *args, &block)
+        @thread.async(@object_id, m, *args, &block)
         self
       end
 
@@ -265,11 +256,8 @@ module ZMQ
         super(m) || @thread.send(@object_id, :respond_to?, m)
       end
 
-      def method_missing(m, *args)
-        if block_given?
-          raise ArgumentError, "blocks cannot be migrated"
-        end
-        @thread.send(@object_id, m, *args)
+      def method_missing(m, *args, &block)
+        @thread.send(@object_id, m, *args, &block)
       end
     end
   end
