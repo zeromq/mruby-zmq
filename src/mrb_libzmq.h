@@ -43,7 +43,9 @@
 #define mrb_zmq_errno() errno
 #endif
 
-#define MRB_LIBZMQ_CONTEXT(mrb) (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
+static mrb_bool zmq_use_mrb_ud = FALSE;
+
+#define MRB_LIBZMQ_CONTEXT(mrb) (zmq_use_mrb_ud ? mrb->ud : mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
 
 static void
 mrb_zmq_handle_error(mrb_state *mrb, const char *func)
@@ -92,10 +94,14 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 };
 
 typedef struct {
+  mrb_allocf allocf;
+  void *allocf_ud;
   void *frontend;
   void *backend;
   char *argv_packed;
   mrb_int argv_len;
+  char *block_packed;
+  mrb_int block_len;
   void *thread;
   void *backend_ctx;
 } mrb_zmq_thread_data_t;
@@ -116,6 +122,7 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
       zmq_threadclose(mrb_zmq_thread_data->thread);
     }
     mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
+    mrb_free(mrb, mrb_zmq_thread_data->block_packed);
     mrb_free(mrb, mrb_zmq_thread_data_);
   }
 }

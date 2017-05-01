@@ -37,17 +37,18 @@ module ZMQ
     include ThreadConstants
 
     # Rough sketch how the background thread gets started
-    #def self.new(*args)
+    #def self.new(*args, &block)
     # instance = super()
     # mrb_zmq_thread_data = malloc(sizeof(mrb_zmq_thread_data_t))
     # endpoint = "inproc://mrb-zmq-thread-pipe-#{instance.object_id}"
     # frontend = ZMQ::Pair.new(endpoint, :bind)
+    # mrb_zmq_thread_data->frontend = frontend
     # frontend.sndtimeo = 12000
     # frontend.rcvtimeo = 12000
     # instance.instance_variable_set(:@pipe, frontend)
-    # mrb_zmq_thread_data->frontend = frontend
     # mrb_zmq_thread_data->backend = ZMQ::Pair.new(endpoint)
     # mrb_zmq_thread_data->argv_packed = args.to_msgpack
+    # mrb_zmq_thread_data->block_packed = block.to_msgpack
     # thread = zmq_threadstart(&Thread_fn, mrb_zmq_thread_data)
     # if thread
     #   mrb_zmq_thread_data->thread = thread
@@ -107,13 +108,14 @@ module ZMQ
     #      pipe.sndtimeo = 12000
     #      pipe.rcvtimeo = 12000
     #      argv = MessagePack.unpack(mrb_zmq_thread_data->argv_packed)
+    #      block = MessagePack.unpack(mrb_zmq_thread_data->block_packed)
     #      if argv[0].is_a?(Class)
     #        thread_fn = argv.shift.allocate
     #      else
     #        thread_fn = ZMQ::Thread::Thread_fn.allocate
     #      end
     #      thread_fn.instance_variable_set(:@pipe, pipe)
-    #      thread_fn.initialize(*argv)
+    #      thread_fn.initialize(*argv, &block)
     #      success = true
     #      pipe.send(success)
     #    rescue => e
@@ -166,16 +168,15 @@ module ZMQ
       if ZMQ.const_defined?("Poller")
         def run
           if @auth
-            block = lambda do |socket, events|
-              case socket
-              when @pipe
-                handle_pipe
-              when @auth
-                @auth.handle_zap
-              end
-            end
             until @interrupted
-              @poller.wait(&block)
+              @poller.wait do |socket, events|
+                case socket
+                when @pipe
+                  handle_pipe
+                when @auth
+                  @auth.handle_zap
+                end
+              end
             end
           else
             @pipe.rcvtimeo = -1
