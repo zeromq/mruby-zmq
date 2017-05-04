@@ -199,7 +199,6 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "|o", &data);
 
   zmq_msg_t *msg = mrb_realloc(mrb, DATA_PTR(self), sizeof(*msg));
-  memset(msg, 0, sizeof(*msg));
   mrb_data_init(self, msg, &mrb_zmq_msg_type);
 
   switch (mrb_type(data)) {
@@ -1226,12 +1225,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class, *zmq_thread_class;
 
   libzmq_mod = mrb_define_module(mrb, "LibZMQ");
-  if (mrb->ud) {
-    mrb_define_const(mrb, libzmq_mod, "_Context", mrb_cptr_value(mrb, context));
-  } else {
-    zmq_use_mrb_ud = TRUE;
-    mrb->ud = context;
-  }
+  mrb_define_const(mrb, libzmq_mod, "_Context", mrb_cptr_value(mrb, context));
   mrb_define_module_function(mrb, libzmq_mod, "bind", mrb_zmq_bind, MRB_ARGS_REQ(2));
   mrb_define_module_function(mrb, libzmq_mod, "close", mrb_zmq_close, MRB_ARGS_ARG(1, 1));
   mrb_define_module_function(mrb, libzmq_mod, "connect", mrb_zmq_connect, MRB_ARGS_REQ(2));

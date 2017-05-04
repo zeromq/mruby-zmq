@@ -43,9 +43,7 @@
 #define mrb_zmq_errno() errno
 #endif
 
-static mrb_bool zmq_use_mrb_ud = FALSE;
-
-#define MRB_LIBZMQ_CONTEXT(mrb) (zmq_use_mrb_ud ? mrb->ud : mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
+#define MRB_LIBZMQ_CONTEXT(mrb) (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
 
 static void
 mrb_zmq_handle_error(mrb_state *mrb, const char *func)
