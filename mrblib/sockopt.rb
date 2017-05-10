@@ -86,6 +86,7 @@ module ZMQ
         if options[:type] == :server
           self.curve_server = true
           self.curve_secretkey = options.fetch(:secret_key)
+          self.zap_domain = options[:zap_domain]
         elsif options[:type] == :client
           self.curve_serverkey = options.fetch(:server_key)
           self.curve_publickey = options.fetch(:public_key)

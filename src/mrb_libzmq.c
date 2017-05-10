@@ -199,6 +199,7 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "|o", &data);
 
   zmq_msg_t *msg = mrb_realloc(mrb, DATA_PTR(self), sizeof(*msg));
+  memset(msg, 0, sizeof(*msg));
   mrb_data_init(self, msg, &mrb_zmq_msg_type);
 
   switch (mrb_type(data)) {
@@ -388,7 +389,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
       rc = zmq_setsockopt(socket, option_name, RSTRING_PTR(option_value), RSTRING_LEN(option_value));
     } break;
     default: {
-      mrb_raise(mrb, E_TYPE_ERROR, "expected nil|false|true|Fixnum|Float|String");
+      mrb_raise(mrb, E_TYPE_ERROR, "expected nil|false|true|Fixnum|Float|String as value");
     }
   }
 
@@ -723,7 +724,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_zmq_thread_data->allocf = mrb->allocf;
   mrb_zmq_thread_data->allocf_ud = mrb->allocf_ud;
 
-  mrb_value args[2] = {
+  mrb_value args[] = {
     mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self))),
     mrb_true_value()
   };
@@ -964,7 +965,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
       rc = zmq_poller_wait_all(DATA_PTR(self), events, n_events, timeout);
       int i;
       for (i = 0; i < rc; i++) {
-        mrb_value argv[2] = {
+        mrb_value argv[] = {
           mrb_obj_value(events[i].user_data),
           mrb_fixnum_value(events[i].events)
         };
@@ -1206,7 +1207,7 @@ void
 mrb_mruby_zmq_gem_init(mrb_state* mrb)
 {
   if (sizeof(mrb_int) < sizeof(intptr_t)) {
-    mrb_warn(mrb, "mruby-zmq: mrb_int is smaller than the pointer size of your System, use ZMQ::Thread at your own risk. Compile it with MRB_INT%S, setable in include/mrbconf.h in your mruby dir, to suppress this warning.\n", mrb_fixnum_value(sizeof(intptr_t) * 8));
+    mrb_warn(mrb, "mruby-zmq: mrb_int is smaller than the pointer size of your System, use ZMQ::Thread at your own risk. Compile mruby with MRB_INT%S, setable in include/mrbconf.h in your mruby dir, to suppress this warning.\n", mrb_fixnum_value(sizeof(intptr_t) * 8));
   }
   void *context = zmq_ctx_new();
   if (unlikely(!context)) {
@@ -1317,19 +1318,19 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_sym register_pack_type = mrb_intern_lit(mrb, "register_pack_type");
   mrb_sym register_unpack_type = mrb_intern_lit(mrb, "register_unpack_type");
 
-  mrb_value pack_sym_args[2] = { mrb_fixnum_value(1), mrb_obj_value(mrb->symbol_class) };
+  mrb_value pack_sym_args[] = { mrb_fixnum_value(1), mrb_obj_value(mrb->symbol_class) };
   mrb_funcall_with_block(mrb, msgpack,
     register_pack_type, sizeof(pack_sym_args) / sizeof(pack_sym_args[0]), pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_symbol, 1)));
   mrb_funcall_with_block(mrb, msgpack,
     register_unpack_type, 1, pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_symbol, 1)));
 
-  mrb_value pack_class_args[2] = { mrb_fixnum_value(2), mrb_obj_value(mrb->class_class) };
+  mrb_value pack_class_args[] = { mrb_fixnum_value(2), mrb_obj_value(mrb->class_class) };
   mrb_funcall_with_block(mrb, msgpack,
     register_pack_type, sizeof(pack_class_args) / sizeof(pack_class_args[0]), pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
   mrb_funcall_with_block(mrb, msgpack,
     register_unpack_type, 1, pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_class, 1)));
 
-  mrb_value pack_module_args[2] = { mrb_fixnum_value(4), mrb_obj_value(mrb->module_class) };
+  mrb_value pack_module_args[] = { mrb_fixnum_value(4), mrb_obj_value(mrb->module_class) };
   mrb_funcall_with_block(mrb, msgpack,
     register_pack_type, sizeof(pack_module_args) / sizeof(pack_module_args[0]), pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
   mrb_funcall_with_block(mrb, msgpack,

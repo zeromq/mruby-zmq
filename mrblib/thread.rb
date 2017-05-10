@@ -121,7 +121,6 @@ module ZMQ
     #    rescue => e
     #      success = false
     #      mrb_zmq_thread_data->backend.send(success)
-    #      mrb_print_error(mrb)
     #    end
     #    if success
     #      thread_fn.run
@@ -160,7 +159,7 @@ module ZMQ
         end
       end
 
-      def initialize(options = {})
+      def initialize(options = {}, &block)
         @options = options
         setup
       end
