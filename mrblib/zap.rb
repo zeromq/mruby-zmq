@@ -1,14 +1,14 @@
 module ZMQ
   class Zap
-    attr_reader :socket
+    attr_reader :zmq_socket
 
     def initialize(options = {})
       @authenticator = options.fetch(:authenticator)
-      @socket = ZMQ::Router.new("inproc://zeromq.zap.01")
+      @zmq_socket = ZMQ::Router.new("inproc://zeromq.zap.01")
     end
 
     def handle_zap
-      socket_identity, _, version, request_id, domain, address, identity, mechanism, *credentials = @socket.recv
+      socket_identity, _, version, request_id, domain, address, identity, mechanism, *credentials = @zmq_socket.recv
       if version.to_str == '1.0'
         user, metadata = @authenticator.authenticate(domain.to_str, address.to_str, identity.to_str, mechanism.to_str, *credentials)
         if user
@@ -24,17 +24,17 @@ module ZMQ
     end
 
     def send_reply(socket_identity, _, version, request_id, status_code, reason, user, metadata = nil)
-      LibZMQ.msg_send(socket_identity, @socket, LibZMQ::SNDMORE)
-      LibZMQ.msg_send(_, @socket, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(socket_identity, @zmq_socket, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(_, @zmq_socket, LibZMQ::SNDMORE)
       if version.is_a?(ZMQ::Msg)
-        LibZMQ.msg_send(version, @socket, LibZMQ::SNDMORE)
+        LibZMQ.msg_send(version, @zmq_socket, LibZMQ::SNDMORE)
       else
-        LibZMQ.send(@socket, version, LibZMQ::SNDMORE)
+        LibZMQ.send(@zmq_socket, version, LibZMQ::SNDMORE)
       end
-      LibZMQ.msg_send(request_id, @socket, LibZMQ::SNDMORE)
-      LibZMQ.send(@socket, status_code, LibZMQ::SNDMORE)
-      LibZMQ.send(@socket, reason, LibZMQ::SNDMORE)
-      LibZMQ.send(@socket, user, LibZMQ::SNDMORE)
+      LibZMQ.msg_send(request_id, @zmq_socket, LibZMQ::SNDMORE)
+      LibZMQ.send(@zmq_socket, status_code, LibZMQ::SNDMORE)
+      LibZMQ.send(@zmq_socket, reason, LibZMQ::SNDMORE)
+      LibZMQ.send(@zmq_socket, user, LibZMQ::SNDMORE)
       if metadata.respond_to?(:each)
         meta = ""
         metadata.each do |key, value|
@@ -45,9 +45,9 @@ module ZMQ
             meta << sprintf("%s%s%s%s", [key.bytesize].pack('C'), key, [value.bytesize].pack('N'), value)
           end
         end
-        LibZMQ.send(@socket, meta, 0)
+        LibZMQ.send(@zmq_socket, meta, 0)
       else
-        LibZMQ.send(@socket, nil, 0)
+        LibZMQ.send(@zmq_socket, nil, 0)
       end
     end
 
