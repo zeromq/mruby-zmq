@@ -856,8 +856,8 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "socket"))) {
-    rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "socket", 0)), mrb_ptr(socket), events);
+  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+    rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)), mrb_ptr(socket), events);
   } else {
     rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), mrb_ptr(socket), events);
   }
@@ -888,8 +888,8 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_modify_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "socket"))) {
-    rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "socket", 0)), events);
+  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+    rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)), events);
   } else {
     rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), events);
   }
@@ -916,8 +916,8 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_remove_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "socket"))) {
-    rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "socket", 0)));
+  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+    rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)));
   } else {
     rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket));
   }

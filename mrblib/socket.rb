@@ -20,6 +20,8 @@ module ZMQ
       self
     end
 
+    # this is just a helper method to write less code,
+    # if you are sendings lots of messages please use the LibZMQ.send method directly
     def send(data, flags = 0)
       case data
       when Array

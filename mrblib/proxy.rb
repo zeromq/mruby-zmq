@@ -1,6 +1,6 @@
 module ZMQ
   class Proxy_fn
-    def initialize(options = {})
+    def initialize(options)
       @background = ZMQ::Socket.new(options[:background][:type])
       @background.bind(options[:background][:endpoint])
       @foreground = ZMQ::Socket.new(options[:foreground][:type])
@@ -15,11 +15,11 @@ module ZMQ
 
   class Proxy
     def initialize(options = {})
-      @options = {}.merge(options)
+      _options = {}.merge(options)
       @control = ZMQ::Pair.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*", :bind)
-      @options[:_control_endpoint] = @control.last_endpoint
+      _options[:_control_endpoint] = @control.last_endpoint
       @thread = ZMQ::Thread.new
-      @proxy = @thread.new(ZMQ::Proxy_fn, @options)
+      @proxy = @thread.new(ZMQ::Proxy_fn, _options)
       @proxy.async(:run)
     end
 

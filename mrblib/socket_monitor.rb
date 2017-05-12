@@ -19,14 +19,15 @@ module ZMQ
         Events[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
       end
 
-      attr_reader :socket
+      # this is a helper for ZMQ::Poller so you can add a object which looks like a zmq socket to be added more easily
+      attr_reader :zmq_socket
 
       def initialize(endpoint)
-        @socket = ZMQ::Pair.new(endpoint)
+        @zmq_socket = ZMQ::Pair.new(endpoint)
       end
 
       def recv
-        msg = @socket.recv
+        msg = @zmq_socket.recv
         event, value = msg[0].to_str(true).unpack('SL')
         {event: Events[event], value: value, endpoint: msg[1].to_str}
       end
