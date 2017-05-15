@@ -14,9 +14,15 @@ module ZMQ
   end
 
   class Proxy
+    ENDPOINT = if LibZMQ.has? "ipc"
+                "ipc://*"
+              else
+                ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*"
+              end.freeze
+
     def initialize(options = {})
       _options = {}.merge(options)
-      @control = ZMQ::Pair.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*", :bind)
+      @control = ZMQ::Pair.new(ENDPOINT, :bind)
       _options[:_control_endpoint] = @control.last_endpoint
       @thread = ZMQ::Thread.new
       @proxy = @thread.new(ZMQ::Proxy_fn, _options)
