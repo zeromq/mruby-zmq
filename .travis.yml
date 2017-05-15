@@ -1,0 +1,22 @@
+sudo: required
+dist: trusty
+addons:
+  apt:
+    packages:
+      - bison
+      - git
+      - ruby-dev
+      - libtool
+      - pkg-config
+      - build-essential
+      - autoconf
+      - automake
+language: c
+compiler:
+  - gcc
+  - clang
+script:
+  - rake test
+os:
+  - linux
+  - osx
