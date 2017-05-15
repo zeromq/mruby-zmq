@@ -360,7 +360,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dio", &socket, &mrb_zmq_socket_type, &option_name, &option_value);
   assert(option_name >= INT_MIN && option_name <= INT_MAX);
 
-  int rc = -1;
+  int rc;
 
   switch(mrb_type(option_value)) {
     case MRB_TT_FALSE: {
@@ -443,7 +443,7 @@ mrb_zmq_msg_set_routing_id(mrb_state *mrb, mrb_value self)
   mrb_int routing_id;
   mrb_get_args(mrb, "di", &msg, &mrb_zmq_msg_type, &routing_id);
 
-  int rc = zmq_msg_set_routing_id(msg, routing_id);
+  int rc = zmq_msg_set_routing_id(msg, (uint32_t) routing_id);
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_msg_set_routing_id");
   }
@@ -814,7 +814,7 @@ mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
       // No way to check here if its a legitmate zmq socket, if something else is passed libzmq asserts and aborts the programm.
       // Also: when handed a raw c pointer only allow the poller to handle it because we cannot know from which thread this socket comes.
       return mrb_cptr(socket);
-    } break;
+    }
     case MRB_TT_DATA: {
       if (DATA_TYPE(socket) == &mrb_zmq_socket_type)
         return DATA_PTR(socket);
@@ -848,7 +848,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   struct RClass *socket_class = mrb_obj_class(mrb, socket);
   assert(events >= SHRT_MIN && events <= SHRT_MAX);
 
-  int rc = -1;
+  int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
     assert(fd >= INT_MIN&&fd <= INT_MAX);
@@ -880,7 +880,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   struct RClass *socket_class = mrb_obj_class(mrb, socket);
   assert(events >= SHRT_MIN && events <= SHRT_MAX);
 
-  int rc = -1;
+  int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
     assert(fd >= INT_MIN&&fd <= INT_MAX);
@@ -908,7 +908,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "o", &socket);
   struct RClass *socket_class = mrb_obj_class(mrb, socket);
 
-  int rc = -1;
+  int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
     assert(fd >= INT_MIN&&fd <= INT_MAX);
@@ -939,7 +939,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "|i&", &timeout, &block);
   assert(timeout >= LONG_MIN && timeout <= LONG_MAX);
 
-  int rc = -1;
+  int rc;
   if (mrb_type(block) != MRB_TT_PROC) {
     zmq_poller_event_t event;
     rc = zmq_poller_wait(DATA_PTR(self), &event, timeout);
@@ -947,10 +947,10 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
       switch(mrb_zmq_errno()) {
         case ETIMEDOUT: {
           return mrb_nil_value();
-        } break;
+        }
         case EINTR: {
           return mrb_false_value();
-        } break;
+        }
         default: {
           mrb_zmq_handle_error(mrb, "zmq_poller_wait");
         }
@@ -980,10 +980,10 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
       switch(mrb_zmq_errno()) {
         case ETIMEDOUT: {
           return mrb_nil_value();
-        } break;
+        }
         case EINTR: {
           return mrb_false_value();
-        } break;
+        }
         default: {
           mrb_zmq_handle_error(mrb, "zmq_poller_wait_all");
         }

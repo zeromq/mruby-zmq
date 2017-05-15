@@ -2,7 +2,7 @@
 #define MRB_LIBZMQ_H
 
 #include <zmq.h>
-#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
+#if (ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0))
   #error "mruby-zmq needs at least libzmq-4.1"
 #endif
 #include <assert.h>
