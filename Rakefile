@@ -8,7 +8,7 @@ end
 desc "test"
 task :test => :mruby do
   dir = "#{Dir.pwd}/build"
-  sh "cd libzmq && ./autogen.sh && ./configure --without-docs && make -j4 && sudo make install"
+  sh "cd libzmq && ./autogen.sh && ./configure --without-docs && make -j2 && sudo make install"
   if ENV['TRAVIS_OS_NAME'] == 'linux'
     sh "sudo ldconfig"
   end
