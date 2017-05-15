@@ -8,11 +8,11 @@ end
 desc "test"
 task :test => :mruby do
   dir = "#{Dir.pwd}/build"
-  sh "cd libzmq && ./autogen.sh && ./configure --without-docs --prefix=#{dir} && make -j4 install"
+  sh "cd libzmq && ./autogen.sh && ./configure --without-docs && make -j4 && sudo make install"
   if ENV['TRAVIS_OS_NAME'] == 'linux'
-    sh "ldconfig"
+    sh "sudo ldconfig"
   end
-  sh "cd mruby && PKG_CONFIG_PATH=#{dir}/lib/pkgconfig MRUBY_CONFIG=#{MRUBY_CONFIG} rake all test"
+  sh "cd mruby && MRUBY_CONFIG=#{MRUBY_CONFIG} rake all test"
 end
 
 task :default => :test
