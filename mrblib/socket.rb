@@ -48,6 +48,18 @@ module ZMQ
       LibZMQ.socket_monitor(self, endpoint, events)
       Monitor.new(endpoint)
     end
+
+    if LibZMQ.respond_to?("join")
+      def join(group)
+        LibZMQ.join(self, group)
+        self
+      end
+
+      def leave(group)
+        LibZMQ.leave(self, group)
+        self
+      end
+    end
   end # Socket
 
   if LibZMQ.const_defined?("CLIENT")
@@ -93,9 +105,13 @@ module ZMQ
     end
 
     class Dish < Socket
-      def initialize(endpoint = nil, group = nil, bind = false)
+      def initialize(endpoint = nil, groups = nil, bind = false)
         super(LibZMQ::DISH)
-        join(group) if group
+        if groups.respond_to?(:each)
+          groups.each {|group| join(group)}
+        elsif groups
+          join(groups)
+        end
         if endpoint
           if bind
             LibZMQ.bind(self, endpoint)
@@ -121,13 +137,11 @@ module ZMQ
   end
 
   class Sub < Socket
-    None = Object.new.freeze
-
-    def initialize(endpoint = nil, subs = None, bind = false)
+    def initialize(endpoint = nil, subs = nil, bind = false)
       super(LibZMQ::SUB)
       if subs.respond_to?(:each)
         subs.each {|sub| subscribe(sub)}
-      elsif subs != None
+      elsif subs
         subscribe(subs)
       end
       if endpoint
@@ -166,19 +180,6 @@ module ZMQ
     end
   end
 
-  class Push < Socket
-    def initialize(endpoint = nil, bind = false)
-      super(LibZMQ::PUSH)
-      if endpoint
-        if bind
-          LibZMQ.bind(self, endpoint)
-        else
-          LibZMQ.connect(self, endpoint)
-        end
-      end
-    end
-  end
-
   class Pull < Socket
     def initialize(endpoint = nil, connect = false)
       super(LibZMQ::PULL)
@@ -187,6 +188,19 @@ module ZMQ
           LibZMQ.connect(self, endpoint)
         else
           LibZMQ.bind(self, endpoint)
+        end
+      end
+    end
+  end
+
+  class Push < Socket
+    def initialize(endpoint = nil, bind = false)
+      super(LibZMQ::PUSH)
+      if endpoint
+        if bind
+          LibZMQ.bind(self, endpoint)
+        else
+          LibZMQ.connect(self, endpoint)
         end
       end
     end

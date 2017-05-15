@@ -59,18 +59,6 @@ module ZMQ
       events & LibZMQ::POLLOUT != 0
     end
 
-    if LibZMQ.respond_to?("join")
-      def join(group)
-        LibZMQ.join(self, group)
-        self
-      end
-
-      def leave(group)
-        LibZMQ.leave(self, group)
-        self
-      end
-    end
-
     def subscribe(topic)
       LibZMQ.setsockopt(self, LibZMQ::SUBSCRIBE, topic)
       self
@@ -81,7 +69,7 @@ module ZMQ
       self
     end
 
-    if LibZMQ.respond_to?("has?") && LibZMQ.has?("curve")
+    if LibZMQ.has?("curve")
       def curve_security(options = {})
         if options[:type] == :server
           self.curve_server = true
@@ -113,7 +101,7 @@ module ZMQ
 
     ["backlog", "handshake_ivl", "heartbeat_ivl", "heartbeat_ttl", "heartbeat_timeout", "linger", "multicast_hops", "rate", "rcvhwm",
       "rcvtimeo", "reconnect_ivl", "reconnect_ivl_max", "recovery_ivl", "sndbuf", "sndhwm", "sndtimeo",
-      "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos"].each do |int|
+      "tcp_keepalive", "tcp_keepalive_cnt", "tcp_keepalive_idle", "tcp_keepalive_intvl", "tos", "use_fd"].each do |int|
         upint = int.upcase
       if LibZMQ.const_defined?(upint)
         const = LibZMQ.const_get(upint)
