@@ -21,6 +21,9 @@ module ZMQ
       end
     rescue => e
       ZMQ.logger.crash(e)
+      if socket_identity && _ && version && request_id
+        send_reply(socket_identity, _, version, request_id, 300, 'Temporary Error', nil)
+      end
     end
 
     def send_reply(socket_identity, _, version, request_id, status_code, reason, user, metadata = nil)
