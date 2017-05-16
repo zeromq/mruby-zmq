@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Asmod4n/mruby-zmq.svg?branch=master)](https://travis-ci.org/Asmod4n/mruby-zmq)
+[![Build Status](https://travis-ci.org/zeromq/mruby-zmq.svg?branch=master)](https://travis-ci.org/zeromq/mruby-zmq)
 
 # mruby-zmq
 mruby bindings for https://github.com/zeromq/libzmq (v4)
