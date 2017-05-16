@@ -89,3 +89,8 @@ Copyright 2017 Hendrik Beskow
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
   project, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+Contribution Policy
+===================
+
+mruby-zmq follows the C4 Process: https://rfc.zeromq.org/spec:42/C4
