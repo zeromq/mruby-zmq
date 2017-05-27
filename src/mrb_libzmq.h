@@ -20,10 +20,12 @@
 #include <mruby/gc.h>
 #include <mruby/numeric.h>
 #include <mruby/proc.h>
-#ifdef HAVE_IFADDRS
+#ifdef HAVE_IFADDRS_H
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
+
+#define NELEMS(args) (sizeof(args) / sizeof(args[0]))
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int
@@ -92,8 +94,7 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 };
 
 typedef struct {
-  mrb_allocf allocf;
-  void *allocf_ud;
+  mrb_state *mrb_parent;
   void *frontend;
   void *backend;
   char *argv_packed;

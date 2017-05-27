@@ -15,7 +15,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_test_dependency 'mruby-sleep'
 
   if spec.cc.search_header_path 'ifaddrs.h'
-    spec.cc.defines << 'HAVE_IFADDRS'
+    spec.cc.defines << 'HAVE_IFADDRS_H'
   end
   if spec.build.toolchains.include? 'visualcpp'
     spec.linker.libraries << 'libzmq'
@@ -23,8 +23,13 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     `pkg-config --cflags libzmq`.split("\s").each do |cflag|
       spec.cc.flags << cflag
     end
+    exitstatus = $?.exitstatus
     `pkg-config --libs libzmq`.split("\s").each do |lib|
       spec.linker.flags_before_libraries << lib
+    end
+    exitstatus += $?.exitstatus
+    unless exitstatus == 0
+      raise RuntimeError, "cannot find libzmq"
     end
   end
 end

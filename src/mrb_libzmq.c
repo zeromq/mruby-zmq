@@ -634,7 +634,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
   mrb_bool success = FALSE;
 
-  mrb_state *mrb = mrb_open_allocf(mrb_zmq_thread_data->allocf, mrb_zmq_thread_data->allocf_ud);
+  mrb_state *mrb = mrb_open_allocf(mrb_zmq_thread_data->mrb_parent->allocf, mrb_zmq_thread_data->mrb_parent->allocf_ud);
   if (likely(mrb)) {
     mrb_zmq_thread_data->backend_ctx = MRB_LIBZMQ_CONTEXT(mrb);
     mrb_value thread_fn = mrb_nil_value();
@@ -721,15 +721,14 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = mrb_realloc(mrb, DATA_PTR(self), sizeof(*mrb_zmq_thread_data));
   memset(mrb_zmq_thread_data, 0, sizeof(*mrb_zmq_thread_data));
   mrb_data_init(self, mrb_zmq_thread_data, &mrb_zmq_thread_type);
-  mrb_zmq_thread_data->allocf = mrb->allocf;
-  mrb_zmq_thread_data->allocf_ud = mrb->allocf_ud;
+  mrb_zmq_thread_data->mrb_parent = mrb;
 
   mrb_value args[] = {
     mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self))),
     mrb_true_value()
   };
   const char *endpoint = mrb_string_value_cstr(mrb, &args[0]);
-  mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), sizeof(args) / sizeof(args[0]), args);
+  mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), NELEMS(args), args);
   void *frontend = DATA_PTR(frontend_val);
   mrb_zmq_thread_data->frontend = frontend;
   mrb_value timeo = mrb_fixnum_value(120000);
@@ -969,7 +968,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
           mrb_obj_value(events[i].user_data),
           mrb_fixnum_value(events[i].events)
         };
-        mrb_yield_argv(mrb, block, sizeof(argv) / sizeof(argv[0]), argv);
+        mrb_yield_argv(mrb, block, NELEMS(argv), argv);
       }
     } else {
       zmq_poller_event_t event;
@@ -1109,7 +1108,7 @@ mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 }
 #endif //ZMQ_HAVE_TIMERS
 
-#ifdef HAVE_IFADDRS
+#ifdef HAVE_IFADDRS_H
 MRB_INLINE mrb_bool
 s_valid_flags (unsigned int flags)
 {
@@ -1164,7 +1163,7 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
 
   return interfaces_ary;
 }
-#endif //HAVE_IFADDRS
+#endif //HAVE_IFADDRS_H
 
 static mrb_value
 mrb_zmq_pack_symbol(mrb_state *mrb, mrb_value self)
@@ -1303,7 +1302,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, zmq_timers_timer_fn_class, "cancel", mrb_zmq_timers_cancel, MRB_ARGS_NONE());
 #endif //ZMQ_HAVE_TIMERS
 
-#ifdef HAVE_IFADDRS
+#ifdef HAVE_IFADDRS_H
   mrb_define_module_function(mrb, zmq_mod, "network_interfaces", mrb_network_interfaces, MRB_ARGS_NONE());
 #endif
 
@@ -1320,19 +1319,19 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 
   mrb_value pack_sym_args[] = { mrb_fixnum_value(1), mrb_obj_value(mrb->symbol_class) };
   mrb_funcall_with_block(mrb, msgpack,
-    register_pack_type, sizeof(pack_sym_args) / sizeof(pack_sym_args[0]), pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_symbol, 1)));
+    register_pack_type, NELEMS(pack_sym_args), pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_symbol, 1)));
   mrb_funcall_with_block(mrb, msgpack,
     register_unpack_type, 1, pack_sym_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_symbol, 1)));
 
   mrb_value pack_class_args[] = { mrb_fixnum_value(2), mrb_obj_value(mrb->class_class) };
   mrb_funcall_with_block(mrb, msgpack,
-    register_pack_type, sizeof(pack_class_args) / sizeof(pack_class_args[0]), pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
+    register_pack_type, NELEMS(pack_class_args), pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
   mrb_funcall_with_block(mrb, msgpack,
     register_unpack_type, 1, pack_class_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_class, 1)));
 
   mrb_value pack_module_args[] = { mrb_fixnum_value(4), mrb_obj_value(mrb->module_class) };
   mrb_funcall_with_block(mrb, msgpack,
-    register_pack_type, sizeof(pack_module_args) / sizeof(pack_module_args[0]), pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
+    register_pack_type, NELEMS(pack_module_args), pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_pack_class, 1)));
   mrb_funcall_with_block(mrb, msgpack,
     register_unpack_type, 1, pack_module_args, mrb_obj_value(mrb_closure_new_cfunc(mrb, mrb_zmq_unpack_class, 1)));
 }
