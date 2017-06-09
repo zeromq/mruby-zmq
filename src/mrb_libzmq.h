@@ -68,6 +68,9 @@ mrb_zmq_handle_error(mrb_state *mrb, const char *func)
   }
 }
 
+// mruby gargabe collects objects which are out of scope
+// as such the author no longer has a use for the socket
+// so we close it immediatily instead of possibly waiting forever to close it
 static void
 mrb_zmq_gc_close(mrb_state *mrb, void *socket)
 {
