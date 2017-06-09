@@ -198,7 +198,7 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
   mrb_value data = mrb_nil_value();
   mrb_get_args(mrb, "|o", &data);
 
-  zmq_msg_t *msg = mrb_realloc(mrb, DATA_PTR(self), sizeof(*msg));
+  zmq_msg_t *msg = (zmq_msg_t *) mrb_realloc(mrb, DATA_PTR(self), sizeof(*msg));
   memset(msg, 0, sizeof(*msg));
   mrb_data_init(self, msg, &mrb_zmq_msg_type);
 
@@ -305,13 +305,13 @@ mrb_zmq_msg_to_str(mrb_state *mrb, mrb_value self)
   mrb_bool static_string = FALSE;
   mrb_get_args(mrb, "|b", &static_string);
 
-  void *data = zmq_msg_data(DATA_PTR(self));
-  size_t size = zmq_msg_size(DATA_PTR(self));
+  void *data = zmq_msg_data((zmq_msg_t *) DATA_PTR(self));
+  size_t size = zmq_msg_size((zmq_msg_t *) DATA_PTR(self));
 
   if (static_string) {
-    return mrb_str_new_static(mrb, data, size);
+    return mrb_str_new_static(mrb, (const char *) data, size);
   } else {
-    return mrb_str_new(mrb, data, size);
+    return mrb_str_new(mrb, (const char *) data, size);
   }
 }
 
@@ -321,7 +321,7 @@ mrb_zmq_msg_eql(mrb_state *mrb, mrb_value self)
   zmq_msg_t *other;
   mrb_get_args(mrb, "d", &other, &mrb_zmq_msg_type);
 
-  zmq_msg_t *msg = DATA_PTR(self);
+  zmq_msg_t *msg = (zmq_msg_t *) DATA_PTR(self);
 
   if (msg == other) {
     return mrb_true_value();
@@ -561,7 +561,7 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
 
   do {
     mrb_value msg_val = mrb_obj_new(mrb, zmq_msg_class, 0, NULL);
-    zmq_msg_t *msg = DATA_PTR(msg_val);
+    zmq_msg_t *msg = (zmq_msg_t *) DATA_PTR(msg_val);
 
     int rc = zmq_msg_recv (msg, DATA_PTR(self), flags);
     if (unlikely(rc == -1)) {
@@ -695,7 +695,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     if (likely(success)) {
       mrb_funcall(mrb, thread_fn, "run", 0, NULL);
     }
-    if (mrb->exc && mrb_zmq_errno() != ETERM) {
+    if (!mrb_obj_is_kind_of(mrb, mrb_obj_value(mrb->exc), E_ETERM_ERROR)) {
       mrb_print_error(mrb);
     }
     mrb_close(mrb);
@@ -718,7 +718,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_get_args(mrb, "*&", &argv, &argv_len, &block);
 
   mrb_value self = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_ptr(thread_class)));
-  mrb_zmq_thread_data_t *mrb_zmq_thread_data = mrb_realloc(mrb, DATA_PTR(self), sizeof(*mrb_zmq_thread_data));
+  mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_realloc(mrb, DATA_PTR(self), sizeof(*mrb_zmq_thread_data));
   memset(mrb_zmq_thread_data, 0, sizeof(*mrb_zmq_thread_data));
   mrb_data_init(self, mrb_zmq_thread_data, &mrb_zmq_thread_type);
   mrb_zmq_thread_data->mrb_parent = mrb;
@@ -749,11 +749,11 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   int arena_index = mrb_gc_arena_save(mrb);
   mrb_value argv_val = mrb_ary_new_from_values(mrb, argv_len, argv);
   mrb_value argv_str = mrb_funcall(mrb, argv_val, "to_msgpack", 0);
-  mrb_zmq_thread_data->argv_packed = mrb_malloc(mrb, RSTRING_LEN(argv_str));
+  mrb_zmq_thread_data->argv_packed = (char *) mrb_malloc(mrb, RSTRING_LEN(argv_str));
   memcpy(mrb_zmq_thread_data->argv_packed, RSTRING_PTR(argv_str), RSTRING_LEN(argv_str));
   mrb_zmq_thread_data->argv_len = RSTRING_LEN(argv_str);
   mrb_value block_str = mrb_funcall(mrb, block, "to_msgpack", 0);
-  mrb_zmq_thread_data->block_packed = mrb_malloc(mrb, RSTRING_LEN(block_str));
+  mrb_zmq_thread_data->block_packed = (char *) mrb_malloc(mrb, RSTRING_LEN(block_str));
   memcpy(mrb_zmq_thread_data->block_packed, RSTRING_PTR(block_str), RSTRING_LEN(block_str));
   mrb_zmq_thread_data->block_len = RSTRING_LEN(block_str);
   mrb_gc_arena_restore(mrb, arena_index);
@@ -1027,7 +1027,7 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   }
 
   mrb_value timer = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, mrb_obj_class(mrb, self), "Timer")));
-  mrb_zmq_timers_fn_t *timer_fn_arg = mrb_realloc(mrb, DATA_PTR(timer), sizeof(*timer_fn_arg));
+  mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) mrb_realloc(mrb, DATA_PTR(timer), sizeof(*timer_fn_arg));
   mrb_data_init(timer, timer_fn_arg, &mrb_zmq_timers_fn_type);
   timer_fn_arg->mrb = mrb;
   timer_fn_arg->timers = self;
@@ -1051,7 +1051,7 @@ mrb_zmq_timers_set_interval(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "i", &interval);
   assert(interval >= 0 && interval <= SIZE_MAX);
 
-  mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+  mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
   int rc = zmq_timers_set_interval(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id, interval);
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_set_interval");
@@ -1063,7 +1063,7 @@ mrb_zmq_timers_set_interval(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_timers_reset(mrb_state *mrb, mrb_value self)
 {
-  mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+  mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
   int rc = zmq_timers_reset(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_reset");
@@ -1076,7 +1076,7 @@ static mrb_value
 mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
 {
   if (DATA_PTR(self)) {
-    mrb_zmq_timers_fn_t *timer_fn_arg = DATA_PTR(self);
+    mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
     int rc = zmq_timers_cancel(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_timers_cancel");
@@ -1093,13 +1093,13 @@ mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_timers_timeout(mrb_state *mrb, mrb_value self)
 {
-  return mrb_fixnum_value(zmq_timers_timeout(DATA_PTR(self)));
+  return mrb_fixnum_value(zmq_timers_timeout((mrb_zmq_timers_fn_t *) DATA_PTR(self)));
 }
 
 static mrb_value
 mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 {
-  int rc = zmq_timers_execute(DATA_PTR(self));
+  int rc = zmq_timers_execute((mrb_zmq_timers_fn_t *) DATA_PTR(self));
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_execute");
   }
@@ -1143,7 +1143,8 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
       for (interface = interfaces; interface; interface = interface->ifa_next) {
         if (s_valid_flags(interface->ifa_flags)
           && interface->ifa_addr
-          && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)) {
+          && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)
+          && (interface->ifa_broadaddr || (is_ipv6 && (interface->ifa_addr->sa_family == AF_INET6)))) {
           mrb_ary_push(mrb, interfaces_ary, mrb_str_new_cstr(mrb, interface->ifa_name));
         }
       }
@@ -1186,20 +1187,20 @@ mrb_zmq_unpack_symbol(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_pack_class(mrb_state *mrb, mrb_value self)
 {
-  mrb_value class;
-  mrb_get_args(mrb, "C", &class);
+  mrb_value mrb_zmq_class;
+  mrb_get_args(mrb, "C", &mrb_zmq_class);
 
-  mrb_value name = mrb_class_path(mrb, mrb_class_ptr(class));
+  mrb_value name = mrb_class_path(mrb, mrb_class_ptr(mrb_zmq_class));
   return mrb_nil_p(name)? name : mrb_str_dup(mrb, name);
 }
 
 static mrb_value
 mrb_zmq_unpack_class(mrb_state *mrb, mrb_value self)
 {
-  mrb_value class;
-  mrb_get_args(mrb, "S", &class);
+  mrb_value mrb_zmq_class;
+  mrb_get_args(mrb, "S", &mrb_zmq_class);
 
-  return mrb_funcall(mrb, class, "constantize", 0);
+  return mrb_funcall(mrb, mrb_zmq_class, "constantize", 0);
 }
 
 void

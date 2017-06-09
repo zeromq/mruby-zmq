@@ -5,4 +5,5 @@ MRuby::Build.new do |conf|
   conf.gembox 'full-core'
   conf.gem File.expand_path(File.dirname(__FILE__))
   conf.cc.defines << 'MRB_INT64'
+  conf.cxx.defines << 'MRB_INT64'
 end

@@ -1,15 +1,17 @@
-MessagePack.register_pack_type(3, Exception) do |exe|
-  [
-    exe.class,
-    exe.message,
-    exe.backtrace
-  ].to_msgpack
-end
-MessagePack.register_unpack_type(3) do |data|
-  data = MessagePack.unpack(data)
-  exe = data[0].new(data[1])
-  exe.set_backtrace(data[2])
-  exe
+unless MessagePack.ext_packer_registered?(Exception)
+  MessagePack.register_pack_type(3, Exception) do |exe|
+    [
+      exe.class,
+      exe.message,
+      exe.backtrace
+    ].to_msgpack
+  end
+  MessagePack.register_unpack_type(3) do |data|
+    data = MessagePack.unpack(data)
+    exe = data[0].new(data[1])
+    exe.set_backtrace(data[2])
+    exe
+  end
 end
 
 module ZMQ
