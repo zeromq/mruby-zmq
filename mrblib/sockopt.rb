@@ -137,7 +137,7 @@ module ZMQ
     end
 
     ["conflate", "curve_server", "gssapi_plaintext", "gssapi_server", "immediate", "ipv6", "plain_server", "probe_router", "req_collerate",
-      "req_relaxed", "router_handhover", "router_mandatory", "xpub_verbose"].each do |boolean|
+      "req_relaxed", "router_handover", "router_mandatory", "xpub_verbose"].each do |boolean|
         upbool = boolean.upcase
       if LibZMQ.const_defined?(upbool)
         const = LibZMQ.const_get(upbool)
