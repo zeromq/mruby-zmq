@@ -695,7 +695,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     if (likely(success)) {
       mrb_funcall(mrb, thread_fn, "run", 0, NULL);
     }
-    if (!mrb_obj_is_kind_of(mrb, mrb_obj_value(mrb->exc), E_ETERM_ERROR)) {
+    if (mrb->exc && !mrb_obj_is_kind_of(mrb, mrb_obj_value(mrb->exc), E_ETERM_ERROR)) {
       mrb_print_error(mrb);
     }
     mrb_close(mrb);
