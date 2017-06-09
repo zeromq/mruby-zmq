@@ -48,11 +48,14 @@ assert('RouterDealer') do
   router = ZMQ::Router.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
   router.rcvtimeo = 500
   router.sndtimeo = 500
-  dealer = ZMQ::Dealer.new(router.last_endpoint)
+  dealer = ZMQ::Dealer.new
+  dealer.identity = "#{dealer.object_id}"
   dealer.rcvtimeo = 500
   dealer.sndtimeo = 500
+  dealer.connect(router.last_endpoint)
   dealer.send("hallo")
   peer, msg = router.recv
+  assert_equal(peer.to_str, "#{dealer.object_id}")
   assert_equal("hallo", msg.to_str)
   peer.send(router, LibZMQ::SNDMORE)
   msg.send(router)
@@ -63,7 +66,9 @@ end
 if ZMQ.const_defined?("Dish")
   assert('DishRadio') do
     dish = ZMQ::Dish.new("udp://239.0.0.1:5555", "test_zmq", :bind)
+    dish.rcvtimeo = 500
     radio = ZMQ::Radio.new("udp://239.0.0.1:5555", :connect)
+    radio.sndtimeo = 500
     msg = ZMQ::Msg.new("hallo")
     msg.group = "test_zmq"
     msg.send(radio)
