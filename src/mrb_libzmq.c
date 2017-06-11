@@ -302,17 +302,7 @@ mrb_zmq_proxy_steerable(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_msg_to_str(mrb_state *mrb, mrb_value self)
 {
-  mrb_bool static_string = FALSE;
-  mrb_get_args(mrb, "|b", &static_string);
-
-  void *data = zmq_msg_data((zmq_msg_t *) DATA_PTR(self));
-  size_t size = zmq_msg_size((zmq_msg_t *) DATA_PTR(self));
-
-  if (static_string) {
-    return mrb_str_new_static(mrb, (const char *) data, size);
-  } else {
-    return mrb_str_new(mrb, (const char *) data, size);
-  }
+  return mrb_str_new(mrb, (const char *) zmq_msg_data((zmq_msg_t *) DATA_PTR(self)), zmq_msg_size((zmq_msg_t *) DATA_PTR(self)));
 }
 
 static mrb_value
