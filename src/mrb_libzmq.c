@@ -1392,7 +1392,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 
 #ifdef ZMQ_HAVE_TIMERS
   struct RClass *zmq_timers_class, *zmq_timers_timer_fn_class;
-  zmq_timers_class = mrb_define_class_under(mrb, libzmq_mod, "Timers", mrb->object_class);
+  zmq_timers_class = mrb_define_class_under(mrb, zmq_mod, "Timers", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_timers_class, MRB_TT_DATA);
   mrb_define_method(mrb, zmq_timers_class, "initialize", mrb_zmq_timers_new, MRB_ARGS_NONE());
   mrb_define_method(mrb, zmq_timers_class, "add", mrb_zmq_timers_add, (MRB_ARGS_REQ(1)|MRB_ARGS_BLOCK()));
@@ -1407,6 +1407,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 
 #ifdef HAVE_IFADDRS_H
   mrb_define_module_function(mrb, zmq_mod, "network_interfaces", mrb_network_interfaces, MRB_ARGS_NONE());
+  mrb_define_module_function(mrb, zmq_mod, "get_broadcast_address", mrb_zmq_get_broadcast_address, MRB_ARGS_REQ(2));
 #endif
 
 #define mrb_zmq_define_const(ZMQ_CONST_NAME, ZMQ_CONST) \
