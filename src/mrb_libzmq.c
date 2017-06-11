@@ -1100,11 +1100,12 @@ mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 
 #ifdef HAVE_IFADDRS_H
 MRB_INLINE mrb_bool
-s_valid_flags (unsigned int flags)
+s_valid_flags (unsigned int flags, int is_ipv6)
 {
     return (flags & IFF_UP)             //  Only use interfaces that are running
            && !(flags & IFF_LOOPBACK)   //  Ignore loopback interface
-           && (flags & IFF_BROADCAST)   //  Only use interfaces that have BROADCAST
+           && ((is_ipv6 || (flags & IFF_BROADCAST))  //  Only use interfaces that have BROADCAST
+                   && (!is_ipv6 || (flags & IFF_MULTICAST))) //  or IPv6 and MULTICAST
 #   if defined (IFF_SLAVE)
            && !(flags & IFF_SLAVE)      //  Ignore devices that are bonding slaves.
 #   endif
@@ -1131,7 +1132,7 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
     if (likely(getifaddrs(&interfaces) == 0)) {
       struct ifaddrs *interface;
       for (interface = interfaces; interface; interface = interface->ifa_next) {
-        if (s_valid_flags(interface->ifa_flags)
+        if (s_valid_flags(interface->ifa_flags, is_ipv6)
           && interface->ifa_addr
           && interface->ifa_addr->sa_family == (is_ipv6 ? AF_INET6 : AF_INET)
           && (interface->ifa_broadaddr || (is_ipv6 && (interface->ifa_addr->sa_family == AF_INET6)))) {
@@ -1154,6 +1155,117 @@ mrb_network_interfaces(mrb_state *mrb, mrb_value self)
 
   return interfaces_ary;
 }
+
+static mrb_value
+s_get_ipv4_broadcast(mrb_state *mrb, const char *ip)
+{
+  struct sockaddr_in sa;
+  int rc = inet_pton(AF_INET, ip, &(sa.sin_addr));
+  if (likely(rc == 1)) {
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf c_jmp;
+    struct ifaddrs *interfaces = NULL;
+
+    MRB_TRY(&c_jmp)
+    {
+      mrb->jmp = &c_jmp;
+      if (likely(getifaddrs(&interfaces) == 0)) {
+        struct ifaddrs *interface;
+        for (interface = interfaces; interface; interface = interface->ifa_next) {
+          if (s_valid_flags(interface->ifa_flags, FALSE)
+            && interface->ifa_addr
+            && interface->ifa_addr->sa_family == AF_INET
+            && interface->ifa_broadaddr
+            && ((struct sockaddr_in *)interface->ifa_addr)->sin_addr.s_addr == sa.sin_addr.s_addr) {
+            mrb_value ipv4_str = mrb_str_new(mrb, NULL, INET_ADDRSTRLEN);
+            const char *rc = inet_ntop(AF_INET, &(((struct sockaddr_in *)interface->ifa_broadaddr)->sin_addr), RSTRING_PTR(ipv4_str), RSTRING_CAPA(ipv4_str));
+            if (likely(rc)) {
+              return mrb_str_resize(mrb, ipv4_str, strlen(rc));
+            } else {
+              mrb_sys_fail(mrb, "inet_ntop");
+            }
+          }
+        }
+        freeifaddrs(interfaces);
+      } else {
+        mrb_sys_fail(mrb, "getifaddrs");
+      }
+      mrb->jmp = prev_jmp;
+    }
+    MRB_CATCH(&c_jmp)
+    {
+      mrb->jmp = prev_jmp;
+      freeifaddrs(interfaces);
+      MRB_THROW(mrb->jmp);
+    }
+    MRB_END_EXC(&c_jmp);
+  } else if (rc == 0) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "IP Address is invalid");
+  } else {
+    mrb_sys_fail(mrb, "inet_pton");
+  }
+
+  mrb_raise(mrb, E_ARGUMENT_ERROR, "Cannot find interface for given IP Address");
+}
+
+static mrb_value
+s_get_ipv6_multicast(mrb_state *mrb, const char *ip)
+{
+  struct sockaddr_in6 sa;
+  int rc = inet_pton(AF_INET6, ip, &(sa.sin6_addr));
+  if (likely(rc == 1)) {
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf c_jmp;
+    struct ifaddrs *interfaces = NULL;
+
+    MRB_TRY(&c_jmp)
+    {
+      mrb->jmp = &c_jmp;
+      if (likely(getifaddrs(&interfaces) == 0)) {
+        struct ifaddrs *interface;
+        for (interface = interfaces; interface; interface = interface->ifa_next) {
+          if (s_valid_flags(interface->ifa_flags, TRUE)
+            && interface->ifa_addr
+            && interface->ifa_addr->sa_family == AF_INET6
+            && memcmp(((struct sockaddr_in6 *)interface->ifa_addr)->sin6_addr.s6_addr, sa.sin6_addr.s6_addr, sizeof(sa.sin6_addr.s6_addr)) == 0) {
+            return mrb_str_cat_cstr(mrb, mrb_str_new_lit(mrb, "ff02::1%"), interface->ifa_name);
+          }
+        }
+        freeifaddrs(interfaces);
+      } else {
+        mrb_sys_fail(mrb, "getifaddrs");
+      }
+      mrb->jmp = prev_jmp;
+    }
+    MRB_CATCH(&c_jmp)
+    {
+      mrb->jmp = prev_jmp;
+      freeifaddrs(interfaces);
+      MRB_THROW(mrb->jmp);
+    }
+    MRB_END_EXC(&c_jmp);
+  } else if (rc == 0) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "IP Address is invalid");
+  } else {
+    mrb_sys_fail(mrb, "inet_pton");
+  }
+
+  mrb_raise(mrb, E_ARGUMENT_ERROR, "Cannot find interface for given IP Address");
+}
+
+static mrb_value
+mrb_zmq_get_broadcast_address(mrb_state *mrb, mrb_value self)
+{
+  char *ip;
+  mrb_bool is_ipv6;
+  mrb_get_args(mrb, "zb", &ip, &is_ipv6);
+
+  if (is_ipv6)
+    return s_get_ipv6_multicast(mrb, ip);
+  else
+    return s_get_ipv4_broadcast(mrb, ip);
+}
+
 #endif //HAVE_IFADDRS_H
 
 static mrb_value
@@ -1255,7 +1367,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   zmq_msg_class = mrb_define_class_under(mrb, zmq_mod, "Msg", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_msg_class, MRB_TT_DATA);
   mrb_define_method(mrb, zmq_msg_class, "initialize", mrb_zmq_msg_new, MRB_ARGS_NONE());
-  mrb_define_method(mrb, zmq_msg_class, "to_str", mrb_zmq_msg_to_str, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, zmq_msg_class, "to_str", mrb_zmq_msg_to_str, MRB_ARGS_NONE());
   mrb_define_method(mrb, zmq_msg_class, "==", mrb_zmq_msg_eql, MRB_ARGS_REQ(1));
 
   zmq_socket_class = mrb_define_class_under(mrb, zmq_mod, "Socket", mrb->object_class);
