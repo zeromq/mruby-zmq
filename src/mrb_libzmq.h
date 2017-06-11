@@ -21,6 +21,7 @@
 #include <mruby/numeric.h>
 #include <mruby/proc.h>
 #ifdef HAVE_IFADDRS_H
+#include <arpa/inet.h>
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
