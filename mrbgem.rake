@@ -24,7 +24,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
       sh "cd #{spec.dir}/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/libzmq/configure CC=#{spec.cc.command} CFLAGS=\"#{spec.cc.flags.join(' ')}\" LDFLAGS=\"#{spec.linker.flags.join(' ')}\" CXX=#{spec.cxx.command} CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --host=#{build.host_target} --build=#{build.build_target} --disable-shared --enable-static --without-docs --prefix=#{spec.build_dir} && make -j4 && make install"
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/lib/libzmq.a\" -pthread"
-    spec.linker.libraries << 'stdc++' << 'pthread'
+    spec.linker.libraries << 'stdc++'
     spec.cc.include_paths << "#{spec.build_dir}/include"
     spec.cxx.include_paths << "#{spec.build_dir}/include"
     build.cc.include_paths << "#{spec.build_dir}/include"

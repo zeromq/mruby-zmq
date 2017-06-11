@@ -66,7 +66,7 @@ module ZMQ
 
     def new(mrb_class, *args, &block)
       LibZMQ.send(@pipe, [NEW, mrb_class, args, block].to_msgpack, 0)
-      msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      msg = MessagePack.unpack(@pipe.recv.to_str)
       case msg[TYPE]
       when INSTANCE
         ThreadProxy.new(self, msg[1])
@@ -77,7 +77,7 @@ module ZMQ
 
     def send(object_id, method, *args, &block)
       LibZMQ.send(@pipe, [SEND, object_id, method, args, block].to_msgpack, 0)
-      msg = MessagePack.unpack(@pipe.recv.to_str(true))
+      msg = MessagePack.unpack(@pipe.recv.to_str)
       case msg[TYPE]
       when RESULT
         msg[1]
@@ -198,7 +198,7 @@ module ZMQ
       TERM = "TERM$".freeze
 
       def handle_pipe
-        msg = @pipe.recv.to_str(true)
+        msg = @pipe.recv.to_str
         if msg == TERM
           @interrupted = true
         else
