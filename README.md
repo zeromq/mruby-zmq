@@ -11,7 +11,9 @@ As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thre
 Installation
 ============
 
-You need at least libzmq 4.1 with development headers and pkg-config then add
+If you dont have libzmq installed on a non Windows platform we will build it and statically link it into your mruby app.
+If you have it installed you need to have pkg-config installed.
+Then add
 
 ```ruby
 conf.gem mgem: 'mruby-zmq'
