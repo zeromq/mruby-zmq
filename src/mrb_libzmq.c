@@ -1083,13 +1083,13 @@ mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_timers_timeout(mrb_state *mrb, mrb_value self)
 {
-  return mrb_fixnum_value(zmq_timers_timeout((mrb_zmq_timers_fn_t *) DATA_PTR(self)));
+  return mrb_fixnum_value(zmq_timers_timeout(DATA_PTR(self)));
 }
 
 static mrb_value
 mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 {
-  int rc = zmq_timers_execute((mrb_zmq_timers_fn_t *) DATA_PTR(self));
+  int rc = zmq_timers_execute(DATA_PTR(self));
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_execute");
   }
@@ -1179,8 +1179,7 @@ mrb_zmq_pack_class(mrb_state *mrb, mrb_value self)
   mrb_value mrb_zmq_class;
   mrb_get_args(mrb, "C", &mrb_zmq_class);
 
-  mrb_value name = mrb_class_path(mrb, mrb_class_ptr(mrb_zmq_class));
-  return mrb_nil_p(name)? name : mrb_str_dup(mrb, name);
+  return mrb_class_path(mrb, mrb_class_ptr(mrb_zmq_class));
 }
 
 static mrb_value
