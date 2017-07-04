@@ -28,7 +28,7 @@ module ZMQ
 
       def recv
         msg, endpoint = @zmq_socket.recv
-        event, value = msg.to_str(true).unpack('SL')
+        event, value = msg.to_str.unpack('SL')
         {event: Events[event], value: value, endpoint: endpoint.to_str}
       end
     end
