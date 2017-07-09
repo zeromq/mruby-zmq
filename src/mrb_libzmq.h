@@ -258,7 +258,7 @@ mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_mod
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value socket_val = mrb_obj_value(obj);
     int wait500ms = 500; // we wait 500 miliseconds for each socket to close.
-    zmq_setsockopt(DATA(socket_val), ZMQ_LINGER, &wait500ms, sizeof(wait500ms));
+    zmq_setsockopt(DATA_PTR(socket_val), ZMQ_LINGER, &wait500ms, sizeof(wait500ms));
     zmq_close(DATA_PTR(socket_val));
     mrb_data_init(socket_val, NULL, NULL);
   }
