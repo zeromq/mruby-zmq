@@ -265,7 +265,7 @@ mrb_zmq_msg_size(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "d", &msg, &mrb_zmq_msg_type);
 
   size_t size = zmq_msg_size(msg);
-  if (POSFIXABLE(size))
+  if (FIXABLE(size))
     return mrb_fixnum_value(size);
   return mrb_float_value(mrb, size);
 }
