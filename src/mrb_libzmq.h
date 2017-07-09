@@ -75,11 +75,9 @@ mrb_zmq_handle_error(mrb_state *mrb, const char *func)
 static void
 mrb_zmq_gc_close(mrb_state *mrb, void *socket)
 {
-  if (likely(socket)) {
-    int disable = 0;
-    zmq_setsockopt(socket, ZMQ_LINGER, &disable, sizeof(disable));
-    zmq_close(socket);
-  }
+  int disable = 0;
+  zmq_setsockopt(socket, ZMQ_LINGER, &disable, sizeof(disable));
+  zmq_close(socket);
 }
 
 static const struct mrb_data_type mrb_zmq_socket_type = {
@@ -115,7 +113,7 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
   if (likely(mrb_zmq_thread_data_)) {
     mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
     if (likely(mrb_zmq_thread_data->frontend)) {
-      int disable = 0;
+      int disable = 0; // The other side might have crashed, don't wait on sending ther term msg.
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
       zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     }
@@ -259,7 +257,9 @@ mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_mod
 
   if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
     mrb_value socket_val = mrb_obj_value(obj);
-    mrb_zmq_gc_close(mrb, DATA_PTR(socket_val));
+    int wait500ms = 500; // we wait 500 miliseconds for each socket to close.
+    zmq_setsockopt(DATA(socket_val), ZMQ_LINGER, &wait500ms, sizeof(wait500ms));
+    zmq_close(DATA_PTR(socket_val));
     mrb_data_init(socket_val, NULL, NULL);
   }
 #ifdef  MRB_EACH_OBJ_OK
