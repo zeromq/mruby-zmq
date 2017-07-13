@@ -110,10 +110,10 @@ typedef struct {
 static void
 mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
 {
-  if (likely(mrb_zmq_thread_data_)) {
+  if (mrb_zmq_thread_data_) {
     mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
     if (likely(mrb_zmq_thread_data->frontend)) {
-      int disable = 0; // The other side might have crashed, don't wait on sending ther term msg.
+      int disable = 0; // The other side might have crashed, don't wait on sending the term msg.
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
       zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     }
@@ -172,7 +172,7 @@ static int
 #else
 static void
 #endif
-mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
+mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *thread_class)
 {
   /* filter dead objects */
   if (mrb_object_dead_p(mrb, obj)) {
@@ -205,8 +205,8 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_
 #endif
   }
 
-  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
-    mrb_value thread_val = mrb_obj_value(obj);
+  mrb_value thread_val = mrb_obj_value(obj);
+  if (mrb_obj_is_kind_of(mrb, thread_val, (struct RClass *)thread_class)) {
     mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
     mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
     mrb_data_init(thread_val, NULL, NULL);
@@ -222,7 +222,7 @@ static int
 #else
 static void
 #endif
-mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_module)
+mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *socket_class)
 {
   /* filter dead objects */
   if (mrb_object_dead_p(mrb, obj)) {
@@ -255,12 +255,15 @@ mrb_zmq_zmq_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *target_mod
 #endif
   }
 
-  if (mrb_obj_is_kind_of(mrb, mrb_obj_value(obj), (struct RClass *)target_module)) {
-    mrb_value socket_val = mrb_obj_value(obj);
-    int wait500ms = 500; // we wait 500 miliseconds for each socket to close.
-    zmq_setsockopt(DATA_PTR(socket_val), ZMQ_LINGER, &wait500ms, sizeof(wait500ms));
-    zmq_close(DATA_PTR(socket_val));
-    mrb_data_init(socket_val, NULL, NULL);
+  mrb_value socket_val = mrb_obj_value(obj);
+  if (mrb_obj_is_kind_of(mrb, socket_val, (struct RClass *)socket_class)) {
+    void *socket = DATA_PTR(socket_val);
+    if (socket) {
+      int wait500ms = 500; // we wait up to 500 miliseconds for each socket to close when mruby is closed via mrb_close(mrb).
+      zmq_setsockopt(socket, ZMQ_LINGER, &wait500ms, sizeof(wait500ms));
+      zmq_close(socket);
+      mrb_data_init(socket_val, NULL, NULL);
+    }
   }
 #ifdef  MRB_EACH_OBJ_OK
   return MRB_EACH_OBJ_OK;
