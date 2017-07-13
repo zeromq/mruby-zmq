@@ -57,7 +57,7 @@ mrb_zmq_ctx_get(mrb_state *mrb, mrb_value self)
 {
   mrb_int option_name;
   mrb_get_args(mrb, "i", &option_name);
-  assert(option_name >= INT_MIN && option_name <= INT_MAX);
+  assert(option_name >= (int) INT_MIN && option_name <= (int) INT_MAX);
 
   int rc = zmq_ctx_get(MRB_LIBZMQ_CONTEXT(mrb), option_name);
   if (unlikely(rc == -1)) {
@@ -72,8 +72,8 @@ mrb_zmq_ctx_set(mrb_state *mrb, mrb_value self)
 {
   mrb_int option_name, option_value;
   mrb_get_args(mrb, "ii", &option_name, &option_value);
-  assert(option_name >= INT_MIN && option_name <= INT_MAX);
-  assert(option_value >= INT_MIN && option_value <= INT_MAX);
+  assert(option_name >= (int) INT_MIN && option_name <= (int) INT_MAX);
+  assert(option_value >= (int) INT_MIN && option_value <= (int) INT_MAX);
 
   int rc = zmq_ctx_set(MRB_LIBZMQ_CONTEXT(mrb), option_name, option_value);
   if (unlikely(rc == -1)) {
@@ -127,9 +127,8 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "diC|i", &socket, &mrb_zmq_socket_type, &option_name, &option_type, &string_return_len);
   assert(string_return_len >= 0);
 
-  struct RClass* option_class = mrb_class_ptr(option_type);
-  size_t option_len = 0;
-  int rc = -1;
+  size_t option_len;
+  int rc;
 
   if (option_name == ZMQ_FD) {
     SOCKET fd;
@@ -138,13 +137,13 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
-    if (MRB_INT_MAX < fd) {
-      return mrb_float_value(mrb, fd);
-    } else {
+    if (POSFIXABLE(fd)) {
       return mrb_fixnum_value(fd);
+    } else {
+      return mrb_float_value(mrb, fd);
     }
   }
-  else if (option_class == mrb->true_class||option_class == mrb->false_class) {
+  else if (mrb_class_ptr(option_type) == mrb->true_class||mrb_class_ptr(option_type) == mrb->false_class) {
     int boolean;
     option_len = sizeof(boolean);
     rc = zmq_getsockopt(socket, option_name, &boolean, &option_len);
@@ -153,7 +152,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     }
     return mrb_bool_value(boolean);
   }
-  else if (option_class == mrb->fixnum_class) {
+  else if (mrb_class_ptr(option_type) == mrb->fixnum_class) {
     int number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
@@ -162,7 +161,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     }
     return mrb_fixnum_value(number);
   }
-  else if (option_class == mrb->float_class) {
+  else if (mrb_class_ptr(option_type) == mrb->float_class) {
     int64_t number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
@@ -175,7 +174,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     return mrb_float_value(mrb, number);
 #endif
   }
-  else if (option_class == mrb->string_class) {
+  else if (mrb_class_ptr(option_type) == mrb->string_class) {
     mrb_value buf = mrb_str_new(mrb, NULL, string_return_len);
     option_len = RSTRING_CAPA(buf);
     rc = zmq_getsockopt(socket, option_name, RSTRING_PTR(buf), &option_len);
@@ -248,7 +247,7 @@ mrb_zmq_msg_send(mrb_state *mrb, mrb_value self)
   void *socket;
   mrb_int flags;
   mrb_get_args(mrb, "ddi", &msg, &mrb_zmq_msg_type, &socket, &mrb_zmq_socket_type, &flags);
-  assert(flags >= INT_MIN && flags <= INT_MAX);
+  assert(flags >= (int) INT_MIN && flags <= (int) INT_MAX);
 
   int rc = zmq_msg_send(msg, socket, flags);
   if (unlikely(rc == -1)) {
@@ -265,7 +264,7 @@ mrb_zmq_msg_size(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "d", &msg, &mrb_zmq_msg_type);
 
   size_t size = zmq_msg_size(msg);
-  if (FIXABLE(size))
+  if (POSFIXABLE(size))
     return mrb_fixnum_value(size);
   return mrb_float_value(mrb, size);
 }
@@ -329,7 +328,7 @@ mrb_zmq_send(mrb_state *mrb, mrb_value self)
   mrb_value message;
   mrb_int flags;
   mrb_get_args(mrb, "doi", &socket, &mrb_zmq_socket_type, &message, &flags);
-  assert(flags >= INT_MIN && flags <= INT_MAX);
+  assert(flags >= (int) INT_MIN && flags <= (int) INT_MAX);
 
   message = mrb_str_to_str(mrb, message);
 
@@ -348,7 +347,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
   mrb_int option_name;
   mrb_value option_value;
   mrb_get_args(mrb, "dio", &socket, &mrb_zmq_socket_type, &option_name, &option_value);
-  assert(option_name >= INT_MIN && option_name <= INT_MAX);
+  assert(option_name >= (int) INT_MIN && option_name <= (int) INT_MAX);
 
   int rc;
 
@@ -366,12 +365,12 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
       rc = zmq_setsockopt(socket, option_name, &boolean, sizeof(boolean));
     } break;
     case MRB_TT_FIXNUM: {
-      assert(mrb_fixnum(option_value) >= INT_MIN && mrb_fixnum(option_value) <= INT_MAX);
+      assert(mrb_fixnum(option_value) >= (int) INT_MIN && mrb_fixnum(option_value) <= (int) INT_MAX);
       int number = (int) mrb_fixnum(option_value);
       rc = zmq_setsockopt(socket, option_name, &number, sizeof(number));
     } break;
     case MRB_TT_FLOAT: {
-      assert(mrb_float(option_value) >= INT64_MIN && mrb_float(option_value) <= INT64_MAX);
+      assert(mrb_float(option_value) >= (int64_t) INT64_MIN && mrb_float(option_value) <= (int64_t) INT64_MAX);
       int64_t number = (int64_t) mrb_float(option_value);
       rc = zmq_setsockopt(socket, option_name, &number, sizeof(number));
     } break;
@@ -508,7 +507,7 @@ mrb_zmq_socket(mrb_state *mrb, mrb_value self)
 
   mrb_int type;
   mrb_get_args(mrb, "i", &type);
-  assert(type >= 0 && type <= INT_MAX);
+  assert(type >= 0 && type <= (int) INT_MAX);
 
   void *socket = zmq_socket(MRB_LIBZMQ_CONTEXT(mrb), type);
   if (likely(socket)) {
@@ -527,7 +526,7 @@ mrb_zmq_socket_monitor(mrb_state *mrb, mrb_value self)
   char *addr;
   mrb_int events;
   mrb_get_args(mrb, "dzi", &socket, &mrb_zmq_socket_type, &addr, &events);
-  assert(events >= 0 && events <= INT_MAX);
+  assert(events >= 0 && events <= (int) INT_MAX);
 
   int rc = zmq_socket_monitor(socket, addr, events);
   if (unlikely(rc == -1)) {
@@ -542,11 +541,11 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
 {
   mrb_int flags = 0;
   mrb_get_args(mrb, "|i", &flags);
-  assert(flags >= INT_MIN && flags <= INT_MAX);
+  assert(flags >= (int) INT_MIN && flags <= (int) INT_MAX);
 
   mrb_value data = mrb_nil_value();
 
-  int more = 0;
+  int more;
   struct RClass *zmq_msg_class = mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Msg");
 
   do {
@@ -840,7 +839,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
-    assert(fd >= INT_MIN&&fd <= INT_MAX);
+    assert(fd >= (int) INT_MIN&&fd <= (int) INT_MAX);
     rc = zmq_poller_add_fd(DATA_PTR(self), fd, mrb_ptr(socket), events);
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
@@ -872,7 +871,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
-    assert(fd >= INT_MIN&&fd <= INT_MAX);
+    assert(fd >= (int) INT_MIN&&fd <= (int) INT_MAX);
     rc = zmq_poller_modify_fd(DATA_PTR(self), fd, events);
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_modify_fd");
@@ -900,7 +899,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
     mrb_int fd = mrb_fixnum(mrb_Integer(mrb, socket));
-    assert(fd >= INT_MIN&&fd <= INT_MAX);
+    assert(fd >= (int) INT_MIN&&fd <= (int) INT_MAX);
     rc = zmq_poller_remove_fd(DATA_PTR(self), fd);
     if (unlikely(rc == -1)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_remove_fd");
