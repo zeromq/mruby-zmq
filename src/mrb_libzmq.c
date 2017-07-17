@@ -127,6 +127,8 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "diC|i", &socket, &mrb_zmq_socket_type, &option_name, &option_type, &string_return_len);
   assert(string_return_len >= 0);
 
+  struct RClass* option_class = mrb_class_ptr(option_type);
+
   size_t option_len;
   int rc;
 
@@ -143,7 +145,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
       return mrb_float_value(mrb, fd);
     }
   }
-  else if (mrb_class_ptr(option_type) == mrb->true_class||mrb_class_ptr(option_type) == mrb->false_class) {
+  else if (option_class == mrb->true_class||option_class == mrb->false_class) {
     int boolean;
     option_len = sizeof(boolean);
     rc = zmq_getsockopt(socket, option_name, &boolean, &option_len);
@@ -152,7 +154,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     }
     return mrb_bool_value(boolean);
   }
-  else if (mrb_class_ptr(option_type) == mrb->fixnum_class) {
+  else if (option_class == mrb->fixnum_class) {
     int number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
@@ -161,7 +163,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     }
     return mrb_fixnum_value(number);
   }
-  else if (mrb_class_ptr(option_type) == mrb->float_class) {
+  else if (option_class == mrb->float_class) {
     int64_t number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
@@ -174,7 +176,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     return mrb_float_value(mrb, number);
 #endif
   }
-  else if (mrb_class_ptr(option_type) == mrb->string_class) {
+  else if (option_class == mrb->string_class) {
     mrb_value buf = mrb_str_new(mrb, NULL, string_return_len);
     option_len = RSTRING_CAPA(buf);
     rc = zmq_getsockopt(socket, option_name, RSTRING_PTR(buf), &option_len);
@@ -543,8 +545,7 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "|i", &flags);
   assert(flags >= (int) INT_MIN && flags <= (int) INT_MAX);
 
-  mrb_value data = mrb_nil_value();
-
+  mrb_value data;
   int more;
   struct RClass *zmq_msg_class = mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Msg");
 
@@ -622,6 +623,9 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 {
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
   mrb_bool success = FALSE;
+  void *backend = zmq_socket(MRB_LIBZMQ_CONTEXT(mrb_zmq_thread_data->mrb_parent), ZMQ_PAIR);
+  int rc = zmq_connect(backend, mrb_zmq_thread_data->endpoint);
+  assert(rc != -1);
 
   mrb_state *mrb = mrb_open_allocf(mrb_zmq_thread_data->mrb_parent->allocf, mrb_zmq_thread_data->mrb_parent->allocf_ud);
   if (likely(mrb)) {
@@ -635,24 +639,15 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     {
       mrb->jmp = &c_jmp;
       struct RClass* zmq_mod = mrb_module_get(mrb, "ZMQ");
-
       mrb_value pipe_val = mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_DATA, mrb_class_get_under(mrb, zmq_mod, "Pair")));
-      mrb_data_init(pipe_val, mrb_zmq_thread_data->backend, &mrb_zmq_socket_type);
+      mrb_data_init(pipe_val, backend, &mrb_zmq_socket_type);
       mrb_value timeo = mrb_fixnum_value(120000);
       mrb_funcall(mrb, pipe_val, "sndtimeo=", 1, timeo);
       mrb_funcall(mrb, pipe_val, "rcvtimeo=", 1, timeo);
 
       mrb_value msgpack_mod_val = mrb_obj_value(mrb_module_get(mrb, "MessagePack"));
-      mrb_value argv_str = mrb_str_new_static(mrb, mrb_zmq_thread_data->argv_packed, mrb_zmq_thread_data->argv_len);
-      mrb_value argv = mrb_funcall(mrb, msgpack_mod_val, "unpack", 1, argv_str);
-      mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
-      mrb_zmq_thread_data->argv_packed = NULL;
-      mrb_zmq_thread_data->argv_len = 0;
-      mrb_value block_str = mrb_str_new_static(mrb, mrb_zmq_thread_data->block_packed, mrb_zmq_thread_data->block_len);
-      mrb_value block = mrb_funcall(mrb, msgpack_mod_val, "unpack", 1, block_str);
-      mrb_free(mrb, mrb_zmq_thread_data->block_packed);
-      mrb_zmq_thread_data->block_packed = NULL;
-      mrb_zmq_thread_data->block_len = 0;
+      mrb_value argv = mrb_funcall(mrb, msgpack_mod_val, "unpack", 1, mrb_zmq_thread_data->argv_str);
+      mrb_value block = mrb_funcall(mrb, msgpack_mod_val, "unpack", 1, mrb_zmq_thread_data->block_str);
       if (mrb_type(mrb_ary_ref(mrb, argv, 0)) == MRB_TT_CLASS) {
         mrb_value bg_class = mrb_ary_shift(mrb, argv);
         enum mrb_vtype ttype = MRB_INSTANCE_TT(mrb_class_ptr(bg_class));
@@ -665,7 +660,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
       mrb_funcall_with_block(mrb, thread_fn, mrb_intern_lit(mrb, "initialize"), RARRAY_LEN(argv), RARRAY_PTR(argv), block);
       success = TRUE;
 
-      int rc = zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
+      rc = zmq_send(backend, &success, sizeof(success), 0);
       if (unlikely(rc == -1)) {
         mrb_zmq_handle_error(mrb, "zmq_send");
       }
@@ -675,9 +670,8 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     {
       mrb->jmp = prev_jmp;
       success = FALSE;
-      zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
-      zmq_close(mrb_zmq_thread_data->backend);
-      mrb_zmq_thread_data->backend = NULL;
+      zmq_send(backend, &success, sizeof(success), 0);
+      zmq_close(backend);
     }
     MRB_END_EXC(&c_jmp);
 
@@ -689,8 +683,8 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     }
     mrb_close(mrb);
   } else {
-    zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
-    zmq_close(mrb_zmq_thread_data->backend);
+    zmq_send(backend, &success, sizeof(success), 0);
+    zmq_close(backend);
   }
 }
 
@@ -716,36 +710,27 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
     mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self))),
     mrb_true_value()
   };
-  const char *endpoint = mrb_string_value_cstr(mrb, &args[0]);
+  mrb_zmq_thread_data->endpoint = mrb_string_value_cstr(mrb, &args[0]);
   mrb_value frontend_val = mrb_obj_new(mrb, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Pair"), NELEMS(args), args);
-  void *frontend = DATA_PTR(frontend_val);
-  mrb_zmq_thread_data->frontend = frontend;
+  mrb_zmq_thread_data->frontend = DATA_PTR(frontend_val);
   mrb_value timeo = mrb_fixnum_value(120000);
   mrb_funcall(mrb, frontend_val, "sndtimeo=", 1, timeo);
   mrb_funcall(mrb, frontend_val, "rcvtimeo=", 1, timeo);
   mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
 
-  void *backend = zmq_socket(MRB_LIBZMQ_CONTEXT(mrb), ZMQ_PAIR);
-  if (likely(backend)) {
-    mrb_zmq_thread_data->backend = backend;
-  } else {
-    mrb_zmq_handle_error(mrb, "zmq_socket");
-  }
-
-  int rc = zmq_connect(backend, endpoint);
-  assert(rc != -1);
-
   int arena_index = mrb_gc_arena_save(mrb);
-  mrb_value argv_val = mrb_ary_new_from_values(mrb, argv_len, argv);
-  mrb_value argv_str = mrb_funcall(mrb, argv_val, "to_msgpack", 0);
-  mrb_zmq_thread_data->argv_packed = (char *) mrb_malloc(mrb, RSTRING_LEN(argv_str));
-  memcpy(mrb_zmq_thread_data->argv_packed, RSTRING_PTR(argv_str), RSTRING_LEN(argv_str));
-  mrb_zmq_thread_data->argv_len = RSTRING_LEN(argv_str);
-  mrb_value block_str = mrb_funcall(mrb, block, "to_msgpack", 0);
-  mrb_zmq_thread_data->block_packed = (char *) mrb_malloc(mrb, RSTRING_LEN(block_str));
-  memcpy(mrb_zmq_thread_data->block_packed, RSTRING_PTR(block_str), RSTRING_LEN(block_str));
-  mrb_zmq_thread_data->block_len = RSTRING_LEN(block_str);
-  mrb_gc_arena_restore(mrb, arena_index);
+  struct RArray a = {
+    .tt = MRB_TT_ARRAY,
+    .c = mrb->array_class,
+    .len = argv_len,
+    .aux.capa = 0,
+    .ptr = argv
+  };
+#ifdef MRB_SET_FROZEN_FLAG
+  MRB_SET_FROZEN_FLAG(&a);
+#endif
+  mrb_zmq_thread_data->argv_str = mrb_funcall(mrb, mrb_obj_value(&a), "to_msgpack", 0);
+  mrb_zmq_thread_data->block_str = mrb_funcall(mrb, block, "to_msgpack", 0);
 
   void *thread = zmq_threadstart(&mrb_zmq_thread_fn, mrb_zmq_thread_data);
   if (likely(thread)) {
@@ -755,7 +740,8 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   }
 
   mrb_bool success = FALSE;
-  zmq_recv(frontend, &success, sizeof(success), 0);
+  zmq_recv(mrb_zmq_thread_data->frontend, &success, sizeof(success), 0);
+  mrb_gc_arena_restore(mrb, arena_index);
   if (unlikely(!success)) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot initialize ZMQ Thread");
   }
@@ -783,8 +769,6 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
     }
     zmq_threadclose(mrb_zmq_thread_data->thread);
-    mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
-    mrb_free(mrb, mrb_zmq_thread_data->block_packed);
     mrb_free(mrb, mrb_zmq_thread_data);
     mrb_data_init(thread_val, NULL, NULL);
     mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
