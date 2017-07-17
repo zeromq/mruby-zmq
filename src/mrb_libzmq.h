@@ -97,14 +97,12 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 
 typedef struct {
   mrb_state *mrb_parent;
+  const char *endpoint;
   void *frontend;
-  void *backend;
-  char *argv_packed;
-  mrb_int argv_len;
-  char *block_packed;
-  mrb_int block_len;
-  void *thread;
+  mrb_value argv_str;
+  mrb_value block_str;
   void *backend_ctx;
+  void *thread;
 } mrb_zmq_thread_data_t;
 
 static void
@@ -122,8 +120,6 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
     if (likely(mrb_zmq_thread_data->thread)) {
       zmq_threadclose(mrb_zmq_thread_data->thread);
     }
-    mrb_free(mrb, mrb_zmq_thread_data->argv_packed);
-    mrb_free(mrb, mrb_zmq_thread_data->block_packed);
     mrb_free(mrb, mrb_zmq_thread_data_);
   }
 }

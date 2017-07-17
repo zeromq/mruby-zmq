@@ -15,6 +15,13 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-class-ext'
   spec.add_test_dependency 'mruby-sleep'
 
+  task :clean do
+    if File.exists?("#{spec.build_dir}/lib/libzmq.a")
+      sh "cd #{spec.build_dir}/build && make uninstall"
+      FileUtils.rm_rf "#{spec.build_dir}/build"
+    end
+  end
+
   if spec.cc.search_header_path 'ifaddrs.h'
     spec.cc.defines << 'HAVE_IFADDRS_H'
   end
@@ -44,9 +51,17 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     exitstatus += $?.exitstatus
     unless exitstatus == 0
       unless File.exists?("#{spec.build_dir}/lib/libzmq.a")
-        sh "cd #{spec.dir}/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/libzmq/configure CC=#{spec.cc.command} CFLAGS=\"#{spec.cc.flags.join(' ')}\" LDFLAGS=\"#{spec.linker.flags.join(' ')}\" CXX=#{spec.cxx.command} CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --prefix=#{spec.build_dir} && make -j4 && make install"
+        warn "cannot find libzmq, building it"
+        if spec.cc.search_header_path 'sodium.h'
+          sh "cd #{spec.dir}/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/libzmq/configure CC=#{spec.cc.command} CFLAGS=\"#{spec.cc.flags.join(' ')}\" LDFLAGS=\"#{spec.linker.flags.join(' ')}\" CXX=#{spec.cxx.command} CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --with-libsodium --prefix=#{spec.build_dir} && make -j4 && make install"
+        else
+          sh "cd #{spec.dir}/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/libzmq/configure CC=#{spec.cc.command} CFLAGS=\"#{spec.cc.flags.join(' ')}\" LDFLAGS=\"#{spec.linker.flags.join(' ')}\" CXX=#{spec.cxx.command} CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --prefix=#{spec.build_dir} && make -j4 && make install"
+        end
       end
       spec.linker.flags_before_libraries << "\"#{spec.build_dir}/lib/libzmq.a\" -pthread"
+      if spec.cc.search_header_path 'sodium.h'
+        spec.linker.libraries << 'sodium'
+      end
       spec.linker.libraries << 'stdc++'
       spec.cc.include_paths << "#{spec.build_dir}/include"
       spec.cxx.include_paths << "#{spec.build_dir}/include"
