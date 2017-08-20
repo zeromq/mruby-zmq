@@ -719,17 +719,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "@pipe"), frontend_val);
 
   int arena_index = mrb_gc_arena_save(mrb);
-  struct RArray a = {
-    .tt = MRB_TT_ARRAY,
-    .c = mrb->array_class,
-    .len = argv_len,
-    .aux.capa = 0,
-    .ptr = argv
-  };
-#ifdef MRB_SET_FROZEN_FLAG
-  MRB_SET_FROZEN_FLAG(&a);
-#endif
-  mrb_zmq_thread_data->argv_str = mrb_funcall(mrb, mrb_obj_value(&a), "to_msgpack", 0);
+  mrb_zmq_thread_data->argv_str = mrb_funcall(mrb, mrb_ary_new_from_values(mrb, argv_len, argv), "to_msgpack", 0);
   mrb_zmq_thread_data->block_str = mrb_funcall(mrb, block, "to_msgpack", 0);
 
   void *thread = zmq_threadstart(&mrb_zmq_thread_fn, mrb_zmq_thread_data);
@@ -931,7 +921,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
 
     return mrb_obj_value(event.user_data);
   } else {
-    mrb_int n_events = mrb_ary_len(mrb, mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets")));
+    mrb_int n_events = RARRAY_LEN(mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets")));
     if (n_events > 0) {
       zmq_poller_event_t events[n_events];
       rc = zmq_poller_wait_all(DATA_PTR(self), events, n_events, timeout);
