@@ -38,32 +38,6 @@ module ZMQ
   class Thread
     include ThreadConstants
 
-    # Rough sketch how the background thread gets started
-    #def self.new(*args, &block)
-    # instance = super()
-    # mrb_zmq_thread_data = malloc(sizeof(mrb_zmq_thread_data_t))
-    # endpoint = "inproc://mrb-zmq-thread-pipe-#{instance.object_id}"
-    # frontend = ZMQ::Pair.new(endpoint, :bind)
-    # mrb_zmq_thread_data->frontend = frontend
-    # frontend.sndtimeo = 12000
-    # frontend.rcvtimeo = 12000
-    # instance.instance_variable_set(:@pipe, frontend)
-    # mrb_zmq_thread_data->backend = ZMQ::Pair.new(endpoint)
-    # mrb_zmq_thread_data->argv_packed = args.to_msgpack
-    # mrb_zmq_thread_data->block_packed = block.to_msgpack
-    # thread = zmq_threadstart(&Thread_fn, mrb_zmq_thread_data)
-    # if thread
-    #   mrb_zmq_thread_data->thread = thread
-    # else
-    #   sys_fail("zmq_threadstart")
-    # end
-    # unless frontend.recv
-    #   raise RuntimeError, "Cannot initialize ZMQ Thread"
-    # end
-    # instance.initialize(*args)
-    # instance
-    #end
-
     def new(mrb_class, *args, &block)
       LibZMQ.send(@pipe, [NEW, mrb_class, args, block].to_msgpack, 0)
       msg = MessagePack.unpack(@pipe.recv.to_str)
@@ -98,45 +72,6 @@ module ZMQ
       LibZMQ.threadclose(self, blocky)
     end
 
-    # this is a rough Sketch how the background thread runs
-    #def &Thread_fn(mrb_zmq_thread_data)
-    #  success = false
-    #  mrb = mrb_open()
-    #  if (mrb) {
-    #    mrb_zmq_thread_data->backend_ctx = LibZMQ::_Context
-    #    thread_fn = nil
-    #    begin
-    #      pipe = mrb_zmq_thread_data->backend
-    #      pipe.sndtimeo = 12000
-    #      pipe.rcvtimeo = 12000
-    #      argv = MessagePack.unpack(mrb_zmq_thread_data->argv_packed)
-    #      block = MessagePack.unpack(mrb_zmq_thread_data->block_packed)
-    #      if argv[0].is_a?(Class)
-    #        thread_fn = argv.shift.allocate
-    #      else
-    #        thread_fn = ZMQ::Thread::Thread_fn.allocate
-    #      end
-    #      thread_fn.instance_variable_set(:@pipe, pipe)
-    #      thread_fn.initialize(*argv, &block)
-    #      success = true
-    #      pipe.send(success)
-    #    rescue => e
-    #      success = false
-    #      mrb_zmq_thread_data->backend.send(success)
-    #    end
-    #    if success
-    #      thread_fn.run
-    #    end
-    #    if (mrb->exc && mrb_zmq_errno() != ETERM) {
-    #      mrb_print_error(mrb)
-    #    }
-    #    mrb_close(mrb)
-    #  } else {
-    #    mrb_zmq_thread_data->backend.send(success)
-    #    mrb_zmq_thread_data->backend.close
-    #  }
-    #end
-
     class Thread_fn
       include ThreadConstants
 
@@ -154,7 +89,7 @@ module ZMQ
       else
         def setup
           if @options[:auth].is_a?(Hash)
-            raise RuntimeError, "authentication: libzmq was compiled without Poller support"
+            raise NotImplementedError, "authentication: libzmq was compiled without Poller support"
           end
           @interrupted = false
           @instances = {}
@@ -248,9 +183,11 @@ module ZMQ
       end
 
       def finalize
-        @thread.finalize(@object_id)
-        remove_instance_variable(:@thread)
-        remove_instance_variable(:@object_id)
+        if instance_variable_defined? :@object_id
+          @thread.finalize(@object_id)
+          remove_instance_variable(:@thread)
+          remove_instance_variable(:@object_id)
+        end
         nil
       end
 
