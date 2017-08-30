@@ -97,12 +97,13 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
 
 typedef struct {
   mrb_state *mrb_parent;
-  const char *endpoint;
-  void *frontend;
   mrb_value argv_str;
   mrb_value block_str;
-  void *backend_ctx;
+  const char *endpoint;
+  void *frontend;
+  void *backend;
   void *thread;
+  void *backend_ctx;
 } mrb_zmq_thread_data_t;
 
 static void
@@ -115,8 +116,9 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
       zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
       zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     }
-    if (likely(mrb_zmq_thread_data->backend_ctx))
+    if (likely(mrb_zmq_thread_data->backend_ctx)) {
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
+    }
     if (likely(mrb_zmq_thread_data->thread)) {
       zmq_threadclose(mrb_zmq_thread_data->thread);
     }
@@ -204,7 +206,6 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *thread_
   mrb_value thread_val = mrb_obj_value(obj);
   if (mrb_obj_is_kind_of(mrb, thread_val, (struct RClass *)thread_class)) {
     mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
-    mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
     mrb_data_init(thread_val, NULL, NULL);
   }
 
