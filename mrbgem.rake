@@ -22,6 +22,9 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     end
   end
 
+  if spec.cc.search_header_path 'threads.h'
+    spec.cc.defines << 'HAVE_THREADS_H'
+  end
   if spec.cc.search_header_path 'ifaddrs.h'
     spec.cc.defines << 'HAVE_IFADDRS_H'
   end

@@ -25,6 +25,13 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
+#include <mruby/msgpack.h>
+
+#ifdef HAVE_THREADS_H
+#include <threads.h>
+#else
+#include "c11threads.h"
+#endif
 
 #define NELEMS(args) (sizeof(args) / sizeof(args[0]))
 
@@ -102,7 +109,7 @@ typedef struct {
   const char *endpoint;
   void *frontend;
   void *backend;
-  void *thread;
+  thrd_t thread;
   void *backend_ctx;
 } mrb_zmq_thread_data_t;
 
@@ -120,7 +127,7 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
       zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
     }
     if (likely(mrb_zmq_thread_data->thread)) {
-      zmq_threadclose(mrb_zmq_thread_data->thread);
+      thrd_join(mrb_zmq_thread_data->thread, NULL);
     }
     mrb_free(mrb, mrb_zmq_thread_data_);
   }

@@ -17,7 +17,7 @@ module ZMQ
       end
       puts msg.join(", ")
       @pub.send(msg) if @pub
-      true
+      msg
     end
 
     def debug(message)

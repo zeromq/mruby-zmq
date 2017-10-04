@@ -19,7 +19,7 @@ module ZMQ
         Events[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
       end
 
-      # this is a helper for ZMQ::Poller so you can add a object which looks like a zmq socket to be added more easily
+      # this is a helper for ZMQ::Poller so you can add a object which looks like a zmq socket more easily
       attr_reader :zmq_socket
 
       def initialize(endpoint)
