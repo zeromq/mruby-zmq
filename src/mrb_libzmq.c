@@ -740,6 +740,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_zmq_thread_data->mrb_parent = mrb;
   mrb_zmq_thread_data->argv_str = mrb_msgpack_pack(mrb, mrb_ary_new_from_values(mrb, argv_len, argv));
   mrb_zmq_thread_data->block_str = mrb_msgpack_pack(mrb, block);
+  mrb_iv_set(mrb, thread_class, mrb_intern_lit(mrb, "child"), self);
 
   mrb_value pipe_args[] = {
     mrb_format(mrb, "inproc://mrb-zmq-thread-pipe-%S", mrb_fixnum_value(mrb_obj_id(self))),
