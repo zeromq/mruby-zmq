@@ -625,7 +625,7 @@ mrb_zmq_z85_encode(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "data size must be divisible by 4");
   }
 
-  mrb_value dest = mrb_str_new(mrb, NULL, mrb_fixnum(mrb_flo_to_fixnum(mrb, mrb_fixnum_mul(mrb, mrb_fixnum_value(size), mrb_float_value(mrb, 1.25)))));
+  mrb_value dest = mrb_str_new(mrb, NULL, mrb_fixnum(mrb_flo_to_fixnum(mrb, mrb_num_mul(mrb, mrb_fixnum_value(size), mrb_float_value(mrb, 1.25)))));
 
   char *rc = zmq_z85_encode(RSTRING_PTR(dest), (uint8_t *) data, size);
   if (unlikely(!rc)) {
