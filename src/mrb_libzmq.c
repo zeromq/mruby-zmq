@@ -1284,7 +1284,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   zmq_mod = mrb_define_module(mrb, "ZMQ");
   zmq_msg_class = mrb_define_class_under(mrb, zmq_mod, "Msg", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_msg_class, MRB_TT_DATA);
-  mrb_define_method(mrb, zmq_msg_class, "initialize", mrb_zmq_msg_new, MRB_ARGS_NONE());
+  mrb_define_method(mrb, zmq_msg_class, "initialize", mrb_zmq_msg_new, MRB_ARGS_OPT(1));
   mrb_define_method(mrb, zmq_msg_class, "initialize_copy", mrb_zmq_msg_copy, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, zmq_msg_class, "to_str", mrb_zmq_msg_to_str, MRB_ARGS_NONE());
   mrb_define_method(mrb, zmq_msg_class, "==", mrb_zmq_msg_eql, MRB_ARGS_REQ(1));
