@@ -1,8 +1,8 @@
-assert('ZMQ::Thread') do
-  th = ZMQ::Thread.new
-  str = th.new(String, "hallo")
-  assert_equal("hallo", str.send(:to_str))
-end
+#assert('ZMQ::Thread') do
+#  th = ZMQ::Thread.new
+#  str = th.new(String, "hallo")
+#  assert_equal("hallo", str.send(:to_str))
+#end
 
 assert('PubSub') do
   publisher = ZMQ::Pub.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
