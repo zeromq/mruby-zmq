@@ -6,6 +6,4 @@ MRuby::Build.new do |conf|
   conf.gem File.expand_path(File.dirname(__FILE__))
   conf.cc.defines << 'MRB_INT64'
   conf.cxx.defines << 'MRB_INT64'
-  conf.cc.defines << 'MRB_USE_ETEXT_EDATA' << 'MRB_USE_LINK_TIME_RO_DATA_P'
-  conf.cxx.defines << 'MRB_USE_ETEXT_EDATA' << 'MRB_USE_LINK_TIME_RO_DATA_P'
 end
