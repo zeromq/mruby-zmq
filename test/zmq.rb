@@ -77,3 +77,9 @@ end
 #     assert_equal("test_zmq", msg.group)
 #   end
 # end
+
+assert('Msg') do
+  # Ensures optional parameter works.
+  ZMQ::Msg.new()
+  ZMQ::Msg.new("hallo")
+end

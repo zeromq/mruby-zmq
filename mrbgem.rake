@@ -13,6 +13,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-time'
   spec.add_dependency 'mruby-sprintf'
   spec.add_dependency 'mruby-class-ext'
+  spec.add_dependency 'mruby-metaprog'
   spec.add_test_dependency 'mruby-sleep'
 
   task :clean do
