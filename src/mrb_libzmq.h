@@ -25,12 +25,14 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
-#include <mruby/msgpack.h>
+// #include <mruby/msgpack.h>
 
+#if 0
 #ifdef HAVE_THREADS_H
 #include <threads.h>
 #else
 #include "c11threads.h"
+#endif
 #endif
 
 #define NELEMS(args) (sizeof(args) / sizeof(args[0]))
@@ -102,6 +104,7 @@ static const struct mrb_data_type mrb_zmq_msg_type = {
   "$i_mrb_zmq_msg_type", mrb_zmq_gc_msg_close
 };
 
+#if 0
 typedef struct {
   mrb_state *mrb_parent;
   mrb_value argv_str;
@@ -136,6 +139,8 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
 static const struct mrb_data_type mrb_zmq_thread_type = {
   "$i_mrb_zmq_thread_type", mrb_zmq_gc_threadclose
 };
+
+#endif
 
 #ifdef ZMQ_HAVE_POLLER
 static void
@@ -172,6 +177,7 @@ static const struct mrb_data_type mrb_zmq_timers_type = {
 };
 #endif //ZMQ_HAVE_TIMERS
 
+#if 0
 #ifdef MRB_EACH_OBJ_OK
 static int
 #else
@@ -220,6 +226,7 @@ mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *thread_
   return MRB_EACH_OBJ_OK;
 #endif
 }
+#endif
 
 #ifdef MRB_EACH_OBJ_OK
 static int

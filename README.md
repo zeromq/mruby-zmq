@@ -6,7 +6,8 @@ mruby bindings for https://github.com/zeromq/libzmq (v4)
 Everything libzmq offers is mapped 1:1 to the LibZMQ namespace, no beautification was done.
 High level ruby functions are inside the ZMQ Namespace, you can find most of it inside the mrblib folder, except some of the Msg and Socket classes functions which have to be done in c.
 
-As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thread_fn Namespaces.
+~~As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thread_fn Namespaces.~~
+Threading code has been deactivated, if someone can find the reason why it suddely started crashing please create a Pullrequest.
 
 Installation
 ============
@@ -64,17 +65,6 @@ pub.send("testme hallo")
 puts sub.recv.to_str
 ```
 
-Threading
-=========
-
-```ruby
-thread = ZMQ::Thread.new # you can optionally add a background class here which manages the thread, all arguments get passed to the background thread too
-string = thread.new(String, "hallo")
-puts string.send(:to_str)
-puts string.async(:upcase!)
-puts string.to_str # this gets routed through method_missing and is as such a bit slower
-```
-
 Logging
 =======
 You can define a environment variable called ZMQ_LOGGER_ENDPOINT to create pub sockets which connect to that endpoint.
@@ -86,7 +76,7 @@ ZMQ.logger.info("hallo")
 
 LICENSE
 =======
-Copyright 2017 Hendrik Beskow
+Copyright 2017,2021 Hendrik Beskow
 
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this

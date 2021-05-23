@@ -1,8 +1,8 @@
-assert('ZMQ::Thread') do
-  th = ZMQ::Thread.new
-  str = th.new(String, "hallo")
-  assert_equal("hallo", str.send(:to_str))
-end
+#assert('ZMQ::Thread') do
+#  th = ZMQ::Thread.new
+#  str = th.new(String, "hallo")
+#  assert_equal("hallo", str.send(:to_str))
+#end
 
 assert('PubSub') do
   publisher = ZMQ::Pub.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
@@ -77,3 +77,9 @@ end
 #     assert_equal("test_zmq", msg.group)
 #   end
 # end
+
+assert('Msg') do
+  # Ensures optional parameter works.
+  ZMQ::Msg.new()
+  ZMQ::Msg.new("hallo")
+end
