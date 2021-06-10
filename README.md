@@ -6,8 +6,7 @@ mruby bindings for https://github.com/zeromq/libzmq (v4)
 Everything libzmq offers is mapped 1:1 to the LibZMQ namespace, no beautification was done.
 High level ruby functions are inside the ZMQ Namespace, you can find most of it inside the mrblib folder, except some of the Msg and Socket classes functions which have to be done in c.
 
-~~As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thread_fn Namespaces.~~
-Threading code has been deactivated, if someone can find the reason why it suddely started crashing please create a Pullrequest.
+As a bonus a Threading abstraction can be found in the ZMQ::Thread and ZMQ::Thread_fn Namespaces.
 
 Installation
 ============
