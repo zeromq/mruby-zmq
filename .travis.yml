@@ -1,9 +1,8 @@
-sudo: required
-dist: trusty
 addons:
   apt:
     packages:
       - ruby-dev
+      - libzmq-dev
 language: c
 compiler:
   - gcc
@@ -12,4 +11,3 @@ script:
   - rake test
 os:
   - linux
-  - osx
