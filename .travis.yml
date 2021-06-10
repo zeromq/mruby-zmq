@@ -3,7 +3,7 @@ addons:
   apt:
     packages:
       - ruby-dev
-      - libzmq-dev
+      - libzmq3-dev
 language: c
 compiler:
   - gcc
