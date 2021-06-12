@@ -75,54 +75,30 @@ module ZMQ
     class Thread_fn
       include ThreadConstants
 
-      if ZMQ.const_defined?("Poller")
-        def setup
-          @poller = ZMQ::Poller.new
-          @poller << @pipe
-          @interrupted = false
-          @instances = {}
-          if @options[:auth].is_a?(Hash)
-            @auth = Zap.new(authenticator: @options[:auth].fetch(:class).new(*@options[:auth].fetch(:args) { [] } ))
-            @poller << @auth
-          end
-        end
-      else
-        def setup
-          if @options[:auth].is_a?(Hash)
-            raise NotImplementedError, "authentication: libzmq was compiled without Poller support"
-          end
-          @interrupted = false
-          @instances = {}
-        end
-      end
-
       def initialize(options = {}, &block)
         @options = options
-        setup
+        @interrupted = false
+        @instances = {}
+        if @options[:auth].is_a?(Hash)
+          @auth = Zap.new(authenticator: @options[:auth].fetch(:class).new(*@options[:auth].fetch(:args) { [] } ))
+          @poller = ZMQ::Poller.new
+          @poller << @pipe << @auth
+        end
       end
 
-      if ZMQ.const_defined?("Poller")
-        def run
-          if @auth
-            until @interrupted
-              @poller.wait do |socket, events|
-                case socket
-                when @pipe
-                  handle_pipe
-                when @auth
-                  @auth.handle_zap
-                end
+      def run
+        if @auth
+          until @interrupted
+            @poller.wait do |socket, events|
+              case socket
+              when @pipe
+                handle_pipe
+              when @auth
+                @auth.handle_zap
               end
             end
-          else
-            @pipe.rcvtimeo = -1
-            until @interrupted
-              handle_pipe
-            end
           end
-        end
-      else #Poller
-        def run
+        else
           @pipe.rcvtimeo = -1
           until @interrupted
             handle_pipe
