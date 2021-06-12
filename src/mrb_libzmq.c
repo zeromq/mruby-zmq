@@ -1030,7 +1030,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   }
 
   pollitem.events = (short) events;
-  pollitem.revents = 0;  
+  pollitem.revents = 0;
 
   if (likely(RARRAY_LEN(sockets) + 1 > 0 &&
       RARRAY_LEN(sockets) + 1 <= SIZE_MAX / sizeof(struct zmq_pollitem_t))) {
@@ -1058,7 +1058,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   mrb_value sockets = mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets"));
   struct zmq_pollitem_t *pollitems = (struct zmq_pollitem_t *) DATA_PTR(self);
   mrb_int socket_obj_id = mrb_obj_id(socket);
-  
+
   for (mrb_int i = 0; i < RARRAY_LEN(sockets); i++) {
     if (socket_obj_id == mrb_obj_id(mrb_ary_ref(mrb, sockets, i))) {
       pollitems[i].events = (short) events;
@@ -1467,7 +1467,8 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   zmq_thread_class = mrb_define_class_under(mrb, zmq_mod, "Thread", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_thread_class, MRB_TT_DATA);
   mrb_define_class_method(mrb, zmq_thread_class, "new", mrb_zmq_threadstart, MRB_ARGS_ANY());
-  mrb_iv_set(mrb, mrb_obj_value(zmq_thread_class), mrb_intern_lit(mrb, "threads"), mrb_hash_new(mrb)); 
+
+  mrb_iv_set(mrb, mrb_obj_value(zmq_thread_class), mrb_intern_lit(mrb, "threads"), mrb_hash_new(mrb));
 
   struct RClass *zmq_poller_class = mrb_define_class_under(mrb, zmq_mod, "Poller", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_poller_class, MRB_TT_DATA);
