@@ -758,7 +758,8 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   if (unlikely(!success)) {
     mrb_bool rcvmore = mrb_bool(mrb_funcall(mrb, frontend_val, "rcvmore?", 0));
     if (rcvmore) {
-      mrb_exc_raise(mrb, mrb_msgpack_unpack(mrb, mrb_str_to_str(mrb, mrb_funcall(mrb, frontend_val, "recv", 0))));
+      mrb_value exc = mrb_msgpack_unpack(mrb, mrb_funcall(mrb, mrb_funcall(mrb, frontend_val, "recv", 0), "to_str", 0));
+      mrb_exc_raise(mrb, exc);
     } else {
       mrb_raise(mrb, E_RUNTIME_ERROR, "Cannot initialize ZMQ Thread");
     }
