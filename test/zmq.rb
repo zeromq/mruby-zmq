@@ -1,7 +1,9 @@
 assert('ZMQ::Thread') do
-  th = ZMQ::Thread.new
-  str = th.new(String, "hallo")
-  assert_equal("hallo", str.send(:to_str))
+  15.times do
+    th = ZMQ::Thread.new
+    str = th.new(String, "hallo")
+    assert_equal("hallo", str.send(:to_str))
+  end
 end
 
 assert('PubSub') do

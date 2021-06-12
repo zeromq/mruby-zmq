@@ -37,6 +37,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     unless exitstatus == 0
       raise "install libzmq(-dev) before continuing"
     end
-    spec.linker.flags_before_libraries << '-pthread' << '-pthread'
+    spec.linker.flags_before_libraries << '-pthread' << '-lpthread'
   end
 end

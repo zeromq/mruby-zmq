@@ -129,6 +129,8 @@ mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
     if (likely(mrb_zmq_thread_data->thread)) {
       thrd_join(mrb_zmq_thread_data->thread, NULL);
     }
+    mrb_value threads = mrb_iv_get(mrb, mrb_obj_value(mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread")), mrb_intern_lit(mrb, "threads"));
+    mrb_hash_delete_key(mrb, threads, mrb_int_value(mrb, (intptr_t) mrb_zmq_thread_data_));
     mrb_free(mrb, mrb_zmq_thread_data_);
   }
 }
@@ -146,6 +148,10 @@ mrb_zmq_gc_poller_destroy(mrb_state *mrb, void *poller)
 
 static const struct mrb_data_type mrb_zmq_poller_type = {
   "$i_mrb_zmq_poller_type", mrb_zmq_gc_poller_destroy
+};
+#else
+static const struct mrb_data_type mrb_zmq_poller_type = {
+  "$i_mrb_zmq_poller_type", mrb_free
 };
 #endif //ZMQ_HAVE_POLLER
 
