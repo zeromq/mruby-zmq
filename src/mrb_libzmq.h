@@ -106,6 +106,7 @@ typedef struct {
   mrb_state *mrb_parent;
   mrb_value argv_str;
   mrb_value block_str;
+  mrb_value thread_fn;
   const char *endpoint;
   void *frontend;
   void *backend;

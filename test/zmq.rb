@@ -74,9 +74,9 @@ if ZMQ.const_defined?("Dish")
     msg = ZMQ::Msg.new("hallo")
     msg.group = "test_zmq"
     msg.send(radio)
-    msg = dish.recv
-    assert_equal("hallo", msg.to_str)
-    assert_equal("test_zmq", msg.group)
+    msg2 = dish.recv
+    assert_equal("hallo", msg2.to_str)
+    assert_equal("test_zmq", msg2.group)
   end
 end
 

@@ -18,19 +18,16 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
 
   task :clean do
     if File.exists?("#{spec.build_dir}/lib/libzmq.a")
-      sh "cd #{spec.build_dir}/build && make uninstall"
+      sh "cd #{spec.build_dir}/build && xargs rm < install_manifest.txt"
       FileUtils.rm_rf "#{spec.build_dir}/build"
     end
   end
 
   def build_libzmq(spec, build)
+    puts spec.build_dir
     unless File.exists?("#{spec.build_dir}/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      if spec.cc.search_header_path 'sodium.h'
-        sh "cd #{spec.dir}/deps/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/deps/libzmq/configure CC=\"#{spec.cc.command}\" CFLAGS=\"#{spec.cc.flags.join(' ')}\" CXX=\"#{spec.cxx.command}\" CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --with-libsodium --prefix=#{spec.build_dir} && make -j4 && make install"
-      else
-        sh "cd #{spec.dir}/deps/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/deps/libzmq/configure CC=\"#{spec.cc.command}\" CFLAGS=\"#{spec.cc.flags.join(' ')}\" CXX=\"#{spec.cxx.command}\" CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --prefix=#{spec.build_dir} && make -j4 && make install"
-      end
+      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j4 && cmake --install ."
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/lib/libzmq.a\""
     if spec.cc.search_header_path 'sodium.h'
