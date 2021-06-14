@@ -10,7 +10,7 @@ assert('PubSub') do
   publisher = ZMQ::Pub.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
   publisher.sndtimeo = 500
   subscriber = ZMQ::Sub.new(publisher.last_endpoint, "hallo")
-  sleep 2
+  sleep 1
   publisher.send("hallo ballo")
   subscriber.rcvtimeo = 500
   msg = subscriber.recv

@@ -667,7 +667,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
     mrb_zmq_thread_data->backend_ctx = MRB_LIBZMQ_CONTEXT(mrb);
     mrb_zmq_thread_data->thread_fn = mrb_nil_value();
 
-    mrb_bool error;
+    mrb_bool error = FALSE;
     mrb_value exc = mrb_protect(mrb, mrb_zmq_thread_fn_cb, mrb_cptr_value(mrb, mrb_zmq_thread_data), &error);
     success = !error;
     if (unlikely(error)) {
@@ -687,7 +687,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 
     mrb_gc_arena_restore(mrb, 0);
     if (likely(success)) {
-      mrb_gc_protect(mrb, mrb_zmq_thread_data->thread_fn);
+      mrb_gc_register(mrb, mrb_zmq_thread_data->thread_fn);
       mrb_funcall(mrb, mrb_zmq_thread_data->thread_fn, "run", 0);
     }
 
@@ -695,6 +695,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
       success = FALSE;
       mrb_print_error(mrb);
     }
+
     mrb_close(mrb);
   } else {
     zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
@@ -787,8 +788,6 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
     mrb_free(mrb, mrb_zmq_thread_data);
     mrb_data_init(thread_val, NULL, NULL);
     mrb_iv_remove(mrb, thread_val, mrb_intern_lit(mrb, "@pipe"));
-    mrb_value threads = mrb_iv_get(mrb, mrb_obj_value(mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread")), mrb_intern_lit(mrb, "threads"));
-    mrb_hash_delete_key(mrb, threads, mrb_int_value(mrb, (intptr_t) mrb_zmq_thread_data));
     return mrb_bool_value(success);
   }
 
@@ -1535,10 +1534,8 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 void
 mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
-  struct RClass *zmq_mod = mrb_module_get(mrb, "ZMQ");
-  mrb_objspace_each_objects(mrb, mrb_zmq_thread_close_gem_final, mrb_class_get_under(mrb, zmq_mod, "Thread"));
   void *context = MRB_LIBZMQ_CONTEXT(mrb);
   zmq_ctx_shutdown(context);
-  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, zmq_mod, "Socket"));
+  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Socket"));
   zmq_ctx_term(context);
 }

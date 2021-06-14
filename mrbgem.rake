@@ -16,28 +16,23 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-metaprog'
   spec.add_test_dependency 'mruby-sleep'
 
-  task :clean do
-    if File.exists?("#{spec.build_dir}/lib/libzmq.a")
-      sh "cd #{spec.build_dir}/build && xargs rm < install_manifest.txt"
-      FileUtils.rm_rf "#{spec.build_dir}/build"
-    end
-  end
-
   def build_libzmq(spec, build)
-    puts spec.build_dir
-    unless File.exists?("#{spec.build_dir}/lib/libzmq.a")
+    unless File.exists?("#{spec.build_dir}/build/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j4 && cmake --install ."
+      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j4 --target libzmq-static"
     end
-    spec.linker.flags_before_libraries << "\"#{spec.build_dir}/lib/libzmq.a\""
-    if spec.cc.search_header_path 'sodium.h'
-      spec.linker.libraries << 'sodium'
+    spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
+    `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
+      spec.cxx.flags << cflag
+      spec.cc.flags << cflag
     end
-    spec.linker.libraries << 'stdc++'
-    spec.cc.include_paths << "#{spec.build_dir}/include"
-    spec.cxx.include_paths << "#{spec.build_dir}/include"
-    build.cc.include_paths << "#{spec.build_dir}/include"
-    build.cxx.include_paths << "#{spec.build_dir}/include"
+    `pkg-config --static --libs \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |lib|
+      spec.linker.flags_before_libraries << lib
+    end
+    spec.cc.include_paths << "#{spec.dir}/deps/libzmq/include"
+    spec.cxx.include_paths << "#{spec.dir}/deps/libzmq/include"
+    build.cc.include_paths << "#{spec.dir}/deps/libzmq/include"
+    build.cxx.include_paths << "#{spec.dir}/deps/libzmq/include"
     spec.cxx.defines << 'ZMQ_BUILD_DRAFT_API=1'
     spec.cc.defines << 'ZMQ_BUILD_DRAFT_API=1'
   end
@@ -67,6 +62,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
         build_libzmq(spec, build)
       end
     end
-    spec.linker.flags_before_libraries << '-pthread' << '-lpthread'
+    spec.linker.flags_before_libraries << '-pthread'
   end
 end

@@ -11,7 +11,7 @@ end
 
 desc "cleanup"
 task :clean do
-  sh "cd mruby && rake deep_clean"
+  sh "cd mruby && MRUBY_CONFIG=#{MRUBY_CONFIG} rake deep_clean"
 end
 
 task :default => :test
