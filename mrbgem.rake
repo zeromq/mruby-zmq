@@ -16,6 +16,35 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-metaprog'
   spec.add_test_dependency 'mruby-sleep'
 
+  task :clean do
+    if File.exists?("#{spec.build_dir}/lib/libzmq.a")
+      sh "cd #{spec.build_dir}/build && make uninstall"
+      FileUtils.rm_rf "#{spec.build_dir}/build"
+    end
+  end
+
+  def build_libzmq(spec, build)
+    unless File.exists?("#{spec.build_dir}/lib/libzmq.a")
+      warn "mruby-zmq: cannot find libzmq, building it"
+      if spec.cc.search_header_path 'sodium.h'
+        sh "cd #{spec.dir}/deps/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/deps/libzmq/configure CC=\"#{spec.cc.command}\" CFLAGS=\"#{spec.cc.flags.join(' ')}\" CXX=\"#{spec.cxx.command}\" CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --with-libsodium --prefix=#{spec.build_dir} && make -j4 && make install"
+      else
+        sh "cd #{spec.dir}/deps/libzmq && ./autogen.sh && mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && #{spec.dir}/deps/libzmq/configure CC=\"#{spec.cc.command}\" CFLAGS=\"#{spec.cc.flags.join(' ')}\" CXX=\"#{spec.cxx.command}\" CXXFLAGS=\"#{spec.cxx.flags.join(' ')}\" --disable-shared --enable-static --without-docs --prefix=#{spec.build_dir} && make -j4 && make install"
+      end
+    end
+    spec.linker.flags_before_libraries << "\"#{spec.build_dir}/lib/libzmq.a\""
+    if spec.cc.search_header_path 'sodium.h'
+      spec.linker.libraries << 'sodium'
+    end
+    spec.linker.libraries << 'stdc++'
+    spec.cc.include_paths << "#{spec.build_dir}/include"
+    spec.cxx.include_paths << "#{spec.build_dir}/include"
+    build.cc.include_paths << "#{spec.build_dir}/include"
+    build.cxx.include_paths << "#{spec.build_dir}/include"
+    spec.cxx.defines << 'ZMQ_BUILD_DRAFT_API=1'
+    spec.cc.defines << 'ZMQ_BUILD_DRAFT_API=1'
+  end
+
   if spec.cc.search_header_path 'threads.h'
     spec.cc.defines << 'HAVE_THREADS_H'
   end
@@ -25,17 +54,21 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   if spec.build.toolchains.include? 'visualcpp'
     spec.linker.libraries << 'libzmq'
   else
-    `pkg-config --cflags libzmq 2>/dev/null`.split("\s").each do |cflag|
-      spec.cxx.flags << cflag
-      spec.cc.flags << cflag
-    end
-    exitstatus = $?.exitstatus
-    `pkg-config --libs libzmq 2>/dev/null`.split("\s").each do |lib|
-      spec.linker.flags_before_libraries << lib
-    end
-    exitstatus += $?.exitstatus
-    unless exitstatus == 0
-      raise "install libzmq(-dev) before continuing"
+    if ENV['BUILD_LIBZMQ']
+      build_libzmq(spec, build)
+    else
+      `pkg-config --cflags libzmq 2>/dev/null`.split("\s").each do |cflag|
+        spec.cxx.flags << cflag
+        spec.cc.flags << cflag
+      end
+      exitstatus = $?.exitstatus
+      `pkg-config --libs libzmq 2>/dev/null`.split("\s").each do |lib|
+        spec.linker.flags_before_libraries << lib
+      end
+      exitstatus += $?.exitstatus
+      unless exitstatus == 0
+        build_libzmq(spec, build)
+      end
     end
     spec.linker.flags_before_libraries << '-pthread' << '-lpthread'
   end
