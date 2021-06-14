@@ -725,8 +725,6 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_realloc(mrb, DATA_PTR(self), sizeof(*mrb_zmq_thread_data));
   memset(mrb_zmq_thread_data, 0, sizeof(*mrb_zmq_thread_data));
   mrb_data_init(self, mrb_zmq_thread_data, &mrb_zmq_thread_type);
-  mrb_value threads = mrb_iv_get(mrb, mrb_obj_value(mrb_class_get_under(mrb, mrb_module_get(mrb, "ZMQ"), "Thread")), mrb_intern_lit(mrb, "threads"));
-  mrb_hash_set(mrb, threads, mrb_int_value(mrb, (intptr_t) mrb_zmq_thread_data), self);
   mrb_zmq_thread_data->mrb_parent = mrb;
   mrb_zmq_thread_data->argv_str = mrb_msgpack_pack_argv(mrb, argv, argv_len);
   mrb_zmq_thread_data->block_str = mrb_msgpack_pack(mrb, block);
@@ -1467,8 +1465,6 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   zmq_thread_class = mrb_define_class_under(mrb, zmq_mod, "Thread", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_thread_class, MRB_TT_DATA);
   mrb_define_class_method(mrb, zmq_thread_class, "new", mrb_zmq_threadstart, MRB_ARGS_ANY());
-
-  mrb_iv_set(mrb, mrb_obj_value(zmq_thread_class), mrb_intern_lit(mrb, "threads"), mrb_hash_new(mrb));
 
   struct RClass *zmq_poller_class = mrb_define_class_under(mrb, zmq_mod, "Poller", mrb->object_class);
   MRB_SET_INSTANCE_TT(zmq_poller_class, MRB_TT_DATA);
