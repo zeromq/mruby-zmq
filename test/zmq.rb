@@ -10,7 +10,7 @@ assert('PubSub') do
   publisher = ZMQ::Pub.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
   publisher.sndtimeo = 500
   subscriber = ZMQ::Sub.new(publisher.last_endpoint, "hallo")
-  sleep 2
+  sleep 1
   publisher.send("hallo ballo")
   subscriber.rcvtimeo = 500
   msg = subscriber.recv
@@ -74,9 +74,9 @@ if ZMQ.const_defined?("Dish")
     msg = ZMQ::Msg.new("hallo")
     msg.group = "test_zmq"
     msg.send(radio)
-    msg = dish.recv
-    assert_equal("hallo", msg.to_str)
-    assert_equal("test_zmq", msg.group)
+    msg2 = dish.recv
+    assert_equal("hallo", msg2.to_str)
+    assert_equal("test_zmq", msg2.group)
   end
 end
 

@@ -1,4 +1,6 @@
 dist: focal
+env:
+  - BUILD_LIBZMQ=1
 addons:
   apt:
     packages:
