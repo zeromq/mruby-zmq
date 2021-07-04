@@ -117,21 +117,19 @@ typedef struct {
 static void
 mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
 {
-  if (mrb_zmq_thread_data_) {
-    mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
-    if (likely(mrb_zmq_thread_data->frontend)) {
-      int disable = 0; // The other side might have crashed, don't wait on sending the term msg.
-      zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
-      zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
-    }
-    if (likely(mrb_zmq_thread_data->backend_ctx)) {
-      zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
-    }
-    if (likely(mrb_zmq_thread_data->thread)) {
-      thrd_join(mrb_zmq_thread_data->thread, NULL);
-    }
-    mrb_free(mrb, mrb_zmq_thread_data_);
+  mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
+  if (likely(mrb_zmq_thread_data->frontend)) {
+    int disable = 0; // The other side might have crashed, don't wait on sending the term msg.
+    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
+    zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
   }
+  if (likely(mrb_zmq_thread_data->backend_ctx)) {
+    zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
+  }
+  if (likely(mrb_zmq_thread_data->thread)) {
+    thrd_join(mrb_zmq_thread_data->thread, NULL);
+  }
+  mrb_free(mrb, mrb_zmq_thread_data_);
 }
 
 static const struct mrb_data_type mrb_zmq_thread_type = {
@@ -176,56 +174,6 @@ static const struct mrb_data_type mrb_zmq_timers_type = {
   "$i_mrb_zmq_timers_type", mrb_zmq_gc_timers_destroy
 };
 #endif //ZMQ_HAVE_TIMERS
-
-#ifdef MRB_EACH_OBJ_OK
-static int
-#else
-static void
-#endif
-mrb_zmq_thread_close_gem_final(mrb_state *mrb, struct RBasic *obj, void *thread_class)
-{
-  /* filter dead objects */
-  if (mrb_object_dead_p(mrb, obj)) {
-#ifdef MRB_EACH_OBJ_OK
-    return MRB_EACH_OBJ_OK;
-#else
-    return;
-#endif
-  }
-
-  /* filter internal objects */
-  switch (obj->tt) {
-  case MRB_TT_ENV:
-  case MRB_TT_ICLASS:
-#ifdef MRB_EACH_OBJ_OK
-    return MRB_EACH_OBJ_OK;
-#else
-    return;
-#endif
-  default:
-    break;
-  }
-
-  /* filter half baked (or internal) objects */
-  if (!obj->c) {
-#ifdef MRB_EACH_OBJ_OK
-    return MRB_EACH_OBJ_OK;
-#else
-    return;
-#endif
-  }
-
-  mrb_value thread_val = mrb_obj_value(obj);
-  if (mrb_obj_is_kind_of(mrb, thread_val, (struct RClass *)thread_class)) {
-    mrb_zmq_gc_threadclose(mrb, DATA_PTR(thread_val));
-    mrb_data_init(thread_val, NULL, NULL);
-  }
-
-#ifdef  MRB_EACH_OBJ_OK
-  return MRB_EACH_OBJ_OK;
-#endif
-}
-
 
 #ifdef MRB_EACH_OBJ_OK
 static int
