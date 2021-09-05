@@ -68,8 +68,12 @@ module ZMQ
       LibZMQ.send(@pipe, [FINALIZE, object_id].to_msgpack, 0)
     end
 
-    def close(blocky = true)
-      LibZMQ.threadclose(self, blocky)
+    def close
+      LibZMQ.threadclose(self)
+    end
+
+    def close!
+      LibZMQ.threadclose!(self)
     end
 
     class Thread_fn
