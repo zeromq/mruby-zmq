@@ -867,7 +867,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
 
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
-    mrb_int fd = mrb_integer(mrb_convert_to_integer(mrb, socket, 0));
+    mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_add_fd(DATA_PTR(self), fd, mrb_ptr(socket), events);
     if (unlikely(rc == -1)) {
@@ -899,7 +899,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
 
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
-    mrb_int fd = mrb_integer(mrb_convert_to_integer(mrb, socket, 0));
+    mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_modify_fd(DATA_PTR(self), fd, events);
     if (unlikely(rc == -1)) {
@@ -927,7 +927,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
 
   int rc;
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
-    mrb_int fd = mrb_integer(mrb_convert_to_integer(mrb, socket, 0));
+    mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_remove_fd(DATA_PTR(self), fd);
     if (unlikely(rc == -1)) {
@@ -1040,7 +1040,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   struct zmq_pollitem_t *pollitems, pollitem;
 
   if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
-    mrb_int fd = mrb_integer(mrb_convert_to_integer(mrb, socket, 0));
+    mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     pollitem.socket = NULL;
     pollitem.fd = (int) fd;
