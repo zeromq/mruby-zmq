@@ -5,8 +5,14 @@ module ZMQ
       self
     end
 
-    def close(blocky = true)
-      LibZMQ.close(self, blocky)
+    def close
+      LibZMQ.close(self)
+      nil
+    end
+
+    # this immediately closes the socket, discarding any messages which couldn't be sent yet.
+    def close!
+      LibZMQ.close!(self)
       nil
     end
 

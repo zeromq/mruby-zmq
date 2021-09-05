@@ -1,0 +1,27 @@
+---
+mruby:
+  version: 3.0.0
+  release_no: 30000
+  git_commit: eaaa9148b532a60daf92dfde1c37530194f2060d
+builds:
+  host:
+    https://github.com/iij/mruby-errno.git:
+      url: https://github.com/iij/mruby-errno.git
+      branch: HEAD
+      commit: b4415207ff6ea62360619c89a1cff83259dc4db0
+      version: 0.0.0
+    https://github.com/Asmod4n/mruby-proc-irep-ext.git:
+      url: https://github.com/Asmod4n/mruby-proc-irep-ext.git
+      branch: HEAD
+      commit: 66ec9ed10982ff03e998b51a8652c9bb2b75ec44
+      version: 0.0.0
+    https://github.com/Asmod4n/mruby-simplemsgpack.git:
+      url: https://github.com/Asmod4n/mruby-simplemsgpack.git
+      branch: HEAD
+      commit: 293a0c58c77b0b8fff0a5eef176ac9deb0d9cdc0
+      version: '2.0'
+    https://github.com/iij/mruby-env.git:
+      url: https://github.com/iij/mruby-env.git
+      branch: HEAD
+      commit: 056ae324451ef16a50c7887e117f0ea30921b71b
+      version: 0.0.0
