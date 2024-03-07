@@ -637,8 +637,8 @@ mrb_zmq_z85_encode(mrb_state *mrb, mrb_value self)
   return dest;
 }
 
-static void
-mrb_zmq_thread_fn_cb(mrb_state *mrb, const mrb_value mrb_zmq_thread_data_)
+static mrb_value
+mrb_zmq_thread_fn_cb(mrb_state *mrb, mrb_value mrb_zmq_thread_data_)
 {
   mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_cptr(mrb_zmq_thread_data_);
 
@@ -666,6 +666,8 @@ mrb_zmq_thread_fn_cb(mrb_state *mrb, const mrb_value mrb_zmq_thread_data_)
   if (unlikely(rc == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_send");
   }
+
+  return mrb_nil_value();
 }
 
 static int
