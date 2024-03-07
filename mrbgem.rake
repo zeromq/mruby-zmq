@@ -19,7 +19,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   def build_libzmq(spec, build)
     unless File.exists?("#{spec.build_dir}/build/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DWITH_LIBBSD=OFF -DWITH_LIBSODIUM=OFF -DWITH_TLS=OFF -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j4 --target libzmq-static"
+      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DWITH_LIBSODIUM=OFF -DENABLE_CURVE=ON -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j4 --target libzmq-static"
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
     `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
