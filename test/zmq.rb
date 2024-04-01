@@ -51,7 +51,7 @@ assert('RouterDealer') do
   router.rcvtimeo = 500
   router.sndtimeo = 500
   dealer = ZMQ::Dealer.new
-  dealer.identity = "#{dealer.object_id}"
+  dealer.routing_id = "#{dealer.object_id}"
   dealer.rcvtimeo = 500
   dealer.sndtimeo = 500
   dealer.connect(router.last_endpoint)

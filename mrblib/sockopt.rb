@@ -43,13 +43,17 @@ module ZMQ
       end
     end
 
-    def identity
-      LibZMQ.getsockopt(self, LibZMQ::IDENTITY, String)
+    def routing_id
+      LibZMQ.getsockopt(self, LibZMQ::ROUTING_ID, String)
     end
 
-    def identity=(option_value)
-      LibZMQ.setsockopt(self, LibZMQ::IDENTITY, option_value.to_str)
+    alias_method :identity, :routing_id
+
+    def routing_id=(option_value)
+      LibZMQ.setsockopt(self, LibZMQ::ROUTING_ID, option_value.to_str)
     end
+
+    alias_method :identity=, :routing_id=
 
     def readable?
       events & LibZMQ::POLLIN != 0
@@ -71,18 +75,18 @@ module ZMQ
 
     if LibZMQ.has?("curve")
       def curve_security(options = {})
-        if options[:type] == :server
+        if :server == options[:type]
           self.curve_server = true
           self.curve_secretkey = options.fetch(:secret_key)
           self.zap_domain = options[:zap_domain]
-        elsif options[:type] == :client
+        elsif :client == options[:type]
           self.curve_serverkey = options.fetch(:server_key)
           self.curve_publickey = options.fetch(:public_key)
           self.curve_secretkey = options.fetch(:secret_key)
         else
           raise ArgumentError, ":type can only be :server or :client"
         end
-        unless mechanism == LibZMQ::CURVE
+        unless LibZMQ::CURVE == mechanism
           raise LibZMQ::Error, "cannot set curve security"
         end
         self

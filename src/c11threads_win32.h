@@ -7,8 +7,8 @@ thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
   uintptr_t handle;
   if (!thr) return thrd_error;
   handle = _beginthreadex(NULL, 0, (_beginthreadex_proc_type)func, arg, 0, NULL);
-  if (handle == 0) {
-      if (errno == EAGAIN || errno == EACCES) {
+  if (0 == handle) {
+      if (EAGAIN == errno || EACCES == errno) {
         return thrd_nomem;
       }
       return thrd_error;
@@ -22,7 +22,7 @@ thrd_join(thrd_t thr, int *res)
 {
     DWORD w, code;
     w = WaitForSingleObject(thr, INFINITE);
-    if (w != WAIT_OBJECT_0)
+    if (WAIT_OBJECT_0 != w)
         return thrd_error;
     if (res) {
         if (!GetExitCodeThread(thr, &code)) {
