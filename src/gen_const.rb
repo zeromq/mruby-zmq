@@ -4,13 +4,17 @@ Dir.chdir(File.dirname($0))
 
 d = File.open("zmq_const.cstub", "w")
 
-IO.readlines("zmq_const.def").each { |name|
-  next if name =~ /^#/
-  name.strip!
-
-  d.write <<-C
-#ifdef ZMQ_#{name}
-mrb_zmq_define_const("#{name}", ZMQ_#{name});
+define_match = /^[ \t]*#define ZMQ_(\S+)[ \t]*((?:.*\\\r?\n)*.*)/m
+IO.readlines('../deps/libzmq/include/zmq.h').each do |line|
+  if (match = define_match.match(line))
+    begin
+      Integer(match[2])
+      d.write <<-C
+#ifdef ZMQ_#{match[1]}
+mrb_zmq_define_const("#{match[1]}", ZMQ_#{match[1]});
 #endif
 C
-}
+    rescue
+    end
+  end
+end

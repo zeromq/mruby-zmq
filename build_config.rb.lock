@@ -2,7 +2,7 @@
 mruby:
   version: 3.3.0
   release_no: 30300
-  git_commit: 9257a61b39d7825ba40efd693e3fa3d588f407d8
+  git_commit: a810b9bca8cd7f99a766431ca39e24c083a1fc0e
 builds:
   host:
     https://github.com/Asmod4n/mruby-proc-irep-ext.git:
@@ -13,10 +13,15 @@ builds:
     https://github.com/Asmod4n/mruby-simplemsgpack.git:
       url: https://github.com/Asmod4n/mruby-simplemsgpack.git
       branch: master
-      commit: b07b6b56839f1358a45909e15a31b54863aaf040
+      commit: 808d7f34dc4b7d0313e932e56393686f436814a2
       version: '2.1'
     https://github.com/iij/mruby-env.git:
       url: https://github.com/iij/mruby-env.git
       branch: master
       commit: 056ae324451ef16a50c7887e117f0ea30921b71b
+      version: 0.0.0
+    https://github.com/Asmod4n/mruby-string-is-utf8.git:
+      url: https://github.com/Asmod4n/mruby-string-is-utf8.git
+      branch: master
+      commit: 1c639fe845008d437420a61852329a158ddd74b1
       version: 0.0.0

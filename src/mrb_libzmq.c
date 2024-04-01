@@ -8,7 +8,7 @@ mrb_zmq_bind(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &endpoint);
 
   int rc = zmq_bind(socket, endpoint);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_bind");
   }
 
@@ -23,7 +23,7 @@ mrb_zmq_close(mrb_state *mrb, mrb_value self)
 
   if (mrb_type(socket_val) == MRB_TT_DATA && DATA_TYPE(socket_val) == &mrb_zmq_socket_type) {
     int rc = zmq_close(DATA_PTR(socket_val));
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_close");
     }
     mrb_data_init(socket_val, NULL, NULL);
@@ -42,7 +42,7 @@ mrb_zmq_close_mark(mrb_state *mrb, mrb_value self)
     int disable = 0;
     zmq_setsockopt(DATA_PTR(socket_val), ZMQ_LINGER, &disable, sizeof(disable));
     int rc = zmq_close(DATA_PTR(socket_val));
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_close");
     }
     mrb_data_init(socket_val, NULL, NULL);
@@ -59,7 +59,7 @@ mrb_zmq_connect(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &endpoint);
 
   int rc = zmq_connect(socket, endpoint);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_connect");
   }
 
@@ -73,7 +73,7 @@ mrb_zmq_ctx_get(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "i", &option_name);
 
   int rc = zmq_ctx_get(MRB_LIBZMQ_CONTEXT(mrb), (int) option_name);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_ctx_get");
   }
 
@@ -87,7 +87,7 @@ mrb_zmq_ctx_set(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "ii", &option_name, &option_value);
 
   int rc = zmq_ctx_set(MRB_LIBZMQ_CONTEXT(mrb), (int) option_name, (int) option_value);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_ctx_set");
   }
 
@@ -101,7 +101,7 @@ mrb_zmq_curve_keypair(mrb_state *mrb, mrb_value self)
   mrb_value secret_key = mrb_str_new(mrb, NULL, 40);
 
   int rc = zmq_curve_keypair(RSTRING_PTR(public_key), RSTRING_PTR(secret_key));
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_curve_keypair");
   }
 
@@ -121,7 +121,7 @@ mrb_zmq_disconnect(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &endpoint);
 
   int rc = zmq_disconnect(socket, endpoint);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_disconnect");
   }
 
@@ -147,7 +147,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     SOCKET fd;
     option_len = sizeof(fd);
     rc = zmq_getsockopt(socket, option_name, &fd, &option_len);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
    }
     return mrb_int_value(mrb, fd);
@@ -156,7 +156,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     int boolean;
     option_len = sizeof(boolean);
     rc = zmq_getsockopt(socket, option_name, &boolean, &option_len);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
     return mrb_bool_value(boolean);
@@ -165,7 +165,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     int number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
     return mrb_int_value(mrb, number);
@@ -174,7 +174,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     int64_t number;
     option_len = sizeof(number);
     rc = zmq_getsockopt(socket, option_name, &number, &option_len);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
 #if (MRB_INT_BIT >= 64)
@@ -187,7 +187,7 @@ mrb_zmq_getsockopt(mrb_state *mrb, mrb_value self)
     mrb_value buf = mrb_str_new(mrb, NULL, string_return_len);
     option_len = RSTRING_CAPA(buf);
     rc = zmq_getsockopt(socket, option_name, RSTRING_PTR(buf), &option_len);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_getsockopt");
     }
 
@@ -213,7 +213,7 @@ mrb_zmq_msg_new(mrb_state *mrb, mrb_value self)
   switch (mrb_type(data)) {
     case MRB_TT_STRING: {
       int rc = zmq_msg_init_size(msg, RSTRING_LEN(data));
-      if (unlikely(rc == -1)) {
+      if (unlikely(-1 == rc)) {
         mrb_zmq_handle_error(mrb, "zmq_msg_init_size");
       }
       memcpy(zmq_msg_data(msg), RSTRING_PTR(data), RSTRING_LEN(data));
@@ -245,7 +245,7 @@ mrb_zmq_msg_copy(mrb_state *mrb, mrb_value copy)
   mrb_data_init(copy, msg_copy, &mrb_zmq_msg_type);
   zmq_msg_init(msg_copy);
   int rc = zmq_msg_copy(msg_copy, msg_src);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_msg_copy");
   }
   return copy;
@@ -276,7 +276,7 @@ mrb_zmq_msg_send(mrb_state *mrb, mrb_value self)
   mrb_assert_int_fit(mrb_int, flags, int, INT_MAX);
 
   int rc = zmq_msg_send(msg, socket, flags);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_msg_send");
   }
 
@@ -299,7 +299,7 @@ mrb_zmq_proxy(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dd|d!", &frontend, &mrb_zmq_socket_type, &backend, &mrb_zmq_socket_type, &capture, &mrb_zmq_socket_type);
 
   int rc = zmq_proxy(frontend, backend, capture);
-  if (rc == -1) {
+  if (-1 == rc) {
     mrb_zmq_handle_error(mrb, "zmq_proxy");
   }
 
@@ -314,7 +314,7 @@ mrb_zmq_proxy_steerable(mrb_state *mrb, mrb_value self)
     &capture, &mrb_zmq_socket_type);
 
   int rc = zmq_proxy_steerable(frontend, backend, capture, control);
-  if (rc == -1) {
+  if (-1 == rc) {
     mrb_zmq_handle_error(mrb, "zmq_proxy");
   }
 
@@ -356,7 +356,7 @@ mrb_zmq_send(mrb_state *mrb, mrb_value self)
   message = mrb_str_to_str(mrb, message);
 
   int rc = zmq_send(socket, RSTRING_PTR(message), RSTRING_LEN(message), flags);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_send");
   }
 
@@ -403,7 +403,7 @@ mrb_zmq_setsockopt(mrb_state *mrb, mrb_value self)
     }
   }
 
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_setsockopt");
   }
 
@@ -418,7 +418,7 @@ mrb_zmq_unbind(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &endpoint);
 
   int rc = zmq_unbind(socket, endpoint);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_unbind");
   }
 
@@ -454,7 +454,7 @@ mrb_zmq_msg_set_routing_id(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "di", &msg, &mrb_zmq_msg_type, &routing_id);
 
   int rc = zmq_msg_set_routing_id(msg, (uint32_t) routing_id);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_msg_set_routing_id");
   }
 
@@ -471,7 +471,7 @@ mrb_zmq_join(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &group);
 
   int rc = zmq_join(socket, group);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_join");
   }
 
@@ -486,7 +486,7 @@ mrb_zmq_leave(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &socket, &mrb_zmq_socket_type, &group);
 
   int rc = zmq_leave(socket, group);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_leave");
   }
 
@@ -510,7 +510,7 @@ mrb_zmq_msg_set_group(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "dz", &msg, &mrb_zmq_msg_type, &group);
 
   int rc = zmq_msg_set_group(msg, group);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_msg_set_group");
   }
 
@@ -550,7 +550,7 @@ mrb_zmq_socket_monitor(mrb_state *mrb, mrb_value self)
   mrb_assert_int_fit(mrb_int, events, int, INT_MAX);
 
   int rc = zmq_socket_monitor(socket, addr, (int) events);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_socket_monitor");
   }
 
@@ -573,7 +573,7 @@ mrb_zmq_socket_recv(mrb_state *mrb, mrb_value self)
     zmq_msg_t *msg = (zmq_msg_t *) DATA_PTR(msg_val);
 
     int rc = zmq_msg_recv (msg, DATA_PTR(self), (int) flags);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_msg_recv");
     }
     more = zmq_msg_more(msg);
@@ -651,7 +651,7 @@ mrb_zmq_thread_fn_cb(mrb_state *mrb, mrb_value mrb_zmq_thread_data_)
 
   mrb_value argv = mrb_msgpack_unpack(mrb, mrb_zmq_thread_data->argv_str);
   mrb_value block = mrb_msgpack_unpack(mrb, mrb_zmq_thread_data->block_str);
-  if (mrb_type(mrb_ary_ref(mrb, argv, 0)) == MRB_TT_CLASS) {
+  if (MRB_TT_CLASS == mrb_type(mrb_ary_ref(mrb, argv, 0))) {
     mrb_value bg_class = mrb_ary_shift(mrb, argv);
     enum mrb_vtype ttype = MRB_INSTANCE_TT(mrb_class_ptr(bg_class));
     if (ttype == 0) ttype = MRB_TT_OBJECT;
@@ -663,7 +663,7 @@ mrb_zmq_thread_fn_cb(mrb_state *mrb, mrb_value mrb_zmq_thread_data_)
   mrb_funcall_with_block(mrb, mrb_zmq_thread_data->thread_fn, mrb_intern_lit(mrb, "initialize"), RARRAY_LEN(argv), RARRAY_PTR(argv), block);
   int success = TRUE;
   int rc = zmq_send(mrb_zmq_thread_data->backend, &success, sizeof(success), 0);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_send");
   }
 
@@ -709,6 +709,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 
     if (mrb->exc && !mrb_obj_is_kind_of(mrb, mrb_obj_value(mrb->exc), E_ETERM_ERROR)) {
       success = FALSE;
+      puts("Error in mruby-zmq thread.");
       mrb_print_error(mrb);
     }
 
@@ -724,7 +725,7 @@ mrb_zmq_thread_fn(void *mrb_zmq_thread_data_)
 static mrb_value
 mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
 {
-  if (unlikely(MRB_INSTANCE_TT(mrb_class_ptr(thread_class)) != MRB_TT_DATA)) {
+  if (unlikely(MRB_TT_DATA != MRB_INSTANCE_TT(mrb_class_ptr(thread_class)))) {
     mrb_raisef(mrb, E_TYPE_ERROR, "%S instance_tt is not MRB_TT_DATA", mrb_class_path(mrb, mrb_class_ptr(thread_class)));
   }
 
@@ -759,7 +760,7 @@ mrb_zmq_threadstart(mrb_state *mrb, mrb_value thread_class)
   }
 
   int rc = thrd_create(&mrb_zmq_thread_data->thread, &mrb_zmq_thread_fn, mrb_zmq_thread_data);
-  if (unlikely(rc != thrd_success)) {
+  if (unlikely(thrd_success != rc)) {
     zmq_close(mrb_zmq_thread_data->backend);
     mrb_zmq_handle_error(mrb, "thrd_create");
   }
@@ -787,7 +788,7 @@ mrb_zmq_threadclose(mrb_state *mrb, mrb_value self)
   mrb_value thread_val;
   mrb_get_args(mrb, "o", &thread_val);
 
-  if (mrb_type(thread_val) == MRB_TT_DATA && DATA_TYPE(thread_val) == &mrb_zmq_thread_type) {
+  if (MRB_TT_DATA == mrb_type(thread_val) && &mrb_zmq_thread_type == DATA_TYPE(thread_val)) {
     mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) DATA_PTR(thread_val);
     zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
     int success = FALSE;
@@ -807,7 +808,7 @@ mrb_zmq_threadclose_mark(mrb_state *mrb, mrb_value self)
   mrb_value thread_val;
   mrb_get_args(mrb, "o", &thread_val);
 
-  if (mrb_type(thread_val) == MRB_TT_DATA && DATA_TYPE(thread_val) == &mrb_zmq_thread_type) {
+  if (MRB_TT_DATA == mrb_type(thread_val) && &mrb_zmq_thread_type == DATA_TYPE(thread_val)) {
     mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) DATA_PTR(thread_val);
     int timeo = 0;
     zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &timeo, sizeof(timeo));
@@ -834,7 +835,7 @@ mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
       return mrb_cptr(socket);
     }
     case MRB_TT_DATA: {
-      if (DATA_TYPE(socket) == &mrb_zmq_socket_type)
+      if (&mrb_zmq_socket_type == DATA_TYPE(socket))
         return DATA_PTR(socket);
     }
     default: {
@@ -872,7 +873,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_add_fd(DATA_PTR(self), fd, mrb_ptr(socket), events);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
     }
   } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
@@ -881,7 +882,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
     rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), mrb_ptr(socket), events);
   }
 
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_poller_add");
   }
 
@@ -904,7 +905,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_modify_fd(DATA_PTR(self), fd, events);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_modify_fd");
     }
   } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
@@ -913,7 +914,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
     rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), events);
   }
 
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_poller_modify");
   }
 
@@ -932,7 +933,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_remove_fd(DATA_PTR(self), fd);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_remove_fd");
     }
   } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
@@ -941,7 +942,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
     rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket));
   }
 
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_poller_remove");
   }
 
@@ -961,7 +962,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
   if (mrb_type(block) != MRB_TT_PROC) {
     zmq_poller_event_t event;
     rc = zmq_poller_wait(DATA_PTR(self), &event, (long) timeout);
-    if (rc == -1) {
+    if (-1 == rc) {
       switch(mrb_zmq_errno()) {
         case ETIMEDOUT: {
           return mrb_nil_value();
@@ -994,7 +995,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
       rc = zmq_poller_wait_all(DATA_PTR(self), &event, 0, timeout);
     }
 
-    if (rc == -1) {
+    if (-1 == rc) {
       switch(mrb_zmq_errno()) {
         case ETIMEDOUT: {
           return mrb_nil_value();
@@ -1085,7 +1086,7 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   mrb_int socket_obj_id = mrb_obj_id(socket);
 
   for (mrb_int i = 0; i < RARRAY_LEN(sockets); i++) {
-    if (socket_obj_id == mrb_obj_id(mrb_ary_ref(mrb, sockets, i))) {
+    if (mrb_obj_id(mrb_ary_ref(mrb, sockets, i)) == socket_obj_id) {
       pollitems[i].events = (short) events;
       break;
     }
@@ -1109,7 +1110,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
   struct zmq_pollitem_t *pollitems = (struct zmq_pollitem_t *) DATA_PTR(self);
   mrb_int socket_obj_id = mrb_obj_id(socket);
 
-  if (RARRAY_LEN(sockets) == 1 && socket_obj_id == mrb_obj_id(mrb_ary_ref(mrb, sockets, 0))) {
+  if (RARRAY_LEN(sockets) == 1 && mrb_obj_id(mrb_ary_ref(mrb, sockets, 0)) == socket_obj_id) {
     mrb_ary_clear(mrb, sockets);
     mrb_free(mrb, DATA_PTR(self));
     mrb_data_init(self, NULL, NULL);
@@ -1117,7 +1118,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
     return self;
   } else {
     for (mrb_int i = 0; i < RARRAY_LEN(sockets); i++) {
-      if (socket_obj_id == mrb_obj_id(mrb_ary_ref(mrb, sockets, i))) {
+      if (mrb_obj_id(mrb_ary_ref(mrb, sockets, i)) == socket_obj_id) {
         struct zmq_pollitem_t *ptr = pollitems + i;
         mrb_int len = RARRAY_LEN(sockets) - i;
         while (--len) {
@@ -1170,11 +1171,11 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
       }
     }
   }
-  else if (ret == 0) {
+  else if (0 == ret) {
     return mrb_nil_value();
   }
-  else if (unlikely(ret == -1)) {
-    if (errno == EINTR) {
+  else if (unlikely(-1 == ret)) {
+    if (EINTR == errno) {
       return mrb_false_value();
     } else {
       mrb_zmq_handle_error(mrb, "zmq_poll");
@@ -1249,7 +1250,7 @@ mrb_zmq_timers_set_interval(mrb_state *mrb, mrb_value self)
 
   mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
   int rc = zmq_timers_set_interval(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id, (size_t) interval);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_set_interval");
   }
 
@@ -1261,7 +1262,7 @@ mrb_zmq_timers_reset(mrb_state *mrb, mrb_value self)
 {
   mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
   int rc = zmq_timers_reset(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_reset");
   }
 
@@ -1274,7 +1275,7 @@ mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
   if (DATA_PTR(self)) {
     mrb_zmq_timers_fn_t *timer_fn_arg = (mrb_zmq_timers_fn_t *) DATA_PTR(self);
     int rc = zmq_timers_cancel(DATA_PTR(timer_fn_arg->timers), timer_fn_arg->timer_id);
-    if (unlikely(rc == -1)) {
+    if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_timers_cancel");
     }
     mrb_hash_delete_key(mrb, mrb_iv_get(mrb, timer_fn_arg->timers, mrb_intern_lit(mrb, "timers")), mrb_int_value(mrb, timer_fn_arg->timer_id));
@@ -1296,7 +1297,7 @@ static mrb_value
 mrb_zmq_timers_execute(mrb_state *mrb, mrb_value self)
 {
   int rc = zmq_timers_execute(DATA_PTR(self));
-  if (unlikely(rc == -1)) {
+  if (unlikely(-1 == rc)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_execute");
   }
 
