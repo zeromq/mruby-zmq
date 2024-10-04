@@ -4,8 +4,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.summary = 'mruby bindings for libzmq4'
   spec.add_conflict 'mruby-czmq'
   spec.add_dependency 'mruby-errno'
-  spec.add_dependency 'mruby-proc-irep-ext'
-  spec.add_dependency 'mruby-simplemsgpack'
   spec.add_dependency 'mruby-objectspace'
   spec.add_dependency 'mruby-pack'
   spec.add_dependency 'mruby-env'
@@ -19,7 +17,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   def build_libzmq(spec, build)
     unless File.exists?("#{spec.build_dir}/build/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DWITH_LIBSODIUM=OFF -DENABLE_CURVE=ON -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
+      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DWITH_LIBSODIUM=ON -DENABLE_CURVE=ON -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
     `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
@@ -32,9 +30,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     end
   end
 
-  if spec.cc.search_header_path 'threads.h'
-    spec.cc.defines << 'HAVE_THREADS_H'
-  end
   if spec.cc.search_header_path 'ifaddrs.h'
     spec.cc.defines << 'HAVE_IFADDRS_H'
   end
@@ -44,18 +39,10 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     if ENV['BUILD_LIBZMQ']
       build_libzmq(spec, build)
     else
-      `pkg-config --cflags libzmq 2>/dev/null`.split("\s").each do |cflag|
-        spec.cxx.flags << cflag
-        spec.cc.flags << cflag
-      end
-      exitstatus = $?.exitstatus
-      `pkg-config --libs libzmq 2>/dev/null`.split("\s").each do |lib|
-        spec.linker.flags_before_libraries << lib
-      end
-      exitstatus += $?.exitstatus
-      unless exitstatus == 0
+      unless spec.search_package('libzmq')
         build_libzmq(spec, build)
       end
+
     end
     spec.linker.flags_before_libraries << '-pthread'
   end

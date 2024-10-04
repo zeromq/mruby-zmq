@@ -1,11 +1,3 @@
-assert('ZMQ::Thread') do
-  15.times do
-    th = ZMQ::Thread.new
-    str = th.new(String, "hallo")
-    assert_equal("hallo", str.send(:to_str))
-  end
-end
-
 assert('PubSub') do
   publisher = ZMQ::Pub.new(ZMQ.ipv6? ? "tcp://[::1]:*" : "tcp://127.0.0.1:*")
   publisher.sndtimeo = 500
