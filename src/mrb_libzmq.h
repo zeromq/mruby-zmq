@@ -25,13 +25,6 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
-#include <mruby/msgpack.h>
-
-#ifdef HAVE_THREADS_H
-#include <threads.h>
-#else
-#include "c11threads.h"
-#endif
 
 #define NELEMS(args) (sizeof(args) / sizeof(args[0]))
 
@@ -100,40 +93,6 @@ mrb_zmq_gc_msg_close(mrb_state *mrb, void *msg)
 
 static const struct mrb_data_type mrb_zmq_msg_type = {
   "$i_mrb_zmq_msg_type", mrb_zmq_gc_msg_close
-};
-
-typedef struct {
-  mrb_state *mrb_parent;
-  mrb_value argv_str;
-  mrb_value block_str;
-  mrb_value thread_fn;
-  const char *endpoint;
-  void *frontend;
-  void *backend;
-  thrd_t thread;
-  void *backend_ctx;
-} mrb_zmq_thread_data_t;
-
-static void
-mrb_zmq_gc_threadclose(mrb_state *mrb, void *mrb_zmq_thread_data_)
-{
-  mrb_zmq_thread_data_t *mrb_zmq_thread_data = (mrb_zmq_thread_data_t *) mrb_zmq_thread_data_;
-  if (likely(mrb_zmq_thread_data->frontend)) {
-    int disable = 0; // The other side might have crashed, don't wait on sending the term msg.
-    zmq_setsockopt(mrb_zmq_thread_data->frontend, ZMQ_SNDTIMEO, &disable, sizeof(disable));
-    zmq_send_const(mrb_zmq_thread_data->frontend, "TERM$", 5, 0);
-  }
-  if (likely(mrb_zmq_thread_data->backend_ctx)) {
-    zmq_ctx_shutdown(mrb_zmq_thread_data->backend_ctx);
-  }
-  if (likely(mrb_zmq_thread_data->thread)) {
-    thrd_join(mrb_zmq_thread_data->thread, NULL);
-  }
-  mrb_free(mrb, mrb_zmq_thread_data_);
-}
-
-static const struct mrb_data_type mrb_zmq_thread_type = {
-  "$i_mrb_zmq_thread_type", mrb_zmq_gc_threadclose
 };
 
 #ifdef ZMQ_HAVE_POLLER

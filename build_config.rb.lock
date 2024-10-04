@@ -2,7 +2,7 @@
 mruby:
   version: 3.3.0
   release_no: 30300
-  git_commit: a810b9bca8cd7f99a766431ca39e24c083a1fc0e
+  git_commit: 0023cbdb3dfda2fb51c12be91ecd72df1fbd7fc7
 builds:
   host:
     https://github.com/Asmod4n/mruby-proc-irep-ext.git:
