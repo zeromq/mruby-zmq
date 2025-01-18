@@ -53,3 +53,4 @@ build-iPhoneSimulator/
 /build/
 build_config.rb.lock
 compile_commands.json
+.cache
