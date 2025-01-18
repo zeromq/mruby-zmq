@@ -7,7 +7,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-objectspace'
   spec.add_dependency 'mruby-pack'
   spec.add_dependency 'mruby-env'
-  spec.add_dependency 'mruby-print'
   spec.add_dependency 'mruby-time'
   spec.add_dependency 'mruby-sprintf'
   spec.add_dependency 'mruby-class-ext'
@@ -15,9 +14,15 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_test_dependency 'mruby-sleep'
 
   def build_libzmq(spec, build)
-    unless File.exists?("#{spec.build_dir}/build/lib/libzmq.a")
+    unless File.file?("#{spec.build_dir}/build/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      sh "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\" -DWITH_LIBSODIUM=ON -DENABLE_CURVE=ON -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
+      cmdline = "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\""
+      if spec.search_package('libsodium')
+        puts "mruby-zmq: building with libsodium"
+        cmdline << " -DWITH_LIBSODIUM=ON -DENABLE_CURVE=ON"
+      end
+      cmdline << " -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
+      sh cmdline
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
     `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
