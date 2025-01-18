@@ -25,6 +25,7 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
+#include <mruby/presym.h>
 
 #define NELEMS(args) (sizeof(args) / sizeof(args[0]))
 
@@ -46,7 +47,8 @@
 #define mrb_zmq_errno() errno
 #endif
 
-#define MRB_LIBZMQ_CONTEXT(mrb) (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get(mrb, "LibZMQ")), mrb_intern_lit(mrb, "_Context"))))
+
+#define MRB_LIBZMQ_CONTEXT(mrb) (mrb_cptr(mrb_const_get(mrb, mrb_obj_value(mrb_module_get_id(mrb, MRB_SYM(LibZMQ))), MRB_SYM(_Context))))
 
 static void
 mrb_zmq_handle_error(mrb_state *mrb, const char *func)

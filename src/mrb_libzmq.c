@@ -106,8 +106,8 @@ mrb_zmq_curve_keypair(mrb_state *mrb, mrb_value self)
   }
 
   mrb_value keypair = mrb_hash_new_capa(mrb, 2);
-  mrb_hash_set(mrb, keypair, mrb_symbol_value(mrb_intern_lit(mrb, "public_key")), public_key);
-  mrb_hash_set(mrb, keypair, mrb_symbol_value(mrb_intern_lit(mrb, "secret_key")), secret_key);
+  mrb_hash_set(mrb, keypair, mrb_symbol_value(MRB_SYM(public_key)), public_key);
+  mrb_hash_set(mrb, keypair, mrb_symbol_value(MRB_SYM(secret_key)), secret_key);
 
   return keypair;
 
@@ -666,7 +666,7 @@ mrb_zmq_poller_new(mrb_state *mrb, mrb_value self)
   }
 
   mrb_data_init(self, zmq_poller_new(), &mrb_zmq_poller_type);
-  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "sockets"), mrb_ary_new(mrb));
+  mrb_iv_set(mrb, self, MRB_SYM(sockets), mrb_ary_new(mrb));
 
   return self;
 }
@@ -681,14 +681,14 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   mrb_assert_int_fit(mrb_int, events, short, SHRT_MAX);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_add_fd(DATA_PTR(self), fd, mrb_ptr(socket), events);
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+  } else if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(zmq_socket))) {
     rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)), mrb_ptr(socket), events);
   } else {
     rc = zmq_poller_add(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), mrb_ptr(socket), events);
@@ -698,7 +698,7 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
     mrb_zmq_handle_error(mrb, "zmq_poller_add");
   }
 
-  mrb_ary_push(mrb, mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets")), socket);
+  mrb_ary_push(mrb, mrb_iv_get(mrb, self, MRB_SYM(sockets)), socket);
 
   return self;
 }
@@ -713,14 +713,14 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   mrb_assert_int_fit(mrb_int, events, short, SHRT_MAX);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_modify_fd(DATA_PTR(self), fd, events);
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_modify_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+  } else if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(zmq_socket))) {
     rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)), events);
   } else {
     rc = zmq_poller_modify(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket), events);
@@ -741,14 +741,14 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
   struct RClass *socket_class = mrb_obj_class(mrb, socket);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "to_i"))) {
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
     mrb_int fd = mrb_as_int(mrb, socket);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
     rc = zmq_poller_remove_fd(DATA_PTR(self), fd);
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_remove_fd");
     }
-  } else if (mrb_obj_respond_to(mrb, socket_class, mrb_intern_lit(mrb, "zmq_socket"))) {
+  } else if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(zmq_socket))) {
     rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, mrb_funcall(mrb, socket, "zmq_socket", 0)));
   } else {
     rc = zmq_poller_remove(DATA_PTR(self), mrb_zmq_get_socket(mrb, socket));
@@ -758,7 +758,7 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
     mrb_zmq_handle_error(mrb, "zmq_poller_remove");
   }
 
-  mrb_funcall(mrb, mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets")), "delete", 1, socket);
+  mrb_funcall(mrb, mrb_iv_get(mrb, self, MRB_SYM(sockets)), "delete", 1, socket);
 
   return self;
 }
@@ -790,7 +790,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
 
     return mrb_obj_value(event.user_data);
   } else {
-    mrb_int n_events = RARRAY_LEN(mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "sockets")));
+    mrb_int n_events = RARRAY_LEN(mrb_iv_get(mrb, self, MRB_SYM(sockets)));
     if (n_events > 0) {
       zmq_poller_event_t events[n_events];
       rc = zmq_poller_wait_all(DATA_PTR(self), events, n_events, timeout);
@@ -842,7 +842,7 @@ mrb_zmq_timers_new(mrb_state *mrb, mrb_value self)
   }
 
   mrb_data_init(self, zmq_timers_new(), &mrb_zmq_timers_type);
-  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "timers"), mrb_hash_new(mrb));
+  mrb_iv_set(mrb, self, MRB_SYM(timers), mrb_hash_new(mrb));
 
   return self;
 }
@@ -864,14 +864,14 @@ mrb_zmq_timers_add(mrb_state *mrb, mrb_value self)
   timer_fn_arg->mrb = mrb;
   timer_fn_arg->timers = self;
   timer_fn_arg->block = block;
-  mrb_iv_set(mrb, timer, mrb_intern_lit(mrb, "block"), block);
+  mrb_iv_set(mrb, timer, MRB_SYM(block), block);
 
   int timer_id = zmq_timers_add(DATA_PTR(self), (size_t) interval, mrb_zmq_timer_fn, timer_fn_arg);
   if (unlikely(timer_id == -1)) {
     mrb_zmq_handle_error(mrb, "zmq_timers_add");
   }
   timer_fn_arg->timer_id = timer_id;
-  mrb_hash_set(mrb, mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "timers")), mrb_int_value(mrb, timer_id), timer);
+  mrb_hash_set(mrb, mrb_iv_get(mrb, self, MRB_SYM(timers)), mrb_int_value(mrb, timer_id), timer);
 
   return timer;
 }
@@ -913,8 +913,8 @@ mrb_zmq_timers_cancel(mrb_state *mrb, mrb_value self)
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_timers_cancel");
     }
-    mrb_hash_delete_key(mrb, mrb_iv_get(mrb, timer_fn_arg->timers, mrb_intern_lit(mrb, "timers")), mrb_int_value(mrb, timer_fn_arg->timer_id));
-    mrb_iv_remove(mrb, self, mrb_intern_lit(mrb, "block"));
+    mrb_hash_delete_key(mrb, mrb_iv_get(mrb, timer_fn_arg->timers, MRB_SYM(timers)), mrb_int_value(mrb, timer_fn_arg->timer_id));
+    mrb_iv_remove(mrb, self, MRB_SYM(block));
     mrb_free(mrb, timer_fn_arg);
     mrb_data_init(self, NULL, NULL);
   }
