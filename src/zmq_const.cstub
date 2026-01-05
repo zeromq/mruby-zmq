@@ -1,678 +1,678 @@
 #ifdef ZMQ_VERSION_MAJOR
-mrb_zmq_define_const("VERSION_MAJOR", ZMQ_VERSION_MAJOR);
+mrb_zmq_define_const(VERSION_MAJOR, ZMQ_VERSION_MAJOR);
 #endif
 #ifdef ZMQ_VERSION_MINOR
-mrb_zmq_define_const("VERSION_MINOR", ZMQ_VERSION_MINOR);
+mrb_zmq_define_const(VERSION_MINOR, ZMQ_VERSION_MINOR);
 #endif
 #ifdef ZMQ_VERSION_PATCH
-mrb_zmq_define_const("VERSION_PATCH", ZMQ_VERSION_PATCH);
+mrb_zmq_define_const(VERSION_PATCH, ZMQ_VERSION_PATCH);
 #endif
 #ifdef ZMQ_DEFINED_STDINT
-mrb_zmq_define_const("DEFINED_STDINT", ZMQ_DEFINED_STDINT);
+mrb_zmq_define_const(DEFINED_STDINT, ZMQ_DEFINED_STDINT);
 #endif
 #ifdef ZMQ_HAUSNUMERO
-mrb_zmq_define_const("HAUSNUMERO", ZMQ_HAUSNUMERO);
+mrb_zmq_define_const(HAUSNUMERO, ZMQ_HAUSNUMERO);
 #endif
 #ifdef ZMQ_IO_THREADS
-mrb_zmq_define_const("IO_THREADS", ZMQ_IO_THREADS);
+mrb_zmq_define_const(IO_THREADS, ZMQ_IO_THREADS);
 #endif
 #ifdef ZMQ_MAX_SOCKETS
-mrb_zmq_define_const("MAX_SOCKETS", ZMQ_MAX_SOCKETS);
+mrb_zmq_define_const(MAX_SOCKETS, ZMQ_MAX_SOCKETS);
 #endif
 #ifdef ZMQ_SOCKET_LIMIT
-mrb_zmq_define_const("SOCKET_LIMIT", ZMQ_SOCKET_LIMIT);
+mrb_zmq_define_const(SOCKET_LIMIT, ZMQ_SOCKET_LIMIT);
 #endif
 #ifdef ZMQ_THREAD_PRIORITY
-mrb_zmq_define_const("THREAD_PRIORITY", ZMQ_THREAD_PRIORITY);
+mrb_zmq_define_const(THREAD_PRIORITY, ZMQ_THREAD_PRIORITY);
 #endif
 #ifdef ZMQ_THREAD_SCHED_POLICY
-mrb_zmq_define_const("THREAD_SCHED_POLICY", ZMQ_THREAD_SCHED_POLICY);
+mrb_zmq_define_const(THREAD_SCHED_POLICY, ZMQ_THREAD_SCHED_POLICY);
 #endif
 #ifdef ZMQ_MAX_MSGSZ
-mrb_zmq_define_const("MAX_MSGSZ", ZMQ_MAX_MSGSZ);
+mrb_zmq_define_const(MAX_MSGSZ, ZMQ_MAX_MSGSZ);
 #endif
 #ifdef ZMQ_MSG_T_SIZE
-mrb_zmq_define_const("MSG_T_SIZE", ZMQ_MSG_T_SIZE);
+mrb_zmq_define_const(MSG_T_SIZE, ZMQ_MSG_T_SIZE);
 #endif
 #ifdef ZMQ_THREAD_AFFINITY_CPU_ADD
-mrb_zmq_define_const("THREAD_AFFINITY_CPU_ADD", ZMQ_THREAD_AFFINITY_CPU_ADD);
+mrb_zmq_define_const(THREAD_AFFINITY_CPU_ADD, ZMQ_THREAD_AFFINITY_CPU_ADD);
 #endif
 #ifdef ZMQ_THREAD_AFFINITY_CPU_REMOVE
-mrb_zmq_define_const("THREAD_AFFINITY_CPU_REMOVE", ZMQ_THREAD_AFFINITY_CPU_REMOVE);
+mrb_zmq_define_const(THREAD_AFFINITY_CPU_REMOVE, ZMQ_THREAD_AFFINITY_CPU_REMOVE);
 #endif
 #ifdef ZMQ_THREAD_NAME_PREFIX
-mrb_zmq_define_const("THREAD_NAME_PREFIX", ZMQ_THREAD_NAME_PREFIX);
+mrb_zmq_define_const(THREAD_NAME_PREFIX, ZMQ_THREAD_NAME_PREFIX);
 #endif
 #ifdef ZMQ_IO_THREADS_DFLT
-mrb_zmq_define_const("IO_THREADS_DFLT", ZMQ_IO_THREADS_DFLT);
+mrb_zmq_define_const(IO_THREADS_DFLT, ZMQ_IO_THREADS_DFLT);
 #endif
 #ifdef ZMQ_MAX_SOCKETS_DFLT
-mrb_zmq_define_const("MAX_SOCKETS_DFLT", ZMQ_MAX_SOCKETS_DFLT);
+mrb_zmq_define_const(MAX_SOCKETS_DFLT, ZMQ_MAX_SOCKETS_DFLT);
 #endif
 #ifdef ZMQ_THREAD_PRIORITY_DFLT
-mrb_zmq_define_const("THREAD_PRIORITY_DFLT", ZMQ_THREAD_PRIORITY_DFLT);
+mrb_zmq_define_const(THREAD_PRIORITY_DFLT, ZMQ_THREAD_PRIORITY_DFLT);
 #endif
 #ifdef ZMQ_THREAD_SCHED_POLICY_DFLT
-mrb_zmq_define_const("THREAD_SCHED_POLICY_DFLT", ZMQ_THREAD_SCHED_POLICY_DFLT);
+mrb_zmq_define_const(THREAD_SCHED_POLICY_DFLT, ZMQ_THREAD_SCHED_POLICY_DFLT);
 #endif
 #ifdef ZMQ_PAIR
-mrb_zmq_define_const("PAIR", ZMQ_PAIR);
+mrb_zmq_define_const(PAIR, ZMQ_PAIR);
 #endif
 #ifdef ZMQ_PUB
-mrb_zmq_define_const("PUB", ZMQ_PUB);
+mrb_zmq_define_const(PUB, ZMQ_PUB);
 #endif
 #ifdef ZMQ_SUB
-mrb_zmq_define_const("SUB", ZMQ_SUB);
+mrb_zmq_define_const(SUB, ZMQ_SUB);
 #endif
 #ifdef ZMQ_REQ
-mrb_zmq_define_const("REQ", ZMQ_REQ);
+mrb_zmq_define_const(REQ, ZMQ_REQ);
 #endif
 #ifdef ZMQ_REP
-mrb_zmq_define_const("REP", ZMQ_REP);
+mrb_zmq_define_const(REP, ZMQ_REP);
 #endif
 #ifdef ZMQ_DEALER
-mrb_zmq_define_const("DEALER", ZMQ_DEALER);
+mrb_zmq_define_const(DEALER, ZMQ_DEALER);
 #endif
 #ifdef ZMQ_ROUTER
-mrb_zmq_define_const("ROUTER", ZMQ_ROUTER);
+mrb_zmq_define_const(ROUTER, ZMQ_ROUTER);
 #endif
 #ifdef ZMQ_PULL
-mrb_zmq_define_const("PULL", ZMQ_PULL);
+mrb_zmq_define_const(PULL, ZMQ_PULL);
 #endif
 #ifdef ZMQ_PUSH
-mrb_zmq_define_const("PUSH", ZMQ_PUSH);
+mrb_zmq_define_const(PUSH, ZMQ_PUSH);
 #endif
 #ifdef ZMQ_XPUB
-mrb_zmq_define_const("XPUB", ZMQ_XPUB);
+mrb_zmq_define_const(XPUB, ZMQ_XPUB);
 #endif
 #ifdef ZMQ_XSUB
-mrb_zmq_define_const("XSUB", ZMQ_XSUB);
+mrb_zmq_define_const(XSUB, ZMQ_XSUB);
 #endif
 #ifdef ZMQ_STREAM
-mrb_zmq_define_const("STREAM", ZMQ_STREAM);
+mrb_zmq_define_const(STREAM, ZMQ_STREAM);
 #endif
 #ifdef ZMQ_AFFINITY
-mrb_zmq_define_const("AFFINITY", ZMQ_AFFINITY);
+mrb_zmq_define_const(AFFINITY, ZMQ_AFFINITY);
 #endif
 #ifdef ZMQ_ROUTING_ID
-mrb_zmq_define_const("ROUTING_ID", ZMQ_ROUTING_ID);
+mrb_zmq_define_const(ROUTING_ID, ZMQ_ROUTING_ID);
 #endif
 #ifdef ZMQ_SUBSCRIBE
-mrb_zmq_define_const("SUBSCRIBE", ZMQ_SUBSCRIBE);
+mrb_zmq_define_const(SUBSCRIBE, ZMQ_SUBSCRIBE);
 #endif
 #ifdef ZMQ_UNSUBSCRIBE
-mrb_zmq_define_const("UNSUBSCRIBE", ZMQ_UNSUBSCRIBE);
+mrb_zmq_define_const(UNSUBSCRIBE, ZMQ_UNSUBSCRIBE);
 #endif
 #ifdef ZMQ_RATE
-mrb_zmq_define_const("RATE", ZMQ_RATE);
+mrb_zmq_define_const(RATE, ZMQ_RATE);
 #endif
 #ifdef ZMQ_RECOVERY_IVL
-mrb_zmq_define_const("RECOVERY_IVL", ZMQ_RECOVERY_IVL);
+mrb_zmq_define_const(RECOVERY_IVL, ZMQ_RECOVERY_IVL);
 #endif
 #ifdef ZMQ_SNDBUF
-mrb_zmq_define_const("SNDBUF", ZMQ_SNDBUF);
+mrb_zmq_define_const(SNDBUF, ZMQ_SNDBUF);
 #endif
 #ifdef ZMQ_RCVBUF
-mrb_zmq_define_const("RCVBUF", ZMQ_RCVBUF);
+mrb_zmq_define_const(RCVBUF, ZMQ_RCVBUF);
 #endif
 #ifdef ZMQ_RCVMORE
-mrb_zmq_define_const("RCVMORE", ZMQ_RCVMORE);
+mrb_zmq_define_const(RCVMORE, ZMQ_RCVMORE);
 #endif
 #ifdef ZMQ_FD
-mrb_zmq_define_const("FD", ZMQ_FD);
+mrb_zmq_define_const(FD, ZMQ_FD);
 #endif
 #ifdef ZMQ_EVENTS
-mrb_zmq_define_const("EVENTS", ZMQ_EVENTS);
+mrb_zmq_define_const(EVENTS, ZMQ_EVENTS);
 #endif
 #ifdef ZMQ_TYPE
-mrb_zmq_define_const("TYPE", ZMQ_TYPE);
+mrb_zmq_define_const(TYPE, ZMQ_TYPE);
 #endif
 #ifdef ZMQ_LINGER
-mrb_zmq_define_const("LINGER", ZMQ_LINGER);
+mrb_zmq_define_const(LINGER, ZMQ_LINGER);
 #endif
 #ifdef ZMQ_RECONNECT_IVL
-mrb_zmq_define_const("RECONNECT_IVL", ZMQ_RECONNECT_IVL);
+mrb_zmq_define_const(RECONNECT_IVL, ZMQ_RECONNECT_IVL);
 #endif
 #ifdef ZMQ_BACKLOG
-mrb_zmq_define_const("BACKLOG", ZMQ_BACKLOG);
+mrb_zmq_define_const(BACKLOG, ZMQ_BACKLOG);
 #endif
 #ifdef ZMQ_RECONNECT_IVL_MAX
-mrb_zmq_define_const("RECONNECT_IVL_MAX", ZMQ_RECONNECT_IVL_MAX);
+mrb_zmq_define_const(RECONNECT_IVL_MAX, ZMQ_RECONNECT_IVL_MAX);
 #endif
 #ifdef ZMQ_MAXMSGSIZE
-mrb_zmq_define_const("MAXMSGSIZE", ZMQ_MAXMSGSIZE);
+mrb_zmq_define_const(MAXMSGSIZE, ZMQ_MAXMSGSIZE);
 #endif
 #ifdef ZMQ_SNDHWM
-mrb_zmq_define_const("SNDHWM", ZMQ_SNDHWM);
+mrb_zmq_define_const(SNDHWM, ZMQ_SNDHWM);
 #endif
 #ifdef ZMQ_RCVHWM
-mrb_zmq_define_const("RCVHWM", ZMQ_RCVHWM);
+mrb_zmq_define_const(RCVHWM, ZMQ_RCVHWM);
 #endif
 #ifdef ZMQ_MULTICAST_HOPS
-mrb_zmq_define_const("MULTICAST_HOPS", ZMQ_MULTICAST_HOPS);
+mrb_zmq_define_const(MULTICAST_HOPS, ZMQ_MULTICAST_HOPS);
 #endif
 #ifdef ZMQ_RCVTIMEO
-mrb_zmq_define_const("RCVTIMEO", ZMQ_RCVTIMEO);
+mrb_zmq_define_const(RCVTIMEO, ZMQ_RCVTIMEO);
 #endif
 #ifdef ZMQ_SNDTIMEO
-mrb_zmq_define_const("SNDTIMEO", ZMQ_SNDTIMEO);
+mrb_zmq_define_const(SNDTIMEO, ZMQ_SNDTIMEO);
 #endif
 #ifdef ZMQ_LAST_ENDPOINT
-mrb_zmq_define_const("LAST_ENDPOINT", ZMQ_LAST_ENDPOINT);
+mrb_zmq_define_const(LAST_ENDPOINT, ZMQ_LAST_ENDPOINT);
 #endif
 #ifdef ZMQ_ROUTER_MANDATORY
-mrb_zmq_define_const("ROUTER_MANDATORY", ZMQ_ROUTER_MANDATORY);
+mrb_zmq_define_const(ROUTER_MANDATORY, ZMQ_ROUTER_MANDATORY);
 #endif
 #ifdef ZMQ_TCP_KEEPALIVE
-mrb_zmq_define_const("TCP_KEEPALIVE", ZMQ_TCP_KEEPALIVE);
+mrb_zmq_define_const(TCP_KEEPALIVE, ZMQ_TCP_KEEPALIVE);
 #endif
 #ifdef ZMQ_TCP_KEEPALIVE_CNT
-mrb_zmq_define_const("TCP_KEEPALIVE_CNT", ZMQ_TCP_KEEPALIVE_CNT);
+mrb_zmq_define_const(TCP_KEEPALIVE_CNT, ZMQ_TCP_KEEPALIVE_CNT);
 #endif
 #ifdef ZMQ_TCP_KEEPALIVE_IDLE
-mrb_zmq_define_const("TCP_KEEPALIVE_IDLE", ZMQ_TCP_KEEPALIVE_IDLE);
+mrb_zmq_define_const(TCP_KEEPALIVE_IDLE, ZMQ_TCP_KEEPALIVE_IDLE);
 #endif
 #ifdef ZMQ_TCP_KEEPALIVE_INTVL
-mrb_zmq_define_const("TCP_KEEPALIVE_INTVL", ZMQ_TCP_KEEPALIVE_INTVL);
+mrb_zmq_define_const(TCP_KEEPALIVE_INTVL, ZMQ_TCP_KEEPALIVE_INTVL);
 #endif
 #ifdef ZMQ_IMMEDIATE
-mrb_zmq_define_const("IMMEDIATE", ZMQ_IMMEDIATE);
+mrb_zmq_define_const(IMMEDIATE, ZMQ_IMMEDIATE);
 #endif
 #ifdef ZMQ_XPUB_VERBOSE
-mrb_zmq_define_const("XPUB_VERBOSE", ZMQ_XPUB_VERBOSE);
+mrb_zmq_define_const(XPUB_VERBOSE, ZMQ_XPUB_VERBOSE);
 #endif
 #ifdef ZMQ_ROUTER_RAW
-mrb_zmq_define_const("ROUTER_RAW", ZMQ_ROUTER_RAW);
+mrb_zmq_define_const(ROUTER_RAW, ZMQ_ROUTER_RAW);
 #endif
 #ifdef ZMQ_IPV6
-mrb_zmq_define_const("IPV6", ZMQ_IPV6);
+mrb_zmq_define_const(IPV6, ZMQ_IPV6);
 #endif
 #ifdef ZMQ_MECHANISM
-mrb_zmq_define_const("MECHANISM", ZMQ_MECHANISM);
+mrb_zmq_define_const(MECHANISM, ZMQ_MECHANISM);
 #endif
 #ifdef ZMQ_PLAIN_SERVER
-mrb_zmq_define_const("PLAIN_SERVER", ZMQ_PLAIN_SERVER);
+mrb_zmq_define_const(PLAIN_SERVER, ZMQ_PLAIN_SERVER);
 #endif
 #ifdef ZMQ_PLAIN_USERNAME
-mrb_zmq_define_const("PLAIN_USERNAME", ZMQ_PLAIN_USERNAME);
+mrb_zmq_define_const(PLAIN_USERNAME, ZMQ_PLAIN_USERNAME);
 #endif
 #ifdef ZMQ_PLAIN_PASSWORD
-mrb_zmq_define_const("PLAIN_PASSWORD", ZMQ_PLAIN_PASSWORD);
+mrb_zmq_define_const(PLAIN_PASSWORD, ZMQ_PLAIN_PASSWORD);
 #endif
 #ifdef ZMQ_CURVE_SERVER
-mrb_zmq_define_const("CURVE_SERVER", ZMQ_CURVE_SERVER);
+mrb_zmq_define_const(CURVE_SERVER, ZMQ_CURVE_SERVER);
 #endif
 #ifdef ZMQ_CURVE_PUBLICKEY
-mrb_zmq_define_const("CURVE_PUBLICKEY", ZMQ_CURVE_PUBLICKEY);
+mrb_zmq_define_const(CURVE_PUBLICKEY, ZMQ_CURVE_PUBLICKEY);
 #endif
 #ifdef ZMQ_CURVE_SECRETKEY
-mrb_zmq_define_const("CURVE_SECRETKEY", ZMQ_CURVE_SECRETKEY);
+mrb_zmq_define_const(CURVE_SECRETKEY, ZMQ_CURVE_SECRETKEY);
 #endif
 #ifdef ZMQ_CURVE_SERVERKEY
-mrb_zmq_define_const("CURVE_SERVERKEY", ZMQ_CURVE_SERVERKEY);
+mrb_zmq_define_const(CURVE_SERVERKEY, ZMQ_CURVE_SERVERKEY);
 #endif
 #ifdef ZMQ_PROBE_ROUTER
-mrb_zmq_define_const("PROBE_ROUTER", ZMQ_PROBE_ROUTER);
+mrb_zmq_define_const(PROBE_ROUTER, ZMQ_PROBE_ROUTER);
 #endif
 #ifdef ZMQ_REQ_CORRELATE
-mrb_zmq_define_const("REQ_CORRELATE", ZMQ_REQ_CORRELATE);
+mrb_zmq_define_const(REQ_CORRELATE, ZMQ_REQ_CORRELATE);
 #endif
 #ifdef ZMQ_REQ_RELAXED
-mrb_zmq_define_const("REQ_RELAXED", ZMQ_REQ_RELAXED);
+mrb_zmq_define_const(REQ_RELAXED, ZMQ_REQ_RELAXED);
 #endif
 #ifdef ZMQ_CONFLATE
-mrb_zmq_define_const("CONFLATE", ZMQ_CONFLATE);
+mrb_zmq_define_const(CONFLATE, ZMQ_CONFLATE);
 #endif
 #ifdef ZMQ_ZAP_DOMAIN
-mrb_zmq_define_const("ZAP_DOMAIN", ZMQ_ZAP_DOMAIN);
+mrb_zmq_define_const(ZAP_DOMAIN, ZMQ_ZAP_DOMAIN);
 #endif
 #ifdef ZMQ_ROUTER_HANDOVER
-mrb_zmq_define_const("ROUTER_HANDOVER", ZMQ_ROUTER_HANDOVER);
+mrb_zmq_define_const(ROUTER_HANDOVER, ZMQ_ROUTER_HANDOVER);
 #endif
 #ifdef ZMQ_TOS
-mrb_zmq_define_const("TOS", ZMQ_TOS);
+mrb_zmq_define_const(TOS, ZMQ_TOS);
 #endif
 #ifdef ZMQ_CONNECT_ROUTING_ID
-mrb_zmq_define_const("CONNECT_ROUTING_ID", ZMQ_CONNECT_ROUTING_ID);
+mrb_zmq_define_const(CONNECT_ROUTING_ID, ZMQ_CONNECT_ROUTING_ID);
 #endif
 #ifdef ZMQ_GSSAPI_SERVER
-mrb_zmq_define_const("GSSAPI_SERVER", ZMQ_GSSAPI_SERVER);
+mrb_zmq_define_const(GSSAPI_SERVER, ZMQ_GSSAPI_SERVER);
 #endif
 #ifdef ZMQ_GSSAPI_PRINCIPAL
-mrb_zmq_define_const("GSSAPI_PRINCIPAL", ZMQ_GSSAPI_PRINCIPAL);
+mrb_zmq_define_const(GSSAPI_PRINCIPAL, ZMQ_GSSAPI_PRINCIPAL);
 #endif
 #ifdef ZMQ_GSSAPI_SERVICE_PRINCIPAL
-mrb_zmq_define_const("GSSAPI_SERVICE_PRINCIPAL", ZMQ_GSSAPI_SERVICE_PRINCIPAL);
+mrb_zmq_define_const(GSSAPI_SERVICE_PRINCIPAL, ZMQ_GSSAPI_SERVICE_PRINCIPAL);
 #endif
 #ifdef ZMQ_GSSAPI_PLAINTEXT
-mrb_zmq_define_const("GSSAPI_PLAINTEXT", ZMQ_GSSAPI_PLAINTEXT);
+mrb_zmq_define_const(GSSAPI_PLAINTEXT, ZMQ_GSSAPI_PLAINTEXT);
 #endif
 #ifdef ZMQ_HANDSHAKE_IVL
-mrb_zmq_define_const("HANDSHAKE_IVL", ZMQ_HANDSHAKE_IVL);
+mrb_zmq_define_const(HANDSHAKE_IVL, ZMQ_HANDSHAKE_IVL);
 #endif
 #ifdef ZMQ_SOCKS_PROXY
-mrb_zmq_define_const("SOCKS_PROXY", ZMQ_SOCKS_PROXY);
+mrb_zmq_define_const(SOCKS_PROXY, ZMQ_SOCKS_PROXY);
 #endif
 #ifdef ZMQ_XPUB_NODROP
-mrb_zmq_define_const("XPUB_NODROP", ZMQ_XPUB_NODROP);
+mrb_zmq_define_const(XPUB_NODROP, ZMQ_XPUB_NODROP);
 #endif
 #ifdef ZMQ_BLOCKY
-mrb_zmq_define_const("BLOCKY", ZMQ_BLOCKY);
+mrb_zmq_define_const(BLOCKY, ZMQ_BLOCKY);
 #endif
 #ifdef ZMQ_XPUB_MANUAL
-mrb_zmq_define_const("XPUB_MANUAL", ZMQ_XPUB_MANUAL);
+mrb_zmq_define_const(XPUB_MANUAL, ZMQ_XPUB_MANUAL);
 #endif
 #ifdef ZMQ_XPUB_WELCOME_MSG
-mrb_zmq_define_const("XPUB_WELCOME_MSG", ZMQ_XPUB_WELCOME_MSG);
+mrb_zmq_define_const(XPUB_WELCOME_MSG, ZMQ_XPUB_WELCOME_MSG);
 #endif
 #ifdef ZMQ_STREAM_NOTIFY
-mrb_zmq_define_const("STREAM_NOTIFY", ZMQ_STREAM_NOTIFY);
+mrb_zmq_define_const(STREAM_NOTIFY, ZMQ_STREAM_NOTIFY);
 #endif
 #ifdef ZMQ_INVERT_MATCHING
-mrb_zmq_define_const("INVERT_MATCHING", ZMQ_INVERT_MATCHING);
+mrb_zmq_define_const(INVERT_MATCHING, ZMQ_INVERT_MATCHING);
 #endif
 #ifdef ZMQ_HEARTBEAT_IVL
-mrb_zmq_define_const("HEARTBEAT_IVL", ZMQ_HEARTBEAT_IVL);
+mrb_zmq_define_const(HEARTBEAT_IVL, ZMQ_HEARTBEAT_IVL);
 #endif
 #ifdef ZMQ_HEARTBEAT_TTL
-mrb_zmq_define_const("HEARTBEAT_TTL", ZMQ_HEARTBEAT_TTL);
+mrb_zmq_define_const(HEARTBEAT_TTL, ZMQ_HEARTBEAT_TTL);
 #endif
 #ifdef ZMQ_HEARTBEAT_TIMEOUT
-mrb_zmq_define_const("HEARTBEAT_TIMEOUT", ZMQ_HEARTBEAT_TIMEOUT);
+mrb_zmq_define_const(HEARTBEAT_TIMEOUT, ZMQ_HEARTBEAT_TIMEOUT);
 #endif
 #ifdef ZMQ_XPUB_VERBOSER
-mrb_zmq_define_const("XPUB_VERBOSER", ZMQ_XPUB_VERBOSER);
+mrb_zmq_define_const(XPUB_VERBOSER, ZMQ_XPUB_VERBOSER);
 #endif
 #ifdef ZMQ_CONNECT_TIMEOUT
-mrb_zmq_define_const("CONNECT_TIMEOUT", ZMQ_CONNECT_TIMEOUT);
+mrb_zmq_define_const(CONNECT_TIMEOUT, ZMQ_CONNECT_TIMEOUT);
 #endif
 #ifdef ZMQ_TCP_MAXRT
-mrb_zmq_define_const("TCP_MAXRT", ZMQ_TCP_MAXRT);
+mrb_zmq_define_const(TCP_MAXRT, ZMQ_TCP_MAXRT);
 #endif
 #ifdef ZMQ_THREAD_SAFE
-mrb_zmq_define_const("THREAD_SAFE", ZMQ_THREAD_SAFE);
+mrb_zmq_define_const(THREAD_SAFE, ZMQ_THREAD_SAFE);
 #endif
 #ifdef ZMQ_MULTICAST_MAXTPDU
-mrb_zmq_define_const("MULTICAST_MAXTPDU", ZMQ_MULTICAST_MAXTPDU);
+mrb_zmq_define_const(MULTICAST_MAXTPDU, ZMQ_MULTICAST_MAXTPDU);
 #endif
 #ifdef ZMQ_VMCI_BUFFER_SIZE
-mrb_zmq_define_const("VMCI_BUFFER_SIZE", ZMQ_VMCI_BUFFER_SIZE);
+mrb_zmq_define_const(VMCI_BUFFER_SIZE, ZMQ_VMCI_BUFFER_SIZE);
 #endif
 #ifdef ZMQ_VMCI_BUFFER_MIN_SIZE
-mrb_zmq_define_const("VMCI_BUFFER_MIN_SIZE", ZMQ_VMCI_BUFFER_MIN_SIZE);
+mrb_zmq_define_const(VMCI_BUFFER_MIN_SIZE, ZMQ_VMCI_BUFFER_MIN_SIZE);
 #endif
 #ifdef ZMQ_VMCI_BUFFER_MAX_SIZE
-mrb_zmq_define_const("VMCI_BUFFER_MAX_SIZE", ZMQ_VMCI_BUFFER_MAX_SIZE);
+mrb_zmq_define_const(VMCI_BUFFER_MAX_SIZE, ZMQ_VMCI_BUFFER_MAX_SIZE);
 #endif
 #ifdef ZMQ_VMCI_CONNECT_TIMEOUT
-mrb_zmq_define_const("VMCI_CONNECT_TIMEOUT", ZMQ_VMCI_CONNECT_TIMEOUT);
+mrb_zmq_define_const(VMCI_CONNECT_TIMEOUT, ZMQ_VMCI_CONNECT_TIMEOUT);
 #endif
 #ifdef ZMQ_USE_FD
-mrb_zmq_define_const("USE_FD", ZMQ_USE_FD);
+mrb_zmq_define_const(USE_FD, ZMQ_USE_FD);
 #endif
 #ifdef ZMQ_GSSAPI_PRINCIPAL_NAMETYPE
-mrb_zmq_define_const("GSSAPI_PRINCIPAL_NAMETYPE", ZMQ_GSSAPI_PRINCIPAL_NAMETYPE);
+mrb_zmq_define_const(GSSAPI_PRINCIPAL_NAMETYPE, ZMQ_GSSAPI_PRINCIPAL_NAMETYPE);
 #endif
 #ifdef ZMQ_GSSAPI_SERVICE_PRINCIPAL_NAMETYPE
-mrb_zmq_define_const("GSSAPI_SERVICE_PRINCIPAL_NAMETYPE", ZMQ_GSSAPI_SERVICE_PRINCIPAL_NAMETYPE);
+mrb_zmq_define_const(GSSAPI_SERVICE_PRINCIPAL_NAMETYPE, ZMQ_GSSAPI_SERVICE_PRINCIPAL_NAMETYPE);
 #endif
 #ifdef ZMQ_BINDTODEVICE
-mrb_zmq_define_const("BINDTODEVICE", ZMQ_BINDTODEVICE);
+mrb_zmq_define_const(BINDTODEVICE, ZMQ_BINDTODEVICE);
 #endif
 #ifdef ZMQ_MORE
-mrb_zmq_define_const("MORE", ZMQ_MORE);
+mrb_zmq_define_const(MORE, ZMQ_MORE);
 #endif
 #ifdef ZMQ_SHARED
-mrb_zmq_define_const("SHARED", ZMQ_SHARED);
+mrb_zmq_define_const(SHARED, ZMQ_SHARED);
 #endif
 #ifdef ZMQ_DONTWAIT
-mrb_zmq_define_const("DONTWAIT", ZMQ_DONTWAIT);
+mrb_zmq_define_const(DONTWAIT, ZMQ_DONTWAIT);
 #endif
 #ifdef ZMQ_SNDMORE
-mrb_zmq_define_const("SNDMORE", ZMQ_SNDMORE);
+mrb_zmq_define_const(SNDMORE, ZMQ_SNDMORE);
 #endif
 #ifdef ZMQ_NULL
-mrb_zmq_define_const("NULL", ZMQ_NULL);
+mrb_zmq_define_const(NULL, ZMQ_NULL);
 #endif
 #ifdef ZMQ_PLAIN
-mrb_zmq_define_const("PLAIN", ZMQ_PLAIN);
+mrb_zmq_define_const(PLAIN, ZMQ_PLAIN);
 #endif
 #ifdef ZMQ_CURVE
-mrb_zmq_define_const("CURVE", ZMQ_CURVE);
+mrb_zmq_define_const(CURVE, ZMQ_CURVE);
 #endif
 #ifdef ZMQ_GSSAPI
-mrb_zmq_define_const("GSSAPI", ZMQ_GSSAPI);
+mrb_zmq_define_const(GSSAPI, ZMQ_GSSAPI);
 #endif
 #ifdef ZMQ_GROUP_MAX_LENGTH
-mrb_zmq_define_const("GROUP_MAX_LENGTH", ZMQ_GROUP_MAX_LENGTH);
+mrb_zmq_define_const(GROUP_MAX_LENGTH, ZMQ_GROUP_MAX_LENGTH);
 #endif
 #ifdef ZMQ_TCP_ACCEPT_FILTER
-mrb_zmq_define_const("TCP_ACCEPT_FILTER", ZMQ_TCP_ACCEPT_FILTER);
+mrb_zmq_define_const(TCP_ACCEPT_FILTER, ZMQ_TCP_ACCEPT_FILTER);
 #endif
 #ifdef ZMQ_IPC_FILTER_PID
-mrb_zmq_define_const("IPC_FILTER_PID", ZMQ_IPC_FILTER_PID);
+mrb_zmq_define_const(IPC_FILTER_PID, ZMQ_IPC_FILTER_PID);
 #endif
 #ifdef ZMQ_IPC_FILTER_UID
-mrb_zmq_define_const("IPC_FILTER_UID", ZMQ_IPC_FILTER_UID);
+mrb_zmq_define_const(IPC_FILTER_UID, ZMQ_IPC_FILTER_UID);
 #endif
 #ifdef ZMQ_IPC_FILTER_GID
-mrb_zmq_define_const("IPC_FILTER_GID", ZMQ_IPC_FILTER_GID);
+mrb_zmq_define_const(IPC_FILTER_GID, ZMQ_IPC_FILTER_GID);
 #endif
 #ifdef ZMQ_IPV4ONLY
-mrb_zmq_define_const("IPV4ONLY", ZMQ_IPV4ONLY);
+mrb_zmq_define_const(IPV4ONLY, ZMQ_IPV4ONLY);
 #endif
 #ifdef ZMQ_SRCFD
-mrb_zmq_define_const("SRCFD", ZMQ_SRCFD);
+mrb_zmq_define_const(SRCFD, ZMQ_SRCFD);
 #endif
 #ifdef ZMQ_GSSAPI_NT_HOSTBASED
-mrb_zmq_define_const("GSSAPI_NT_HOSTBASED", ZMQ_GSSAPI_NT_HOSTBASED);
+mrb_zmq_define_const(GSSAPI_NT_HOSTBASED, ZMQ_GSSAPI_NT_HOSTBASED);
 #endif
 #ifdef ZMQ_GSSAPI_NT_USER_NAME
-mrb_zmq_define_const("GSSAPI_NT_USER_NAME", ZMQ_GSSAPI_NT_USER_NAME);
+mrb_zmq_define_const(GSSAPI_NT_USER_NAME, ZMQ_GSSAPI_NT_USER_NAME);
 #endif
 #ifdef ZMQ_GSSAPI_NT_KRB5_PRINCIPAL
-mrb_zmq_define_const("GSSAPI_NT_KRB5_PRINCIPAL", ZMQ_GSSAPI_NT_KRB5_PRINCIPAL);
+mrb_zmq_define_const(GSSAPI_NT_KRB5_PRINCIPAL, ZMQ_GSSAPI_NT_KRB5_PRINCIPAL);
 #endif
 #ifdef ZMQ_EVENT_CONNECTED
-mrb_zmq_define_const("EVENT_CONNECTED", ZMQ_EVENT_CONNECTED);
+mrb_zmq_define_const(EVENT_CONNECTED, ZMQ_EVENT_CONNECTED);
 #endif
 #ifdef ZMQ_EVENT_CONNECT_DELAYED
-mrb_zmq_define_const("EVENT_CONNECT_DELAYED", ZMQ_EVENT_CONNECT_DELAYED);
+mrb_zmq_define_const(EVENT_CONNECT_DELAYED, ZMQ_EVENT_CONNECT_DELAYED);
 #endif
 #ifdef ZMQ_EVENT_CONNECT_RETRIED
-mrb_zmq_define_const("EVENT_CONNECT_RETRIED", ZMQ_EVENT_CONNECT_RETRIED);
+mrb_zmq_define_const(EVENT_CONNECT_RETRIED, ZMQ_EVENT_CONNECT_RETRIED);
 #endif
 #ifdef ZMQ_EVENT_LISTENING
-mrb_zmq_define_const("EVENT_LISTENING", ZMQ_EVENT_LISTENING);
+mrb_zmq_define_const(EVENT_LISTENING, ZMQ_EVENT_LISTENING);
 #endif
 #ifdef ZMQ_EVENT_BIND_FAILED
-mrb_zmq_define_const("EVENT_BIND_FAILED", ZMQ_EVENT_BIND_FAILED);
+mrb_zmq_define_const(EVENT_BIND_FAILED, ZMQ_EVENT_BIND_FAILED);
 #endif
 #ifdef ZMQ_EVENT_ACCEPTED
-mrb_zmq_define_const("EVENT_ACCEPTED", ZMQ_EVENT_ACCEPTED);
+mrb_zmq_define_const(EVENT_ACCEPTED, ZMQ_EVENT_ACCEPTED);
 #endif
 #ifdef ZMQ_EVENT_ACCEPT_FAILED
-mrb_zmq_define_const("EVENT_ACCEPT_FAILED", ZMQ_EVENT_ACCEPT_FAILED);
+mrb_zmq_define_const(EVENT_ACCEPT_FAILED, ZMQ_EVENT_ACCEPT_FAILED);
 #endif
 #ifdef ZMQ_EVENT_CLOSED
-mrb_zmq_define_const("EVENT_CLOSED", ZMQ_EVENT_CLOSED);
+mrb_zmq_define_const(EVENT_CLOSED, ZMQ_EVENT_CLOSED);
 #endif
 #ifdef ZMQ_EVENT_CLOSE_FAILED
-mrb_zmq_define_const("EVENT_CLOSE_FAILED", ZMQ_EVENT_CLOSE_FAILED);
+mrb_zmq_define_const(EVENT_CLOSE_FAILED, ZMQ_EVENT_CLOSE_FAILED);
 #endif
 #ifdef ZMQ_EVENT_DISCONNECTED
-mrb_zmq_define_const("EVENT_DISCONNECTED", ZMQ_EVENT_DISCONNECTED);
+mrb_zmq_define_const(EVENT_DISCONNECTED, ZMQ_EVENT_DISCONNECTED);
 #endif
 #ifdef ZMQ_EVENT_MONITOR_STOPPED
-mrb_zmq_define_const("EVENT_MONITOR_STOPPED", ZMQ_EVENT_MONITOR_STOPPED);
+mrb_zmq_define_const(EVENT_MONITOR_STOPPED, ZMQ_EVENT_MONITOR_STOPPED);
 #endif
 #ifdef ZMQ_EVENT_ALL
-mrb_zmq_define_const("EVENT_ALL", ZMQ_EVENT_ALL);
+mrb_zmq_define_const(EVENT_ALL, ZMQ_EVENT_ALL);
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
-mrb_zmq_define_const("EVENT_HANDSHAKE_FAILED_NO_DETAIL", ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL);
+mrb_zmq_define_const(EVENT_HANDSHAKE_FAILED_NO_DETAIL, ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL);
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_SUCCEEDED
-mrb_zmq_define_const("EVENT_HANDSHAKE_SUCCEEDED", ZMQ_EVENT_HANDSHAKE_SUCCEEDED);
+mrb_zmq_define_const(EVENT_HANDSHAKE_SUCCEEDED, ZMQ_EVENT_HANDSHAKE_SUCCEEDED);
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
-mrb_zmq_define_const("EVENT_HANDSHAKE_FAILED_PROTOCOL", ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL);
+mrb_zmq_define_const(EVENT_HANDSHAKE_FAILED_PROTOCOL, ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL);
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
-mrb_zmq_define_const("EVENT_HANDSHAKE_FAILED_AUTH", ZMQ_EVENT_HANDSHAKE_FAILED_AUTH);
+mrb_zmq_define_const(EVENT_HANDSHAKE_FAILED_AUTH, ZMQ_EVENT_HANDSHAKE_FAILED_AUTH);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_UNSPECIFIED
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_UNSPECIFIED", ZMQ_PROTOCOL_ERROR_ZMTP_UNSPECIFIED);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_UNSPECIFIED, ZMQ_PROTOCOL_ERROR_ZMTP_UNSPECIFIED);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_UNEXPECTED_COMMAND
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_UNEXPECTED_COMMAND", ZMQ_PROTOCOL_ERROR_ZMTP_UNEXPECTED_COMMAND);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_UNEXPECTED_COMMAND, ZMQ_PROTOCOL_ERROR_ZMTP_UNEXPECTED_COMMAND);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_SEQUENCE
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_INVALID_SEQUENCE", ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_SEQUENCE);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_INVALID_SEQUENCE, ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_SEQUENCE);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_KEY_EXCHANGE
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_KEY_EXCHANGE", ZMQ_PROTOCOL_ERROR_ZMTP_KEY_EXCHANGE);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_KEY_EXCHANGE, ZMQ_PROTOCOL_ERROR_ZMTP_KEY_EXCHANGE);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_UNSPECIFIED
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_UNSPECIFIED", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_UNSPECIFIED);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_UNSPECIFIED, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_UNSPECIFIED);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_MESSAGE
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_MESSAGE", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_MESSAGE);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_MESSAGE, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_MESSAGE);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_HELLO
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_HELLO", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_HELLO);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_HELLO, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_HELLO);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_INITIATE
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_INITIATE", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_INITIATE);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_INITIATE, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_INITIATE);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_ERROR
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_ERROR", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_ERROR);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_ERROR, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_ERROR);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_READY
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_READY", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_READY);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_READY, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_READY);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_WELCOME
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_WELCOME", ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_WELCOME);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_WELCOME, ZMQ_PROTOCOL_ERROR_ZMTP_MALFORMED_COMMAND_WELCOME);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_METADATA
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_INVALID_METADATA", ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_METADATA);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_INVALID_METADATA, ZMQ_PROTOCOL_ERROR_ZMTP_INVALID_METADATA);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_CRYPTOGRAPHIC
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_CRYPTOGRAPHIC", ZMQ_PROTOCOL_ERROR_ZMTP_CRYPTOGRAPHIC);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_CRYPTOGRAPHIC, ZMQ_PROTOCOL_ERROR_ZMTP_CRYPTOGRAPHIC);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZMTP_MECHANISM_MISMATCH
-mrb_zmq_define_const("PROTOCOL_ERROR_ZMTP_MECHANISM_MISMATCH", ZMQ_PROTOCOL_ERROR_ZMTP_MECHANISM_MISMATCH);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZMTP_MECHANISM_MISMATCH, ZMQ_PROTOCOL_ERROR_ZMTP_MECHANISM_MISMATCH);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_UNSPECIFIED
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_UNSPECIFIED", ZMQ_PROTOCOL_ERROR_ZAP_UNSPECIFIED);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_UNSPECIFIED, ZMQ_PROTOCOL_ERROR_ZAP_UNSPECIFIED);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_MALFORMED_REPLY
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_MALFORMED_REPLY", ZMQ_PROTOCOL_ERROR_ZAP_MALFORMED_REPLY);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_MALFORMED_REPLY, ZMQ_PROTOCOL_ERROR_ZAP_MALFORMED_REPLY);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_BAD_REQUEST_ID
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_BAD_REQUEST_ID", ZMQ_PROTOCOL_ERROR_ZAP_BAD_REQUEST_ID);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_BAD_REQUEST_ID, ZMQ_PROTOCOL_ERROR_ZAP_BAD_REQUEST_ID);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_BAD_VERSION
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_BAD_VERSION", ZMQ_PROTOCOL_ERROR_ZAP_BAD_VERSION);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_BAD_VERSION, ZMQ_PROTOCOL_ERROR_ZAP_BAD_VERSION);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_INVALID_STATUS_CODE
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_INVALID_STATUS_CODE", ZMQ_PROTOCOL_ERROR_ZAP_INVALID_STATUS_CODE);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_INVALID_STATUS_CODE, ZMQ_PROTOCOL_ERROR_ZAP_INVALID_STATUS_CODE);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_ZAP_INVALID_METADATA
-mrb_zmq_define_const("PROTOCOL_ERROR_ZAP_INVALID_METADATA", ZMQ_PROTOCOL_ERROR_ZAP_INVALID_METADATA);
+mrb_zmq_define_const(PROTOCOL_ERROR_ZAP_INVALID_METADATA, ZMQ_PROTOCOL_ERROR_ZAP_INVALID_METADATA);
 #endif
 #ifdef ZMQ_PROTOCOL_ERROR_WS_UNSPECIFIED
-mrb_zmq_define_const("PROTOCOL_ERROR_WS_UNSPECIFIED", ZMQ_PROTOCOL_ERROR_WS_UNSPECIFIED);
+mrb_zmq_define_const(PROTOCOL_ERROR_WS_UNSPECIFIED, ZMQ_PROTOCOL_ERROR_WS_UNSPECIFIED);
 #endif
 #ifdef ZMQ_POLLIN
-mrb_zmq_define_const("POLLIN", ZMQ_POLLIN);
+mrb_zmq_define_const(POLLIN, ZMQ_POLLIN);
 #endif
 #ifdef ZMQ_POLLOUT
-mrb_zmq_define_const("POLLOUT", ZMQ_POLLOUT);
+mrb_zmq_define_const(POLLOUT, ZMQ_POLLOUT);
 #endif
 #ifdef ZMQ_POLLERR
-mrb_zmq_define_const("POLLERR", ZMQ_POLLERR);
+mrb_zmq_define_const(POLLERR, ZMQ_POLLERR);
 #endif
 #ifdef ZMQ_POLLPRI
-mrb_zmq_define_const("POLLPRI", ZMQ_POLLPRI);
+mrb_zmq_define_const(POLLPRI, ZMQ_POLLPRI);
 #endif
 #ifdef ZMQ_POLLITEMS_DFLT
-mrb_zmq_define_const("POLLITEMS_DFLT", ZMQ_POLLITEMS_DFLT);
+mrb_zmq_define_const(POLLITEMS_DFLT, ZMQ_POLLITEMS_DFLT);
 #endif
 #ifdef ZMQ_HAS_CAPABILITIES
-mrb_zmq_define_const("HAS_CAPABILITIES", ZMQ_HAS_CAPABILITIES);
+mrb_zmq_define_const(HAS_CAPABILITIES, ZMQ_HAS_CAPABILITIES);
 #endif
 #ifdef ZMQ_STREAMER
-mrb_zmq_define_const("STREAMER", ZMQ_STREAMER);
+mrb_zmq_define_const(STREAMER, ZMQ_STREAMER);
 #endif
 #ifdef ZMQ_FORWARDER
-mrb_zmq_define_const("FORWARDER", ZMQ_FORWARDER);
+mrb_zmq_define_const(FORWARDER, ZMQ_FORWARDER);
 #endif
 #ifdef ZMQ_QUEUE
-mrb_zmq_define_const("QUEUE", ZMQ_QUEUE);
+mrb_zmq_define_const(QUEUE, ZMQ_QUEUE);
 #endif
 #ifdef ZMQ_SERVER
-mrb_zmq_define_const("SERVER", ZMQ_SERVER);
+mrb_zmq_define_const(SERVER, ZMQ_SERVER);
 #endif
 #ifdef ZMQ_CLIENT
-mrb_zmq_define_const("CLIENT", ZMQ_CLIENT);
+mrb_zmq_define_const(CLIENT, ZMQ_CLIENT);
 #endif
 #ifdef ZMQ_RADIO
-mrb_zmq_define_const("RADIO", ZMQ_RADIO);
+mrb_zmq_define_const(RADIO, ZMQ_RADIO);
 #endif
 #ifdef ZMQ_DISH
-mrb_zmq_define_const("DISH", ZMQ_DISH);
+mrb_zmq_define_const(DISH, ZMQ_DISH);
 #endif
 #ifdef ZMQ_GATHER
-mrb_zmq_define_const("GATHER", ZMQ_GATHER);
+mrb_zmq_define_const(GATHER, ZMQ_GATHER);
 #endif
 #ifdef ZMQ_SCATTER
-mrb_zmq_define_const("SCATTER", ZMQ_SCATTER);
+mrb_zmq_define_const(SCATTER, ZMQ_SCATTER);
 #endif
 #ifdef ZMQ_DGRAM
-mrb_zmq_define_const("DGRAM", ZMQ_DGRAM);
+mrb_zmq_define_const(DGRAM, ZMQ_DGRAM);
 #endif
 #ifdef ZMQ_PEER
-mrb_zmq_define_const("PEER", ZMQ_PEER);
+mrb_zmq_define_const(PEER, ZMQ_PEER);
 #endif
 #ifdef ZMQ_CHANNEL
-mrb_zmq_define_const("CHANNEL", ZMQ_CHANNEL);
+mrb_zmq_define_const(CHANNEL, ZMQ_CHANNEL);
 #endif
 #ifdef ZMQ_ZAP_ENFORCE_DOMAIN
-mrb_zmq_define_const("ZAP_ENFORCE_DOMAIN", ZMQ_ZAP_ENFORCE_DOMAIN);
+mrb_zmq_define_const(ZAP_ENFORCE_DOMAIN, ZMQ_ZAP_ENFORCE_DOMAIN);
 #endif
 #ifdef ZMQ_LOOPBACK_FASTPATH
-mrb_zmq_define_const("LOOPBACK_FASTPATH", ZMQ_LOOPBACK_FASTPATH);
+mrb_zmq_define_const(LOOPBACK_FASTPATH, ZMQ_LOOPBACK_FASTPATH);
 #endif
 #ifdef ZMQ_METADATA
-mrb_zmq_define_const("METADATA", ZMQ_METADATA);
+mrb_zmq_define_const(METADATA, ZMQ_METADATA);
 #endif
 #ifdef ZMQ_MULTICAST_LOOP
-mrb_zmq_define_const("MULTICAST_LOOP", ZMQ_MULTICAST_LOOP);
+mrb_zmq_define_const(MULTICAST_LOOP, ZMQ_MULTICAST_LOOP);
 #endif
 #ifdef ZMQ_ROUTER_NOTIFY
-mrb_zmq_define_const("ROUTER_NOTIFY", ZMQ_ROUTER_NOTIFY);
+mrb_zmq_define_const(ROUTER_NOTIFY, ZMQ_ROUTER_NOTIFY);
 #endif
 #ifdef ZMQ_XPUB_MANUAL_LAST_VALUE
-mrb_zmq_define_const("XPUB_MANUAL_LAST_VALUE", ZMQ_XPUB_MANUAL_LAST_VALUE);
+mrb_zmq_define_const(XPUB_MANUAL_LAST_VALUE, ZMQ_XPUB_MANUAL_LAST_VALUE);
 #endif
 #ifdef ZMQ_SOCKS_USERNAME
-mrb_zmq_define_const("SOCKS_USERNAME", ZMQ_SOCKS_USERNAME);
+mrb_zmq_define_const(SOCKS_USERNAME, ZMQ_SOCKS_USERNAME);
 #endif
 #ifdef ZMQ_SOCKS_PASSWORD
-mrb_zmq_define_const("SOCKS_PASSWORD", ZMQ_SOCKS_PASSWORD);
+mrb_zmq_define_const(SOCKS_PASSWORD, ZMQ_SOCKS_PASSWORD);
 #endif
 #ifdef ZMQ_IN_BATCH_SIZE
-mrb_zmq_define_const("IN_BATCH_SIZE", ZMQ_IN_BATCH_SIZE);
+mrb_zmq_define_const(IN_BATCH_SIZE, ZMQ_IN_BATCH_SIZE);
 #endif
 #ifdef ZMQ_OUT_BATCH_SIZE
-mrb_zmq_define_const("OUT_BATCH_SIZE", ZMQ_OUT_BATCH_SIZE);
+mrb_zmq_define_const(OUT_BATCH_SIZE, ZMQ_OUT_BATCH_SIZE);
 #endif
 #ifdef ZMQ_WSS_KEY_PEM
-mrb_zmq_define_const("WSS_KEY_PEM", ZMQ_WSS_KEY_PEM);
+mrb_zmq_define_const(WSS_KEY_PEM, ZMQ_WSS_KEY_PEM);
 #endif
 #ifdef ZMQ_WSS_CERT_PEM
-mrb_zmq_define_const("WSS_CERT_PEM", ZMQ_WSS_CERT_PEM);
+mrb_zmq_define_const(WSS_CERT_PEM, ZMQ_WSS_CERT_PEM);
 #endif
 #ifdef ZMQ_WSS_TRUST_PEM
-mrb_zmq_define_const("WSS_TRUST_PEM", ZMQ_WSS_TRUST_PEM);
+mrb_zmq_define_const(WSS_TRUST_PEM, ZMQ_WSS_TRUST_PEM);
 #endif
 #ifdef ZMQ_WSS_HOSTNAME
-mrb_zmq_define_const("WSS_HOSTNAME", ZMQ_WSS_HOSTNAME);
+mrb_zmq_define_const(WSS_HOSTNAME, ZMQ_WSS_HOSTNAME);
 #endif
 #ifdef ZMQ_WSS_TRUST_SYSTEM
-mrb_zmq_define_const("WSS_TRUST_SYSTEM", ZMQ_WSS_TRUST_SYSTEM);
+mrb_zmq_define_const(WSS_TRUST_SYSTEM, ZMQ_WSS_TRUST_SYSTEM);
 #endif
 #ifdef ZMQ_ONLY_FIRST_SUBSCRIBE
-mrb_zmq_define_const("ONLY_FIRST_SUBSCRIBE", ZMQ_ONLY_FIRST_SUBSCRIBE);
+mrb_zmq_define_const(ONLY_FIRST_SUBSCRIBE, ZMQ_ONLY_FIRST_SUBSCRIBE);
 #endif
 #ifdef ZMQ_RECONNECT_STOP
-mrb_zmq_define_const("RECONNECT_STOP", ZMQ_RECONNECT_STOP);
+mrb_zmq_define_const(RECONNECT_STOP, ZMQ_RECONNECT_STOP);
 #endif
 #ifdef ZMQ_HELLO_MSG
-mrb_zmq_define_const("HELLO_MSG", ZMQ_HELLO_MSG);
+mrb_zmq_define_const(HELLO_MSG, ZMQ_HELLO_MSG);
 #endif
 #ifdef ZMQ_DISCONNECT_MSG
-mrb_zmq_define_const("DISCONNECT_MSG", ZMQ_DISCONNECT_MSG);
+mrb_zmq_define_const(DISCONNECT_MSG, ZMQ_DISCONNECT_MSG);
 #endif
 #ifdef ZMQ_PRIORITY
-mrb_zmq_define_const("PRIORITY", ZMQ_PRIORITY);
+mrb_zmq_define_const(PRIORITY, ZMQ_PRIORITY);
 #endif
 #ifdef ZMQ_BUSY_POLL
-mrb_zmq_define_const("BUSY_POLL", ZMQ_BUSY_POLL);
+mrb_zmq_define_const(BUSY_POLL, ZMQ_BUSY_POLL);
 #endif
 #ifdef ZMQ_HICCUP_MSG
-mrb_zmq_define_const("HICCUP_MSG", ZMQ_HICCUP_MSG);
+mrb_zmq_define_const(HICCUP_MSG, ZMQ_HICCUP_MSG);
 #endif
 #ifdef ZMQ_XSUB_VERBOSE_UNSUBSCRIBE
-mrb_zmq_define_const("XSUB_VERBOSE_UNSUBSCRIBE", ZMQ_XSUB_VERBOSE_UNSUBSCRIBE);
+mrb_zmq_define_const(XSUB_VERBOSE_UNSUBSCRIBE, ZMQ_XSUB_VERBOSE_UNSUBSCRIBE);
 #endif
 #ifdef ZMQ_TOPICS_COUNT
-mrb_zmq_define_const("TOPICS_COUNT", ZMQ_TOPICS_COUNT);
+mrb_zmq_define_const(TOPICS_COUNT, ZMQ_TOPICS_COUNT);
 #endif
 #ifdef ZMQ_NORM_MODE
-mrb_zmq_define_const("NORM_MODE", ZMQ_NORM_MODE);
+mrb_zmq_define_const(NORM_MODE, ZMQ_NORM_MODE);
 #endif
 #ifdef ZMQ_NORM_UNICAST_NACK
-mrb_zmq_define_const("NORM_UNICAST_NACK", ZMQ_NORM_UNICAST_NACK);
+mrb_zmq_define_const(NORM_UNICAST_NACK, ZMQ_NORM_UNICAST_NACK);
 #endif
 #ifdef ZMQ_NORM_BUFFER_SIZE
-mrb_zmq_define_const("NORM_BUFFER_SIZE", ZMQ_NORM_BUFFER_SIZE);
+mrb_zmq_define_const(NORM_BUFFER_SIZE, ZMQ_NORM_BUFFER_SIZE);
 #endif
 #ifdef ZMQ_NORM_SEGMENT_SIZE
-mrb_zmq_define_const("NORM_SEGMENT_SIZE", ZMQ_NORM_SEGMENT_SIZE);
+mrb_zmq_define_const(NORM_SEGMENT_SIZE, ZMQ_NORM_SEGMENT_SIZE);
 #endif
 #ifdef ZMQ_NORM_BLOCK_SIZE
-mrb_zmq_define_const("NORM_BLOCK_SIZE", ZMQ_NORM_BLOCK_SIZE);
+mrb_zmq_define_const(NORM_BLOCK_SIZE, ZMQ_NORM_BLOCK_SIZE);
 #endif
 #ifdef ZMQ_NORM_NUM_PARITY
-mrb_zmq_define_const("NORM_NUM_PARITY", ZMQ_NORM_NUM_PARITY);
+mrb_zmq_define_const(NORM_NUM_PARITY, ZMQ_NORM_NUM_PARITY);
 #endif
 #ifdef ZMQ_NORM_NUM_AUTOPARITY
-mrb_zmq_define_const("NORM_NUM_AUTOPARITY", ZMQ_NORM_NUM_AUTOPARITY);
+mrb_zmq_define_const(NORM_NUM_AUTOPARITY, ZMQ_NORM_NUM_AUTOPARITY);
 #endif
 #ifdef ZMQ_NORM_PUSH
-mrb_zmq_define_const("NORM_PUSH", ZMQ_NORM_PUSH);
+mrb_zmq_define_const(NORM_PUSH, ZMQ_NORM_PUSH);
 #endif
 #ifdef ZMQ_NORM_FIXED
-mrb_zmq_define_const("NORM_FIXED", ZMQ_NORM_FIXED);
+mrb_zmq_define_const(NORM_FIXED, ZMQ_NORM_FIXED);
 #endif
 #ifdef ZMQ_NORM_CC
-mrb_zmq_define_const("NORM_CC", ZMQ_NORM_CC);
+mrb_zmq_define_const(NORM_CC, ZMQ_NORM_CC);
 #endif
 #ifdef ZMQ_NORM_CCL
-mrb_zmq_define_const("NORM_CCL", ZMQ_NORM_CCL);
+mrb_zmq_define_const(NORM_CCL, ZMQ_NORM_CCL);
 #endif
 #ifdef ZMQ_NORM_CCE
-mrb_zmq_define_const("NORM_CCE", ZMQ_NORM_CCE);
+mrb_zmq_define_const(NORM_CCE, ZMQ_NORM_CCE);
 #endif
 #ifdef ZMQ_NORM_CCE_ECNONLY
-mrb_zmq_define_const("NORM_CCE_ECNONLY", ZMQ_NORM_CCE_ECNONLY);
+mrb_zmq_define_const(NORM_CCE_ECNONLY, ZMQ_NORM_CCE_ECNONLY);
 #endif
 #ifdef ZMQ_RECONNECT_STOP_CONN_REFUSED
-mrb_zmq_define_const("RECONNECT_STOP_CONN_REFUSED", ZMQ_RECONNECT_STOP_CONN_REFUSED);
+mrb_zmq_define_const(RECONNECT_STOP_CONN_REFUSED, ZMQ_RECONNECT_STOP_CONN_REFUSED);
 #endif
 #ifdef ZMQ_RECONNECT_STOP_HANDSHAKE_FAILED
-mrb_zmq_define_const("RECONNECT_STOP_HANDSHAKE_FAILED", ZMQ_RECONNECT_STOP_HANDSHAKE_FAILED);
+mrb_zmq_define_const(RECONNECT_STOP_HANDSHAKE_FAILED, ZMQ_RECONNECT_STOP_HANDSHAKE_FAILED);
 #endif
 #ifdef ZMQ_RECONNECT_STOP_AFTER_DISCONNECT
-mrb_zmq_define_const("RECONNECT_STOP_AFTER_DISCONNECT", ZMQ_RECONNECT_STOP_AFTER_DISCONNECT);
+mrb_zmq_define_const(RECONNECT_STOP_AFTER_DISCONNECT, ZMQ_RECONNECT_STOP_AFTER_DISCONNECT);
 #endif
 #ifdef ZMQ_ZERO_COPY_RECV
-mrb_zmq_define_const("ZERO_COPY_RECV", ZMQ_ZERO_COPY_RECV);
+mrb_zmq_define_const(ZERO_COPY_RECV, ZMQ_ZERO_COPY_RECV);
 #endif
 #ifdef ZMQ_NOTIFY_CONNECT
-mrb_zmq_define_const("NOTIFY_CONNECT", ZMQ_NOTIFY_CONNECT);
+mrb_zmq_define_const(NOTIFY_CONNECT, ZMQ_NOTIFY_CONNECT);
 #endif
 #ifdef ZMQ_NOTIFY_DISCONNECT
-mrb_zmq_define_const("NOTIFY_DISCONNECT", ZMQ_NOTIFY_DISCONNECT);
+mrb_zmq_define_const(NOTIFY_DISCONNECT, ZMQ_NOTIFY_DISCONNECT);
 #endif
 #ifdef ZMQ_EVENT_PIPES_STATS
-mrb_zmq_define_const("EVENT_PIPES_STATS", ZMQ_EVENT_PIPES_STATS);
+mrb_zmq_define_const(EVENT_PIPES_STATS, ZMQ_EVENT_PIPES_STATS);
 #endif
 #ifdef ZMQ_CURRENT_EVENT_VERSION
-mrb_zmq_define_const("CURRENT_EVENT_VERSION", ZMQ_CURRENT_EVENT_VERSION);
+mrb_zmq_define_const(CURRENT_EVENT_VERSION, ZMQ_CURRENT_EVENT_VERSION);
 #endif
 #ifdef ZMQ_CURRENT_EVENT_VERSION_DRAFT
-mrb_zmq_define_const("CURRENT_EVENT_VERSION_DRAFT", ZMQ_CURRENT_EVENT_VERSION_DRAFT);
+mrb_zmq_define_const(CURRENT_EVENT_VERSION_DRAFT, ZMQ_CURRENT_EVENT_VERSION_DRAFT);
 #endif

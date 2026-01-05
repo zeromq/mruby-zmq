@@ -11,7 +11,7 @@ IO.readlines('../deps/libzmq/include/zmq.h').each do |line|
       Integer(match[2])
       d.write <<-C
 #ifdef ZMQ_#{match[1]}
-mrb_zmq_define_const("#{match[1]}", ZMQ_#{match[1]});
+mrb_zmq_define_const(#{match[1]}, ZMQ_#{match[1]});
 #endif
 C
     rescue
