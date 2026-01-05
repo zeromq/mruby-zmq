@@ -26,19 +26,15 @@
 #include <ifaddrs.h>
 #endif
 #include <mruby/presym.h>
+#include <mruby/num_helpers.hpp>
+#include <mruby/branch_pred.h>
+#include <vector>      // for std::vector
+#include <cstddef>     // for size_t (optional but clean)
 
 #define NELEMS(args) (sizeof(args) / sizeof(args[0]))
 
 #if !defined(SOCKET) && !defined(_WIN32)
 #define SOCKET int
-#endif
-
-#if (__GNUC__ >= 3) || (__INTEL_COMPILER >= 800) || defined(__clang__)
-# define likely(x) __builtin_expect(!!(x), 1)
-# define unlikely(x) __builtin_expect(!!(x), 0)
-#else
-# define likely(x) (x)
-# define unlikely(x) (x)
 #endif
 
 #ifdef _WIN32

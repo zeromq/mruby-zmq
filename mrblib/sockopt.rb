@@ -8,7 +8,7 @@ module ZMQ
       if LibZMQ.const_defined?(upint)
         const = LibZMQ.const_get(upint)
         define_method(int) do
-          LibZMQ.getsockopt(self, const, Fixnum)
+          LibZMQ.getsockopt(self, const, Integer)
         end
       end
     end

@@ -11,17 +11,18 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-sprintf'
   spec.add_dependency 'mruby-class-ext'
   spec.add_dependency 'mruby-metaprog'
+  spec.add_dependency 'mruby-c-ext-helpers'
   spec.add_test_dependency 'mruby-sleep'
 
   def build_libzmq(spec, build)
     unless File.file?("#{spec.build_dir}/build/lib/libzmq.a")
       warn "mruby-zmq: cannot find libzmq, building it"
-      cmdline = "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\""
+      cmdline = "mkdir -p #{spec.build_dir}/build && cd #{spec.build_dir}/build && cmake -DBUILD_SHARED=OFF -DBUILD_STATIC=ON -DCMAKE_INSTALL_PREFIX=\"#{spec.build_dir}\""
       if spec.search_package('libsodium')
         puts "mruby-zmq: building with libsodium"
-        cmdline << " -DWITH_LIBSODIUM=ON -DENABLE_CURVE=ON"
+        cmdline << " -DWITH_LIBSODIUM=ON -DWITH_LIBSODIUM_STATIC=ON -DENABLE_CURVE=ON"
       end
-      cmdline << " -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
+      cmdline << " -DENABLE_DRAFTS=ON #{spec.dir}/deps/libzmq/ -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && cmake --build . -j$(nproc) --target libzmq-static && make -j$(nproc) install"
       sh cmdline
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
@@ -35,8 +36,8 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     end
   end
 
-  if spec.cc.search_header_path 'ifaddrs.h'
-    spec.cc.defines << 'HAVE_IFADDRS_H'
+  if spec.cxx.search_header_path 'ifaddrs.h'
+    spec.cxx.defines << 'HAVE_IFADDRS_H'
   end
   if spec.build.toolchains.include? 'visualcpp'
     spec.linker.libraries << 'libzmq'
