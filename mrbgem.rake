@@ -1,7 +1,10 @@
+require_relative 'mrblib/version'
+
 MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.license = 'MPL-2.0'
   spec.author  = 'Hendrik Beskow'
   spec.summary = 'mruby bindings for libzmq4'
+  spec.version = ZMQ::VERSION
   spec.add_conflict 'mruby-czmq'
   spec.add_dependency 'mruby-errno'
   spec.add_dependency 'mruby-objectspace'
