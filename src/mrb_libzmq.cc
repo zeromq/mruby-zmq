@@ -601,7 +601,16 @@ mrb_zmq_z85_decode(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "string len must be divisible by 5");
   }
 
-  mrb_value dest = mrb_str_new(mrb, NULL, 0.8 * string_len);
+  mrb_int groups = string_len / 5;
+
+  if (groups > MRB_INT_MAX / 4) {
+    mrb_raise(mrb, E_RANGE_ERROR, "Z85 output too large");
+  }
+
+  mrb_int out_size = groups * 4;
+
+  mrb_value dest = mrb_str_new(mrb, NULL, out_size);
+
 
   uint8_t *rc = zmq_z85_decode((uint8_t *) RSTRING_PTR(dest), string);
   if (unlikely(!rc)) {
@@ -623,9 +632,17 @@ mrb_zmq_z85_encode(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "data size must be divisible by 4");
   }
 
-  mrb_value dest = mrb_str_new(mrb, NULL, mrb_integer(mrb_float_to_integer(mrb, mrb_num_mul(mrb, mrb_convert_number(mrb, size), mrb_float_value(mrb, 1.25)))));
+  mrb_int groups = size / 4;
 
-  char *rc = zmq_z85_encode(RSTRING_PTR(dest), (uint8_t *) data, size);
+  if (unlikely(groups > MRB_INT_MAX / 5)) {
+    mrb_raise(mrb, E_RANGE_ERROR, "Z85 output too large");
+  }
+
+  mrb_int out_size = groups * 5;
+
+  mrb_value dest = mrb_str_new(mrb, NULL, out_size);
+
+  char *rc = zmq_z85_encode(RSTRING_PTR(dest), (uint8_t*)data, size);
   if (unlikely(!rc)) {
     mrb_zmq_handle_error(mrb, "zmq_z85_encode");
   }
@@ -681,14 +698,15 @@ mrb_zmq_poller_add(mrb_state *mrb, mrb_value self)
   void *poller = mrb_data_get_ptr(mrb, self, &mrb_zmq_poller_type);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
-    mrb_int fd = mrb_as_int(mrb, socket);
-    mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(fileno))) {
+      mrb_value fd_val = mrb_type_convert(mrb, socket, MRB_TT_INTEGER, MRB_SYM(fileno));
+      mrb_int fd = mrb_integer(fd_val);
+      mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
 
-    rc = zmq_poller_add_fd(poller, fd, mrb_ptr(socket), events);
-    if (unlikely(-1 == rc)) {
-      mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
-    }
+      rc = zmq_poller_add_fd(poller, (int) fd, mrb_ptr(socket), events);
+      if (unlikely(-1 == rc)) {
+        mrb_zmq_handle_error(mrb, "zmq_poller_add_fd");
+      }
   } else if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(zmq_socket))) {
     rc = zmq_poller_add(poller, mrb_zmq_get_socket(mrb, mrb_funcall_id(mrb, socket, MRB_SYM(zmq_socket), 0)), mrb_ptr(socket), events);
   } else {
@@ -715,10 +733,11 @@ mrb_zmq_poller_modify(mrb_state *mrb, mrb_value self)
   void *poller = mrb_data_get_ptr(mrb, self, &mrb_zmq_poller_type);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
-    mrb_int fd = mrb_as_int(mrb, socket);
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(fileno))) {
+    mrb_value fd_val = mrb_type_convert(mrb, socket, MRB_TT_INTEGER, MRB_SYM(fileno));
+    mrb_int fd = mrb_integer(fd_val);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
-    rc = zmq_poller_modify_fd(poller, fd, events);
+    rc = zmq_poller_modify_fd(poller, (int) fd, events);
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_modify_fd");
     }
@@ -744,10 +763,11 @@ mrb_zmq_poller_remove(mrb_state *mrb, mrb_value self)
   void *poller = mrb_data_get_ptr(mrb, self, &mrb_zmq_poller_type);
 
   int rc;
-  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(to_i))) {
-    mrb_int fd = mrb_as_int(mrb, socket);
+  if (mrb_obj_respond_to(mrb, socket_class, MRB_SYM(fileno))) {
+    mrb_value fd_val = mrb_type_convert(mrb, socket, MRB_TT_INTEGER, MRB_SYM(fileno));
+    mrb_int fd = mrb_integer(fd_val);
     mrb_assert_int_fit(mrb_int, fd, int, INT_MAX);
-    rc = zmq_poller_remove_fd(poller, fd);
+    rc = zmq_poller_remove_fd(poller, (int) fd);
     if (unlikely(-1 == rc)) {
       mrb_zmq_handle_error(mrb, "zmq_poller_remove_fd");
     }

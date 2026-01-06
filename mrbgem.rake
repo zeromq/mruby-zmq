@@ -27,6 +27,10 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
     `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
+      if cflag.start_with?('-I')
+        spec.build.cxx.include_paths << cflag[2..] # strip "-I"
+        spec.build.cc.include_paths << cflag[2..]
+      end
       spec.cxx.flags << cflag
       spec.cc.flags << cflag
     end
