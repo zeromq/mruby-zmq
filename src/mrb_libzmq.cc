@@ -655,9 +655,13 @@ mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
 {
   switch(mrb_type(socket)) {
     case MRB_TT_CPTR: {
-      // No way to check here if its a legitmate zmq socket, if something else is passed libzmq asserts and aborts the programm.
-      // Also: when handed a raw c pointer only allow the poller to handle it because we cannot know from which thread this socket comes.
-      return mrb_cptr(socket);
+      void *s_ =  mrb_cptr(socket);
+      SOCKET sock;
+      size_t optvallen_ = sizeof(sock);
+      int rc = zmq_getsockopt(s_, ZMQ_FD, &sock, &optvallen_);
+      if (unlikely(rc == -1)) {
+        mrb_raise(mrb, E_TYPE_ERROR, "Expected a ZMQ Socket");
+      }
     }
     case MRB_TT_DATA: {
       if (&mrb_zmq_socket_type == DATA_TYPE(socket))
@@ -816,8 +820,7 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
   } else {
     mrb_int n_events = RARRAY_LEN(mrb_iv_get(mrb, self, MRB_SYM(sockets)));
     if (n_events > 0) {
-      std::vector<zmq_poller_event_t> events;
-      events.resize(static_cast<size_t>(n_events));
+      std::vector<zmq_poller_event_t> events(static_cast<size_t>(n_events));
 
       rc = zmq_poller_wait_all(poller,
                               events.data(),
@@ -1056,8 +1059,10 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   struct RClass *libzmq_mod, *zmq_mod, *zmq_msg_class, *zmq_socket_class;
 
   libzmq_mod = mrb_define_module_id(mrb, MRB_SYM(LibZMQ));
-  mrb_define_const_id(mrb, libzmq_mod, MRB_SYM(_Context),
+  mrb_define_const_id(mrb, libzmq_mod, MRB_SYM(__CTX__),
                       mrb_cptr_value(mrb, context));
+  mrb_define_const_id(mrb, mrb_module_get_id(mrb, MRB_SYM(LibZMQ)), MRB_SYM(__foreigen_context__),
+                      mrb_false_value());
 
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(bind),           mrb_zmq_bind,           MRB_ARGS_REQ(2));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(close),          mrb_zmq_close,          MRB_ARGS_REQ(1));
@@ -1187,9 +1192,9 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
 void
 mrb_mruby_zmq_gem_final(mrb_state* mrb)
 {
-  void *context = MRB_LIBZMQ_CONTEXT(mrb);
-  zmq_ctx_shutdown(context);
-  mrb_objspace_each_objects(mrb, mrb_zmq_zmq_close_gem_final, mrb_class_get_under_id(mrb, mrb_module_get_id(mrb, MRB_SYM(ZMQ)), MRB_SYM(Socket)));
-  zmq_ctx_term(context);
+  mrb_value foreigen_context = mrb_const_get(mrb, mrb_obj_value(mrb_module_get_id(mrb, MRB_SYM(LibZMQ))), MRB_SYM(__foreigen_context__));
+  if (!mrb_bool(foreigen_context)) {
+    mrb_zmq_ctx_shutdown_close_and_term(mrb);
+  }
 }
 MRB_END_DECL

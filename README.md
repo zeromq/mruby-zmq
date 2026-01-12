@@ -69,6 +69,26 @@ There is also a ZMQ_LOGGER_IDENT env var which adds a ident to each msg from ZMQ
 ZMQ.logger.info("hallo")
 ```
 
+Swapping out a zmq context
+==========================
+There is now a C API where power users can swap out a zmq context with their own,
+```c
+// this shuts down the registered zmq context, closes all sockets and then terminates it.
+// this must only be used on the thread which called mrb_open.
+MRB_API void
+mrb_zmq_ctx_shutdown_close_and_term(mrb_state* mrb);
+
+// this swaps out the zmq context, it closes all sockets when its called for the first time after calling mrb_open.
+// this must only be used on the thread which called mrb_open.
+MRB_API void
+mrb_zmq_set_context(mrb_state *mrb, void *context_);
+```
+
+This would be its declaration, to use it
+```c
+#include <mruby/zmq.h>
+```
+
 LICENSE
 =======
 Copyright 2017,2021 Hendrik Beskow

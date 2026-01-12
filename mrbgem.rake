@@ -30,10 +30,6 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
     end
     spec.linker.flags_before_libraries << "\"#{spec.build_dir}/build/lib/libzmq.a\""
     `pkg-config --cflags \"#{spec.build_dir}/build/libzmq.pc\"`.split("\s").each do |cflag|
-      if cflag.start_with?('-I')
-        build.cxx.include_paths << cflag[2..] # strip "-I"
-        build.cc.include_paths << cflag[2..]
-      end
       spec.cxx.flags << cflag
       spec.cc.flags << cflag
     end
@@ -41,6 +37,10 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
       next if lib == '-lzmq'
       spec.linker.flags_before_libraries << lib
     end
+    src = File.join(spec.build_dir, 'include')
+    dst = File.join(File.expand_path(File.dirname(__FILE__)), 'include')
+    FileUtils.mkdir_p(dst)
+    FileUtils.cp_r("#{src}/.", dst)
   end
 
   if spec.cxx.search_header_path 'ifaddrs.h'
