@@ -807,6 +807,9 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
         case ETIMEDOUT: {
           return mrb_nil_value();
         }
+        case EAGAIN: {
+          return mrb_nil_value();
+        }
         case EINTR: {
           return mrb_false_value();
         }
