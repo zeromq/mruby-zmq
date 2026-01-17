@@ -115,7 +115,7 @@ module ZMQ
       end
     end
 
-    ["connect_rid", "curve_publickey", "curve_secretkey", "curve_serverkey", "gssapi_principal", "gssapi_service_principal", "plain_password",
+    ["connect_rid", "connect_routing_id", "curve_publickey", "curve_secretkey", "curve_serverkey", "gssapi_principal", "gssapi_service_principal", "plain_password",
       "plain_username", "zap_domain"].each do |data|
         updata = data.upcase
       if LibZMQ.const_defined?(updata)
