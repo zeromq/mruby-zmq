@@ -1,4 +1,5 @@
 #include "mrb_libzmq.h"
+#include <cerrno>
 
 static mrb_value
 mrb_zmq_bind(mrb_state *mrb, mrb_value self)
@@ -846,6 +847,9 @@ mrb_zmq_poller_wait(mrb_state *mrb, mrb_value self)
     if (-1 == rc) {
       switch(mrb_zmq_errno()) {
         case ETIMEDOUT: {
+          return mrb_nil_value();
+        }
+        case EAGAIN: {
           return mrb_nil_value();
         }
         case EINTR: {
