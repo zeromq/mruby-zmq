@@ -1,25 +1,40 @@
 module ZMQ
   class Socket
     class Monitor
-      Events = {
-        LibZMQ::EVENT_CONNECTED => :connected,
-        LibZMQ::EVENT_CONNECT_DELAYED => :connect_delayed,
-        LibZMQ::EVENT_CONNECT_RETRIED => :connect_retried,
-        LibZMQ::EVENT_LISTENING => :listening,
-        LibZMQ::EVENT_BIND_FAILED => :bind_failed,
-        LibZMQ::EVENT_ACCEPTED => :accepted,
-        LibZMQ::EVENT_ACCEPT_FAILED => :accept_failed,
-        LibZMQ::EVENT_CLOSED => :closed,
-        LibZMQ::EVENT_CLOSE_FAILED => :close_failed,
-        LibZMQ::EVENT_DISCONNECTED => :disconnected,
-        LibZMQ::EVENT_MONITOR_STOPPED => :monitor_stopped
-      }
-      if LibZMQ.const_defined?("EVENT_HANDSHAKE_FAILED")
-        Events[LibZMQ::EVENT_HANDSHAKE_FAILED] = :handshake_failed
-        Events[LibZMQ::EVENT_HANDSHAKE_SUCCEED] = :handshake_succeed
+      Events = {}
+
+      # Core events (always present in libzmq 4.x)
+      {
+        EVENT_CONNECTED:        :connected,
+        EVENT_CONNECT_DELAYED:  :connect_delayed,
+        EVENT_CONNECT_RETRIED:  :connect_retried,
+        EVENT_LISTENING:        :listening,
+        EVENT_BIND_FAILED:      :bind_failed,
+        EVENT_ACCEPTED:         :accepted,
+        EVENT_ACCEPT_FAILED:    :accept_failed,
+        EVENT_CLOSED:           :closed,
+        EVENT_CLOSE_FAILED:     :close_failed,
+        EVENT_DISCONNECTED:     :disconnected,
+        EVENT_MONITOR_STOPPED:  :monitor_stopped,
+        EVENT_ALL:              :all
+      }.each do |const, sym|
+        if LibZMQ.const_defined?(const)
+          Events[LibZMQ.const_get(const)] = sym
+        end
       end
 
-      # this is a helper for ZMQ::Poller so you can add a object which looks like a zmq socket more easily
+      # Handshake events (may or may not exist depending on libzmq version)
+      {
+        EVENT_HANDSHAKE_FAILED_NO_DETAIL: :handshake_failed_no_detail,
+        EVENT_HANDSHAKE_SUCCEEDED:        :handshake_succeeded,
+        EVENT_HANDSHAKE_FAILED_PROTOCOL:  :handshake_failed_protocol,
+        EVENT_HANDSHAKE_FAILED_AUTH:      :handshake_failed_auth
+      }.each do |const, sym|
+        if LibZMQ.const_defined?(const)
+          Events[LibZMQ.const_get(const)] = sym
+        end
+      end
+
       attr_reader :zmq_socket
 
       def initialize(endpoint)
@@ -29,7 +44,11 @@ module ZMQ
       def recv
         msg, endpoint = @zmq_socket.recv
         event, value = msg.to_str.unpack('SL')
-        {event: Events[event], value: value, endpoint: endpoint.to_str}
+        {
+          event: Events[event] || event,
+          value: value,
+          endpoint: endpoint.to_str
+        }
       end
     end
   end
