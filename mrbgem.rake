@@ -14,7 +14,7 @@ MRuby::Gem::Specification.new('mruby-zmq') do |spec|
   spec.add_dependency 'mruby-sprintf'
   spec.add_dependency 'mruby-class-ext'
   spec.add_dependency 'mruby-metaprog'
-  spec.add_dependency 'mruby-c-ext-helpers'
+  spec.add_dependency 'mruby-c-ext-helpers' , '>= 0.2.1'
   spec.add_test_dependency 'mruby-sleep'
 
   def build_libzmq(spec, build)
