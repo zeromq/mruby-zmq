@@ -1,5 +1,4 @@
 #include "mrb_libzmq.h"
-#include <cerrno>
 
 static mrb_value
 mrb_zmq_bind(mrb_state *mrb, mrb_value self)
@@ -321,7 +320,8 @@ mrb_zmq_proxy_steerable(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_zmq_msg_to_str(mrb_state *mrb, mrb_value self)
 {
-  return mrb_str_new(mrb, (const char *) zmq_msg_data((zmq_msg_t *) DATA_PTR(self)), zmq_msg_size((zmq_msg_t *) DATA_PTR(self)));
+  zmq_msg_t *msg_ = (zmq_msg_t *) mrb_data_get_ptr(mrb, self, &mrb_zmq_msg_type);
+  return mrb_str_new(mrb, (const char *) zmq_msg_data(msg_), zmq_msg_size(msg_));
 }
 
 static mrb_value
@@ -330,7 +330,7 @@ mrb_zmq_msg_eql(mrb_state *mrb, mrb_value self)
   zmq_msg_t *other;
   mrb_get_args(mrb, "d", &other, &mrb_zmq_msg_type);
 
-  zmq_msg_t *msg = (zmq_msg_t *) DATA_PTR(self);
+  zmq_msg_t *msg = (zmq_msg_t *) mrb_data_get_ptr(mrb, self, &mrb_zmq_msg_type);
 
   if (msg == other) {
     return mrb_true_value();
@@ -663,7 +663,8 @@ mrb_zmq_get_socket(mrb_state *mrb, mrb_value socket)
       if (unlikely(rc == -1)) {
         mrb_raise(mrb, E_TYPE_ERROR, "Expected a ZMQ Socket");
       }
-    }
+      return s_;
+    };
     case MRB_TT_DATA: {
       if (&mrb_zmq_socket_type == DATA_TYPE(socket))
         return DATA_PTR(socket);
@@ -1082,7 +1083,7 @@ mrb_mruby_zmq_gem_init(mrb_state* mrb)
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(getsockopt),     mrb_zmq_getsockopt,     MRB_ARGS_ARG(3, 1));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(msg_gets),       mrb_zmq_msg_gets,       MRB_ARGS_ARG(2, 1));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(msg_send),       mrb_zmq_msg_send,       MRB_ARGS_REQ(3));
-  mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(msg_size),       mrb_zmq_msg_size,       MRB_ARGS_NONE());
+  mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(msg_size),       mrb_zmq_msg_size,       MRB_ARGS_REQ(1));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(proxy),          mrb_zmq_proxy,          MRB_ARGS_ARG(2, 1));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(proxy_steerable),mrb_zmq_proxy_steerable,MRB_ARGS_ARG(3, 1));
   mrb_define_module_function_id(mrb, libzmq_mod, MRB_SYM(send),           mrb_zmq_send,           MRB_ARGS_REQ(3));

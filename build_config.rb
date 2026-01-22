@@ -5,5 +5,6 @@ MRuby::Build.new do |conf|
   conf.enable_sanitizer "address,undefined,leak"
   conf.cc.flags << '-fno-omit-frame-pointer'
   conf.enable_test
+  conf.gembox 'default'
   conf.gem File.expand_path(File.dirname(__FILE__))
 end
